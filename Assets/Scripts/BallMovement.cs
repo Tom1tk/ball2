@@ -21,7 +21,6 @@ public class BallMovement : MonoBehaviour
     [SerializeField]
     ParticleSystem DodgeFX;
 
-    [SerializeField]
     Controls _controls;
 
     Vector2 movementInput;
@@ -51,6 +50,9 @@ public class BallMovement : MonoBehaviour
     float boostFXdur;
     public bool charging;
     public float playerMagnitudeBeforePhysicsUpdate;
+    [SerializeField] private float movingSpeedThreshold = 1f;    
+    private MeshRenderer sphereRenderer;
+    private HealthScript myHealth;
     
 
     void Awake()
@@ -58,6 +60,9 @@ public class BallMovement : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
 
         ChargeFX.Stop();
+
+        sphereRenderer = sphere.GetComponent<MeshRenderer>();
+        myHealth = GetComponent<HealthScript>();
 
         changeSphereColour(0);
 
@@ -93,7 +98,8 @@ public class BallMovement : MonoBehaviour
         
         Vector3 relativeDirection = directionInput.x * cameraTransform.right + directionInput.z * new Vector3(cameraTransform.forward.x, 0f, cameraTransform.forward.z);
 
-        relativeDirection.Normalize();
+        if (relativeDirection != Vector3.zero)
+            relativeDirection.Normalize();
 
         changeSphereColour(rb.linearVelocity.magnitude);
 
@@ -105,6 +111,7 @@ public class BallMovement : MonoBehaviour
         if(charging && boostLv < boostMax)
         {
             boostLv += Time.deltaTime;
+            rb.AddForce(Vector3.up * Physics.gravity.magnitude * 0.85f, ForceMode.Acceleration);
         }
 
         if(dodgeTimer < dodgeCooldown)
@@ -138,7 +145,7 @@ public class BallMovement : MonoBehaviour
 
     void boostPress()
     {
-        rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
+        rb.linearVelocity *= 0.3f;
         UIref.showBoostUI();
         boostLv = 0.1f;
         charging = true;
@@ -152,7 +159,7 @@ public class BallMovement : MonoBehaviour
         var main = SpeedFX.main;
         main.duration = (boostLv*3f)/10f;
 
-        rb.AddForce(new Vector3(cameraTransform.forward.x, 0f, cameraTransform.forward.z) * (boostLv*boostForce), ForceMode.Impulse);
+        rb.AddForce(cameraTransform.forward * (boostLv * boostForce), ForceMode.Impulse);
         boostLv = 0f;
         charging = false;
         changeSphereColour(rb.linearVelocity.magnitude);
@@ -186,15 +193,15 @@ public class BallMovement : MonoBehaviour
     {
         if(charging)
         { 
-            sphere.GetComponent<MeshRenderer>().material = sphereMat3; 
+            sphereRenderer.material = sphereMat3; 
         }
-        else if (x > 1)
+        else if (x > movingSpeedThreshold)
         {
-            sphere.GetComponent<MeshRenderer>().material = sphereMat2;
+            sphereRenderer.material = sphereMat2;
         }
         else
         {
-            sphere.GetComponent<MeshRenderer>().material = sphereMat1;
+            sphereRenderer.material = sphereMat1;
         }
     }
 
@@ -209,11 +216,13 @@ public class BallMovement : MonoBehaviour
 
     void OnCollisionEnter(Collision other)
     {
-        if (other.transform.tag == "Enemy")
+        if (other.transform.CompareTag("Enemy"))
         {   
-            //get player and enemy speed before collision
+            if (!other.gameObject.TryGetComponent<EnemyAI>(out var enemyAI))
+                return;
+
             float playerCollisionSpeed = playerMagnitudeBeforePhysicsUpdate;
-            float otherCollisionSpeed = other.gameObject.GetComponent<EnemyAI>().enemyMagnitudeBeforePhysicsUpdate;
+            float otherCollisionSpeed = enemyAI.enemyMagnitudeBeforePhysicsUpdate;
 
             /*
             Debug.Log("player collision speed: " + playerCollisionSpeed); 
@@ -223,7 +232,7 @@ public class BallMovement : MonoBehaviour
             //whoever was going slower before the collision takes damage
             if (otherCollisionSpeed > playerCollisionSpeed && otherCollisionSpeed > 30f)
             {
-                this.gameObject.GetComponent<HealthScript>().takeDmg();
+                myHealth.takeDmg();
                 Debug.Log("enemy was the faster object, player takes dmg");
 
             }else if(playerCollisionSpeed > otherCollisionSpeed && playerCollisionSpeed > 30f)
@@ -236,11 +245,11 @@ public class BallMovement : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        if (other.transform.tag == "Strawberry")
+        if (other.CompareTag("Strawberry"))
         {   
             Destroy(other.gameObject);
             UIref.strawbCollected += 1;
-            this.gameObject.GetComponent<HealthScript>().healDmg();
+            myHealth.healDmg();
         }
     }
 }

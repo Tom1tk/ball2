@@ -15,7 +15,7 @@ public class UIScript : MonoBehaviour
     public GameObject boostSlider;
     public Slider dodgeUI;
     public GameObject dodgeSlider;
-    public doorOpen doorRef;
+    //public doorOpen doorRef;
     public GameObject pauseMenu; //, winScreen, loseScreen;
 
     void Awake()
