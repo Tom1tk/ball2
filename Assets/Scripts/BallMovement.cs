@@ -32,6 +32,11 @@ public class BallMovement : MonoBehaviour
     Camera tpCamera;
     Transform cameraTransform;
 
+    public Material sphereMat1, sphereMat2, sphereMat3;
+
+    public GameObject sphere;
+
+
     [SerializeField]
     Text debugText;
 
@@ -53,6 +58,8 @@ public class BallMovement : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
 
         ChargeFX.Stop();
+
+        changeSphereColour(0);
 
         _controls = new Controls();
         rb = GetComponent<Rigidbody>();
@@ -80,7 +87,7 @@ public class BallMovement : MonoBehaviour
 
     void FixedUpdate()
     {   
-        playerMagnitudeBeforePhysicsUpdate = rb.velocity.magnitude;
+        playerMagnitudeBeforePhysicsUpdate = rb.linearVelocity.magnitude;
 
         Vector3 directionInput = new Vector3(movementInput.x, 0f, movementInput.y);
         
@@ -88,7 +95,9 @@ public class BallMovement : MonoBehaviour
 
         relativeDirection.Normalize();
 
-        if(rb.velocity.magnitude < maxVelocity && !charging)
+        changeSphereColour(rb.linearVelocity.magnitude);
+
+        if (rb.linearVelocity.magnitude < maxVelocity && !charging)
         {
             rb.AddForce(relativeDirection * inputForce);
         }
@@ -106,7 +115,7 @@ public class BallMovement : MonoBehaviour
             UIref.hideDodgeUI();
         }
 
-        spriteAnim.SetFloat("speed", rb.velocity.magnitude);
+        //spriteAnim.SetFloat("speed", rb.velocity.magnitude);
 
         if(displayDebugText)
         {
@@ -117,7 +126,7 @@ public class BallMovement : MonoBehaviour
             "\n \n camera right transform = " + cameraTransform.right.ToString() +
             "\n camera forward transform= " + cameraTransform.forward.ToString() +
             "\n \n relatve direction= " + relativeDirection.ToString() +
-            "\n \n player speed= " + rb.velocity.magnitude.ToString() +
+            "\n \n player speed= " + rb.linearVelocity.magnitude.ToString() +
             "\n \n player boost= " + boostLv.ToString() +
             "\n boost FX duration= " + boostFXdur.ToString() + 
             "\n \n player dodge= " + dodgeInput.ToString() +
@@ -129,7 +138,7 @@ public class BallMovement : MonoBehaviour
 
     void boostPress()
     {
-        rb.velocity = new Vector3(0f, rb.velocity.y, 0f);
+        rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
         UIref.showBoostUI();
         boostLv = 0.1f;
         charging = true;
@@ -146,7 +155,8 @@ public class BallMovement : MonoBehaviour
         rb.AddForce(new Vector3(cameraTransform.forward.x, 0f, cameraTransform.forward.z) * (boostLv*boostForce), ForceMode.Impulse);
         boostLv = 0f;
         charging = false;
-        
+        changeSphereColour(rb.linearVelocity.magnitude);
+
         boostFXdur = main.duration;
         SpeedFX.Play();
         UIref.hideBoostUI();
@@ -169,6 +179,22 @@ public class BallMovement : MonoBehaviour
                 rb.AddForce(new Vector3(cameraTransform.right.x, 0f, cameraTransform.right.z) * (dodgeForce), ForceMode.Impulse);
                 dodgeTimer = 0f;
             }
+        }
+    }
+
+    private void changeSphereColour(float x)
+    {
+        if(charging)
+        { 
+            sphere.GetComponent<MeshRenderer>().material = sphereMat3; 
+        }
+        else if (x > 1)
+        {
+            sphere.GetComponent<MeshRenderer>().material = sphereMat2;
+        }
+        else
+        {
+            sphere.GetComponent<MeshRenderer>().material = sphereMat1;
         }
     }
 

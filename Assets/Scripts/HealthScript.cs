@@ -82,8 +82,9 @@ public class HealthScript : MonoBehaviour
         {
             if(this.gameObject.CompareTag("Player"))
             {
-                UIref.showLoseUI();
-                Destroy(this.gameObject);
+                //UIref.showLoseUI();
+                this.gameObject.SetActive(false);
+                //Destroy(this.gameObject);
             }else{
                 UIref.enemiesAlive -= 1;
                 //leaves the hamster sprite exposed from its broken ball whilst disabling the AI and halting any particle effects

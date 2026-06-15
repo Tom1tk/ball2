@@ -36,12 +36,19 @@ public class EnemyAI : MonoBehaviour
     public Vector3 wanderPoint;
     public float enemyMagnitudeBeforePhysicsUpdate;
 
+    private NavMeshPath cachedPath;
+    private float pathUpdateCooldown = 0.2f;
+    private float pathUpdateTimer;
+
+
     void Awake()
     {
         ChargeFX.Stop();
         rb = GetComponent<Rigidbody>();
         spriteAnim = GetComponentInChildren<Animator>();
         player = GameObject.Find("PlayerBall").GetComponent<Transform>();
+
+        cachedPath = new NavMeshPath();
 
         Attacked = false;
         boostStarted = false;
@@ -53,14 +60,25 @@ public class EnemyAI : MonoBehaviour
     }
     void FixedUpdate() 
     {
-        enemyMagnitudeBeforePhysicsUpdate = rb.velocity.magnitude;
+        enemyMagnitudeBeforePhysicsUpdate = rb.linearVelocity.magnitude;
+
+        pathUpdateTimer += Time.fixedDeltaTime;
 
         //enemyAgent.SetDestination(player.position);
 
         //since the NavMeshAgent doesnt update its own position, we have to do it manually as the first corner [0]
         enemyAgent.nextPosition = rb.position;
-        //to avoid desync where the agent and enemy would be in different places, causing the enemy to fly in some cases
+
         enemyAgent.Warp(rb.position);
+
+        
+        // Check if the ball is grounded.
+        // The sphere radius is 0.5f, so starting a raycast at 0.55f below the center 
+        // and shooting it 0.15f down avoids hitting the ball's own collider.
+        RaycastHit hit;
+        Vector3 rayStart = transform.position + Vector3.down * 0.55f;
+        bool isGrounded = Physics.Raycast(rayStart, Vector3.down, out hit, 0.65f);
+        
 
         //enemies don't have a run animation
         //spriteAnim.SetFloat("speed", rb.velocity.magnitude);
@@ -68,28 +86,40 @@ public class EnemyAI : MonoBehaviour
         canSeePlayer = Physics.CheckSphere(transform.position, detectionRange, playerLayer);
         canAttackPlayer = Physics.CheckSphere(transform.position, boostAttackRange, playerLayer);
 
-        if (!canSeePlayer && !canAttackPlayer && !boostStarted) 
+
+
+        if (!canSeePlayer && !canAttackPlayer && !boostStarted && isGrounded)
         {
-            if(wanderPointCreated == false)
+            if (wanderPointCreated == false)
             {
                 StartCoroutine(createWanderPoint());
             }
+
             Wander();
+
         }
-        if (canSeePlayer && !canAttackPlayer && !boostStarted) 
-        {
-            ChasePlayer();
+
+        if (canSeePlayer && !canAttackPlayer && !boostStarted && isGrounded)
+        { 
+            if (pathUpdateTimer >= pathUpdateCooldown)
+            {   
+                ChasePlayer();
+                pathUpdateTimer = 0f;
+            }
         }
-        
-        if (canSeePlayer && canAttackPlayer && !boostStarted) 
-        {
-            boostStarted = true;
-            StartCoroutine(BoostAtPlayer());
             
+
+        if (canSeePlayer && canAttackPlayer && !boostStarted)
+        {
+             boostStarted = true;
+             StartCoroutine(BoostAtPlayer());
+
             //leftovers from CoD style health healing system
             //player.GetComponent<HealthScript>().combatStarted();
             //this.gameObject.GetComponent<HealthScript>().combatStarted();
-        }
+         }
+            
+        
         
         if(displayNavPath)
         {
@@ -110,30 +140,57 @@ public class EnemyAI : MonoBehaviour
     void Wander()
     {
         NavMeshPath wanderPath = new NavMeshPath();
-        enemyAgent.CalculatePath(wanderPoint, wanderPath);
-        enemyAgent.SetPath(wanderPath);
 
-        //finds direction from agent to destination as vector3
-        Vector3 wanderDirection = (wanderPath.corners[1] - this.transform.position).normalized;
-        //adds force in that direction
-        rb.AddForce(wanderDirection * inputForce/2f);
+        enemyAgent.CalculatePath(wanderPoint, cachedPath);
+        enemyAgent.SetPath(cachedPath);
 
-        player.GetComponent<HealthScript>().combatEnded();
+        // Safety check on cachedPath corners
+        if (cachedPath.corners.Length >= 2)
+        {
+            // Finds direction from agent to destination as Vector3
+            Vector3 wanderDirection = (cachedPath.corners[1] - this.transform.position).normalized;
+            //adds force in that direction
+            rb.AddForce(wanderDirection * inputForce / 2f);
+        }
+        else
+        {
+            // Fallback: move directly towards the wanderPoint if path is too short or invalid
+            Vector3 wanderDirection = (wanderPoint - this.transform.position).normalized;
+            rb.AddForce(wanderDirection * inputForce / 2f);
+        }
+        if (player != null)
+        {
+            player.GetComponent<HealthScript>().combatEnded();
+        }
+
         this.gameObject.GetComponent<HealthScript>().combatEnded();
     }
 
     void ChasePlayer()
     {
         NavMeshPath pathToPlayer = new NavMeshPath();
-        enemyAgent.CalculatePath(player.position, pathToPlayer);
-        enemyAgent.SetPath(pathToPlayer);
-        
-        //since the first corner will always be the enemy location, we use the second corner [1] to follow the player
-        Vector3 ChaseDirection = (pathToPlayer.corners[1] - this.transform.position).normalized;
-        //adds force in that direction
-        rb.AddForce(ChaseDirection * inputForce);
 
-        player.GetComponent<HealthScript>().combatStarted();
+        enemyAgent.CalculatePath(player.position, cachedPath);
+        enemyAgent.SetPath(cachedPath);
+
+
+        if (cachedPath.corners.Length >= 2)
+        {
+            // Since the first corner is the enemy location, use the second corner [1]
+            Vector3 ChaseDirection = (cachedPath.corners[1] - this.transform.position).normalized;
+            rb.AddForce(ChaseDirection * inputForce);
+        }
+        else if (player != null)
+        {
+            // Fallback: move directly towards the player
+            Vector3 ChaseDirection = (player.position - this.transform.position).normalized;
+            rb.AddForce(ChaseDirection * inputForce);
+        }
+        if (player != null)
+        {
+            player.GetComponent<HealthScript>().combatStarted();
+        }
+
         this.gameObject.GetComponent<HealthScript>().combatStarted();
     }
 
@@ -142,7 +199,7 @@ public class EnemyAI : MonoBehaviour
         if (!Attacked)
         {
             Attacked = true;
-            rb.velocity = new Vector3(0f, rb.velocity.y, 0f);
+            rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
 
             ChargeFX.Play();
 

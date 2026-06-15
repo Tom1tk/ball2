@@ -9,14 +9,14 @@ public class UIScript : MonoBehaviour
 {
     public bool gamePlaying;
     public int enemiesAlive, strawbCollected, strawbMax, enemiesMax;
-    public TMP_Text enemyCounter, strawbCounter;
+    //public TMP_Text enemyCounter, strawbCounter;
     public BallMovement PlayerRef;
     public Slider boostUI;
     public GameObject boostSlider;
     public Slider dodgeUI;
     public GameObject dodgeSlider;
     public doorOpen doorRef;
-    public GameObject pauseMenu, winScreen, loseScreen;
+    public GameObject pauseMenu; //, winScreen, loseScreen;
 
     void Awake()
     {
@@ -34,17 +34,18 @@ public class UIScript : MonoBehaviour
     {
         boostUI.value = PlayerRef.boostLv;
         dodgeUI.value = PlayerRef.dodgeTimer;
-        enemyCounter.text = enemiesAlive.ToString() + " / " + enemiesMax.ToString();
+        /*
+        enemyCounter.text = enemiesAlive.ToString() + " / " + enemiesMax.ToString(); 
         strawbCounter.text = strawbCollected.ToString() + " / " + strawbMax.ToString();
 
-        if(strawbCollected == strawbMax)
+        if (strawbCollected == strawbMax)
         {
             showWinUI();
         }
-        if((enemiesAlive <= 3) && (doorRef.open == false))
+        if ((enemiesAlive <= 3) && (doorRef.open == false))
         {
             doorRef.openDoor();
-        }
+        }*/
     }
 
     public void showBoostUI()
@@ -78,6 +79,7 @@ public class UIScript : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
     }
 
+    /*
     public void showWinUI()
     {
         winScreen.SetActive(true);
@@ -90,7 +92,7 @@ public class UIScript : MonoBehaviour
         loseScreen.SetActive(true);
         //Time.timeScale = 0f;
         Cursor.lockState = CursorLockMode.Confined;
-    }
+    }*/
 
     public void restartGame()
     {
