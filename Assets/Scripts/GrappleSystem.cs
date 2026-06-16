@@ -16,15 +16,21 @@ public class GrappleSystem : MonoBehaviour
 
     [Header("Settings")]
     [SerializeField] float maxRange = 30f;
-    [SerializeField] float projectileSpeed = 80f;
-    [SerializeField] float returnSpeed = 80f;
+    [SerializeField] float projectileSpeed = 120f;
+    [SerializeField] float returnSpeed = 120f;
     [SerializeField] float reelAcceleration = 30f;
     [SerializeField] float maxReelSpeed = 60f;
     [SerializeField] float minRopeLength = 1f;
     [SerializeField] LayerMask grappleMask = ~0;
+    [SerializeField] float ropeStiffness = 800f;
+    [SerializeField] float ropeDamping = 15f;
     [SerializeField] float stuckAngleThreshold = 170f;
     [SerializeField] float indicatorOffset = 1.5f;
     [SerializeField] float baseCursorScale = 0.2f;
+    [SerializeField] float swingAntiGravity = 0.3f;
+    [SerializeField] float releaseBoostMultiplier = 1.4f;
+
+    public bool anyHooked { get; private set; }
 
     private enum HookState { Ready, Firing, Hooked, Returning }
 
@@ -44,6 +50,8 @@ public class GrappleSystem : MonoBehaviour
     private InputAction rightGrapple;
     private InputAction reel;
 
+    private Vector2 leftCursorDefaultPos, rightCursorDefaultPos;
+
     void Awake()
     {
         leftGrapple = new InputAction("LeftGrapple", binding: "<Mouse>/leftButton");
@@ -51,6 +59,9 @@ public class GrappleSystem : MonoBehaviour
         reel = new InputAction("Reel", binding: "<Keyboard>/leftShift");
 
         leftState = rightState = HookState.Ready;
+
+        leftCursorDefaultPos = leftCursor.anchoredPosition;
+        rightCursorDefaultPos = rightCursor.anchoredPosition;
     }
 
     void OnEnable()
@@ -90,14 +101,24 @@ public class GrappleSystem : MonoBehaviour
         reel?.Dispose();
     }
 
+    void Update()
+    {
+        updateCursorTargeting();
+    }
+
     void FixedUpdate()
     {
+        anyHooked = leftState == HookState.Hooked || rightState == HookState.Hooked;
+
         updateIndicatorPositions();
         processReel();
         processHook(ref leftState, ref leftProjectile, ref leftFireDir, ref leftHookPoint, ref leftHookNormal, ref leftRopeLength, ref leftDistance, leftIndicator, leftLine);
         processHook(ref rightState, ref rightProjectile, ref rightFireDir, ref rightHookPoint, ref rightHookNormal, ref rightRopeLength, ref rightDistance, rightIndicator, rightLine);
         checkStuckAngle();
         updateVisuals();
+
+        if (anyHooked)
+            rb.AddForce(Vector3.up * Physics.gravity.magnitude * swingAntiGravity, ForceMode.Acceleration);
     }
 
     void updateIndicatorPositions()
@@ -133,7 +154,11 @@ public class GrappleSystem : MonoBehaviour
     {
         ref HookState state = ref isLeft ? ref leftState : ref rightState;
         if (state == HookState.Firing || state == HookState.Hooked)
+        {
+            if (state == HookState.Hooked)
+                rb.linearVelocity *= releaseBoostMultiplier;
             state = HookState.Returning;
+        }
     }
 
     void processHook(ref HookState state, ref GameObject projectile, ref Vector3 fireDir, ref Vector3 hookPoint, ref Vector3 hookNormal, ref float ropeLength, ref float distance, Transform indicator, LineRenderer line)
@@ -189,14 +214,15 @@ public class GrappleSystem : MonoBehaviour
         Vector3 toHook = hookPoint - rb.position;
         float dist = toHook.magnitude;
 
-        if (dist > ropeLength && dist > 0.001f)
-        {
-            Vector3 dir = toHook / dist;
-            rb.position = hookPoint - dir * ropeLength;
+        if (dist < 0.001f) return;
+        Vector3 dir = toHook / dist;
 
+        if (dist > ropeLength)
+        {
+            float overshoot = dist - ropeLength;
             float velAlong = Vector3.Dot(rb.linearVelocity, dir);
-            if (velAlong > 0f)
-                rb.linearVelocity -= dir * velAlong;
+            float force = ropeStiffness * overshoot - ropeDamping * velAlong;
+            rb.AddForce(dir * force, ForceMode.Acceleration);
         }
     }
 
@@ -287,12 +313,50 @@ public class GrappleSystem : MonoBehaviour
         float multiplier;
         switch (state)
         {
-            case HookState.Ready:       multiplier = 1.0f; break;
-            case HookState.Firing:      multiplier = 0.7f; break;
-            case HookState.Hooked:      multiplier = 1.3f; break;
-            case HookState.Returning:   multiplier = 0.5f; break;
-            default:                    multiplier = 1.0f; break;
+            case HookState.Ready:       
+                multiplier = 1.0f; 
+                break;
+            case HookState.Firing:      
+                multiplier = 0.7f; 
+                break;
+            case HookState.Hooked:      
+                multiplier = 1.3f; 
+                break;
+            case HookState.Returning:   
+                multiplier = 0.5f; 
+                break;
+            default:                    
+                multiplier = 1.0f;
+                break;
         }
         cursor.localScale = Vector3.one * baseCursorScale * multiplier;
+    }
+
+    void updateCursorTargeting()
+    {
+        updateCursorTarget(leftCursor, leftState, leftIndicator, leftCursorDefaultPos);
+        updateCursorTarget(rightCursor, rightState, rightIndicator, rightCursorDefaultPos);
+    }
+
+    void updateCursorTarget(RectTransform cursor, HookState state, Transform indicator, Vector2 defaultPos)
+    {
+        if (state != HookState.Ready)
+        {
+            cursor.anchoredPosition = defaultPos;
+            return;
+        }
+
+        Vector3 fireDir = playerCamera.transform.forward;
+        if (Physics.Raycast(indicator.position, fireDir, out RaycastHit hit, maxRange, grappleMask))
+        {
+            Vector2 screenPoint = playerCamera.WorldToScreenPoint(hit.point);
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                (RectTransform)cursor.parent, screenPoint, null, out Vector2 localPoint);
+            cursor.anchoredPosition = localPoint;
+        }
+        else
+        {
+            cursor.anchoredPosition = defaultPos;
+        }
     }
 }

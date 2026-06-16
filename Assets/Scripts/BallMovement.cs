@@ -13,6 +13,7 @@ public class BallMovement : MonoBehaviour
     Animator spriteAnim;
 
     UIScript UIref;
+    GrappleSystem grappleSystem;
 
     [SerializeField]
     ParticleSystem ChargeFX;
@@ -50,7 +51,9 @@ public class BallMovement : MonoBehaviour
     float boostFXdur;
     public bool charging;
     public float playerMagnitudeBeforePhysicsUpdate;
-    [SerializeField] private float movingSpeedThreshold = 1f;    
+    [SerializeField] private float movingSpeedThreshold = 1f;
+    [SerializeField] float gravityScale = 0.4f;
+    [SerializeField] float airStrafeForce = 1f;
     private MeshRenderer sphereRenderer;
     private HealthScript myHealth;
     
@@ -63,7 +66,7 @@ public class BallMovement : MonoBehaviour
 
         sphereRenderer = sphere.GetComponent<MeshRenderer>();
         myHealth = GetComponent<HealthScript>();
-
+        grappleSystem = GetComponent<GrappleSystem>();
         changeSphereColour(0);
 
         _controls = new Controls();
@@ -92,6 +95,8 @@ public class BallMovement : MonoBehaviour
 
     void FixedUpdate()
     {   
+        rb.AddForce(Vector3.up * Physics.gravity.magnitude * (1f - gravityScale), ForceMode.Acceleration);
+
         playerMagnitudeBeforePhysicsUpdate = rb.linearVelocity.magnitude;
 
         Vector3 directionInput = new Vector3(movementInput.x, 0f, movementInput.y);
@@ -103,9 +108,11 @@ public class BallMovement : MonoBehaviour
 
         changeSphereColour(rb.linearVelocity.magnitude);
 
-        if (rb.linearVelocity.magnitude < maxVelocity && !charging)
+        bool hooked = grappleSystem != null && grappleSystem.anyHooked;
+
+        if ((rb.linearVelocity.magnitude < maxVelocity && !charging) || hooked)
         {
-            rb.AddForce(relativeDirection * inputForce);
+            rb.AddForce(relativeDirection * inputForce * (hooked ? airStrafeForce : 1f));
         }
 
         if(charging && boostLv < boostMax)
