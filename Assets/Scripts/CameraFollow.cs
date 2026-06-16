@@ -10,14 +10,17 @@ public class CameraFollow : MonoBehaviour
     [SerializeField] float minPitch = -30f;
     [SerializeField] float maxPitch = 60f;
     [SerializeField] float collisionRadius = 0.3f;
-    [SerializeField] float minCameraDistance = 1f;
-    [SerializeField] float lazySpeed = 5f;
-    [SerializeField] float reactiveSpeed = 20f;
+    [SerializeField] float minDistance = 1.5f;
+    [SerializeField] float collisionSmoothTime = 0.1f;
+    [SerializeField] float lazySpeed = 8f;
+    [SerializeField] float reactiveSpeed = 25f;
     [SerializeField] LayerMask blockMask = ~0;
 
     float yaw;
     float pitch;
     Vector3 dampVelocity;
+    float currentDistance;
+    float distanceVelocity;
     Rigidbody targetRb;
 
     void Start()
@@ -25,6 +28,8 @@ public class CameraFollow : MonoBehaviour
         Vector3 angles = transform.eulerAngles;
         yaw = angles.y;
         pitch = angles.x;
+
+        currentDistance = distance;
 
         if (target != null)
         {
@@ -44,16 +49,16 @@ public class CameraFollow : MonoBehaviour
         pitch = Mathf.Clamp(pitch, minPitch, maxPitch);
 
         Quaternion rotation = Quaternion.Euler(pitch, yaw, 0f);
-        Vector3 offset = rotation * new Vector3(0f, 0f, -distance);
         Vector3 lookTarget = target.position + Vector3.up * verticalOffset;
+        Vector3 dirToCamera = rotation * Vector3.back;
 
-        Vector3 desiredPosition = target.position + offset;
-        Vector3 toCamera = desiredPosition - target.position;
-        float maxDist = toCamera.magnitude;
-        Vector3 dirToCamera = toCamera / maxDist;
+        float targetDist = distance;
+        if (Physics.SphereCast(lookTarget, collisionRadius, dirToCamera, out RaycastHit hit, distance, blockMask))
+            targetDist = Mathf.Clamp(hit.distance, minDistance, distance);
 
-        if (Physics.SphereCast(target.position, collisionRadius, dirToCamera, out RaycastHit hit, maxDist, blockMask))
-            desiredPosition = target.position + dirToCamera * Mathf.Max(hit.distance, minCameraDistance);
+        currentDistance = Mathf.SmoothDamp(currentDistance, targetDist, ref distanceVelocity, collisionSmoothTime);
+
+        Vector3 desiredPosition = lookTarget + dirToCamera * currentDistance;
 
         float speed = reactiveSpeed;
         if (targetRb != null && targetRb.linearVelocity.sqrMagnitude > 0.01f)
