@@ -11,16 +11,21 @@ public class CameraFollow : MonoBehaviour
     [SerializeField] float maxPitch = 60f;
     [SerializeField] float collisionRadius = 0.3f;
     [SerializeField] float minCameraDistance = 1f;
+    [SerializeField] float smoothSpeed = 10f;
     [SerializeField] LayerMask blockMask = ~0;
 
     float yaw;
     float pitch;
+    Vector3 velocity;
 
     void Start()
     {
         Vector3 angles = transform.eulerAngles;
         yaw = angles.y;
         pitch = angles.x;
+
+        if (target != null)
+            blockMask &= ~(1 << target.gameObject.layer);
     }
 
     void LateUpdate()
@@ -45,7 +50,7 @@ public class CameraFollow : MonoBehaviour
         if (Physics.SphereCast(target.position, collisionRadius, dirToCamera, out RaycastHit hit, maxDist, blockMask))
             desiredPosition = target.position + dirToCamera * Mathf.Max(hit.distance, minCameraDistance);
 
-        transform.position = desiredPosition;
+        transform.position = Vector3.SmoothDamp(transform.position, desiredPosition, ref velocity, 1f / smoothSpeed);
         transform.LookAt(lookTarget);
     }
 }
