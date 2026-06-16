@@ -101,6 +101,11 @@ public class UIScript : MonoBehaviour
         Cursor.lockState = CursorLockMode.Confined;
     }*/
 
+    public void restartLevel()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
     public void restartGame()
     {
         SceneManager.LoadScene("Main");
