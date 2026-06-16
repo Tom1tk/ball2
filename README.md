@@ -1,2 +1,2 @@
-# HamsterGame
-3rd year project of a unity game where the player controls a hamster in a ball
+# Ball2 - The Baller
+Physics-based hamster-in-a-ball game. Roll, boost, dodge, and grapple your way through enemy hamsters.
