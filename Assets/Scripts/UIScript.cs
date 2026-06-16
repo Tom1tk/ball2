@@ -67,6 +67,7 @@ public class UIScript : MonoBehaviour
 
     public void showPauseUI()
     {
+        gamePlaying = true;
         Cursor.lockState = CursorLockMode.Confined;
         Time.timeScale = 0f;
         pauseMenu.SetActive(true);
@@ -74,9 +75,15 @@ public class UIScript : MonoBehaviour
 
     public void hidePauseUI()
     {
+        gamePlaying = false;
         pauseMenu.SetActive(false);
         Time.timeScale = 1f;
         Cursor.lockState = CursorLockMode.Locked;
+    }
+
+    public void togglePause()
+    {
+        if (gamePlaying) hidePauseUI(); else showPauseUI();
     }
 
     /*

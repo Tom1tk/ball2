@@ -25,6 +25,8 @@ public class CameraFollow : MonoBehaviour
 
     void LateUpdate()
     {
+        if (Time.timeScale <= 0f) return;
+
         Vector2 mouseDelta = Mouse.current?.delta.ReadValue() ?? Vector2.zero;
 
         yaw += mouseDelta.x * sensitivity;

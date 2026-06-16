@@ -90,7 +90,7 @@ public class BallMovement : MonoBehaviour
         _controls.Player.Dodge.started += ctx => dodgeInput = ctx.ReadValue<float>();
         _controls.Player.Dodge.performed += __ => dodge();
 
-        _controls.Player.Pause.started += ___ => UIref.showPauseUI();
+        _controls.Player.Pause.started += ___ => UIref.togglePause();
     }
 
     void FixedUpdate()
