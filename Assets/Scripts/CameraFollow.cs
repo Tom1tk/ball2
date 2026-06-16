@@ -11,12 +11,14 @@ public class CameraFollow : MonoBehaviour
     [SerializeField] float maxPitch = 60f;
     [SerializeField] float collisionRadius = 0.3f;
     [SerializeField] float minCameraDistance = 1f;
-    [SerializeField] float smoothSpeed = 10f;
+    [SerializeField] float lazySpeed = 5f;
+    [SerializeField] float reactiveSpeed = 20f;
     [SerializeField] LayerMask blockMask = ~0;
 
     float yaw;
     float pitch;
-    Vector3 velocity;
+    Vector3 dampVelocity;
+    Rigidbody targetRb;
 
     void Start()
     {
@@ -25,7 +27,10 @@ public class CameraFollow : MonoBehaviour
         pitch = angles.x;
 
         if (target != null)
+        {
             blockMask &= ~(1 << target.gameObject.layer);
+            targetRb = target.GetComponent<Rigidbody>();
+        }
     }
 
     void LateUpdate()
@@ -50,7 +55,15 @@ public class CameraFollow : MonoBehaviour
         if (Physics.SphereCast(target.position, collisionRadius, dirToCamera, out RaycastHit hit, maxDist, blockMask))
             desiredPosition = target.position + dirToCamera * Mathf.Max(hit.distance, minCameraDistance);
 
-        transform.position = Vector3.SmoothDamp(transform.position, desiredPosition, ref velocity, 1f / smoothSpeed);
+        float speed = reactiveSpeed;
+        if (targetRb != null && targetRb.linearVelocity.sqrMagnitude > 0.01f)
+        {
+            Vector3 camToTarget = (target.position - transform.position).normalized;
+            float dot = Vector3.Dot(camToTarget, targetRb.linearVelocity.normalized);
+            speed = Mathf.Lerp(reactiveSpeed, lazySpeed, Mathf.Clamp01(dot));
+        }
+
+        transform.position = Vector3.SmoothDamp(transform.position, desiredPosition, ref dampVelocity, 1f / speed);
         transform.LookAt(lookTarget);
     }
 }
