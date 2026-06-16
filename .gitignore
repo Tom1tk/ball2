@@ -31,6 +31,7 @@ ExportedObj/
 *.csproj
 *.unityproj
 *.sln
+*.slnx
 *.suo
 *.tmp
 *.user
@@ -60,4 +61,12 @@ crashlytics-build.properties
 
 # Plastic SCM
 .plastic/
+
+# Auto-generated
+/UpgradeLog*.htm
+/Backup/
+.vsconfig
+.vscode/
+ignore.conf
+.collabignore
 
