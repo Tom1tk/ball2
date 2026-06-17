@@ -4,7 +4,7 @@
 > An agent takes **one** ticket, works it on a branch against `./Tools/run-tests.sh`, and respects its **Lane** (see `AGENTS.md`).
 > Status keys: `READY` (do now) · `BLOCKED` (waiting on a dependency) · `DONE`.
 
-**Do-now order:** B2-001 → B2-002 → B2-003 → B2-004, then B2-007 / B2-010 can run in parallel.
+**Do-now order:** ~~B2-001~~ DONE → B2-002 → B2-003 → B2-004, then B2-007 / B2-010 can run in parallel.
 
 ---
 
@@ -14,10 +14,19 @@
 ```
 id: B2-001
 lane: A
-status: READY
+status: DONE
 goal: Split the single Assembly-CSharp into testable assemblies so logic can be unit-tested
       headless and agents get a real termination signal.
 ```
+**Work log (2026-06-17):**
+- Created `Assets/Scripts/Core/`, `Assets/Scripts/Gameplay/Input/`, `Assets/Tests/EditMode/`, `Assets/Tests/PlayMode/`.
+- Wrote 4 `.asmdef` files per spec contents. `Ball2.Core` (refs: none, engine refs on for `Vector3`/`Mathf`), `Ball2.Gameplay` (refs: Core, InputSystem, UI, TextMeshPro), `Ball2.Tests.EditMode` (Editor-only, NUnit), `Ball2.Tests.PlayMode` (all platforms, NUnit).
+- `git mv`'d 9 MonoBehaviours (`.cs` + `.meta`) from `Assets/Scripts/` → `Assets/Scripts/Gameplay/`. History and GUIDs preserved.
+- `git mv`'d `Controls.cs` + `Controls.inputactions` (`.cs` + `.meta` + `.inputactions` + `.meta`) from `Assets/Controls/` → `Assets/Scripts/Gameplay/Input/`. Removed empty `Assets/Controls/` + its `.meta`.
+- Verified: `UIScript.cs` uses `TMPro` (TMP ref justified), `EnemyAI.cs` uses `UnityEngine.AI` (covered by engine refs), `Controls` used only by `BallMovement` (same assembly — no cross-asmdef ref needed).
+- Unity batchmode compile check: `Unity -batchmode -nographics -quit -projectPath . -logFile` → exit code 0, no `error CS` lines, "Exiting batchmode successfully now!". Ball2.Gameplay compiled with all 10 scripts. Expected warnings for empty assemblies (Core, Tests.EditMode, Tests.PlayMode — no scripts yet; B2-003 adds the first).
+- **All acceptance criteria met:** (1) batchmode compiles with no errors, (2) no gameplay scripts in Assembly-CSharp (all 10 `.cs` under Ball2.Gameplay), (3) Gameplay refs Core, Core refs neither Gameplay nor networking.
+- Branch: `B2-001-assembly-split`. PR opened for audit.
 **Do:**
 1. Create these folders + `.asmdef` files (contents below). Unity generates the `.meta` on import.
    - `Assets/Scripts/Core/Ball2.Core.asmdef`
@@ -66,11 +75,13 @@ goal: Split the single Assembly-CSharp into testable assemblies so logic can be 
 ```
 id: B2-002
 lane: A
-status: BLOCKED (needs B2-001)
+status: READY (unblocked by B2-001)
 goal: A one-command headless test run that emits machine-readable pass/fail — the only valid
       "observe" step for Lane A.
 ```
 **Do:** add `Tools/run-tests.sh` (the file is provided in this bundle — drop it in and `chmod +x`). It locates Unity from `ProjectVersion.txt` (override `UNITY_BIN`), runs the chosen platform's tests, and parses the NUnit3 XML into a summary, exiting non-zero on any failure.
+
+**Note:** The script currently lives at `Assets/Tools/run_tests.sh` (underscore in filename). Its `PROJECT_PATH` calculation uses `$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)`, which resolves to `Assets/` — one level too shallow since it's nested under `Assets/Tools/`. Fix: change `..` to `../..`, or move the script to repo-root `Tools/run-tests.sh` (spec convention). Also consider adding a `run-tests.ps1` PowerShell twin for native Windows use.
 **acceptance:**
 - `./Tools/run-tests.sh EditMode` runs Unity headless, writes `test-results-EditMode.xml`, prints a `Tests: … Passed: … Failed: …` line.
 - Exit code is 0 when all tests pass, non-zero when any fail (verify both, e.g. by temporarily adding a failing assertion).
