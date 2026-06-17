@@ -10,19 +10,6 @@ namespace Ball2.Tests.EditMode
         // A unit aim pointing down +Z.
         private static readonly Vector3 AimForward = Vector3.forward;
 
-        private static LockOnConfig DefaultConfig()
-        {
-            // Fresh config each test so tests don't share mutable state.
-            return new LockOnConfig
-            {
-                Range = 18f,
-                AcquisitionAngleDeg = 20f,
-                TrackingStrength = 0.35f,
-                DodgeToleranceDeg = 45f,
-                BreakRange = 18f,
-                Epsilon = 1e-5f
-            };
-        }
 
         // ---------------------------------------------------------------------
         // 1. No candidate near reticle / out of (short) range → no lock;
@@ -32,7 +19,7 @@ namespace Ball2.Tests.EditMode
         [Test]
         public void NoCandidates_NoLock_BoostNormal()
         {
-            var cfg = DefaultConfig();
+            var cfg = new LockOnConfig();
             var input = new LockOnInput(
                 playerPosition: Vector3.zero,
                 aimDirection: AimForward,
@@ -51,7 +38,7 @@ namespace Ball2.Tests.EditMode
         [Test]
         public void NullCandidates_NoLock()
         {
-            var cfg = DefaultConfig();
+            var cfg = new LockOnConfig();
             var input = new LockOnInput(
                 playerPosition: Vector3.zero,
                 aimDirection: AimForward,
@@ -68,7 +55,7 @@ namespace Ball2.Tests.EditMode
         [Test]
         public void EnemyOutOfRange_NoLock()
         {
-            var cfg = DefaultConfig();
+            var cfg = new LockOnConfig();
             // 30 units ahead — beyond the 18 unit range.
             var enemy = new LockOnCandidate(1, new Vector3(0, 0, 30), Vector3.zero);
             var input = new LockOnInput(
@@ -83,7 +70,7 @@ namespace Ball2.Tests.EditMode
         [Test]
         public void EnemyOffReticle_NoLock()
         {
-            var cfg = DefaultConfig();
+            var cfg = new LockOnConfig();
             // Enemy close enough (10 units) but 90 degrees off the aim ray.
             var enemy = new LockOnCandidate(1, new Vector3(10, 0, 0), Vector3.zero);
             var input = new LockOnInput(
@@ -103,7 +90,7 @@ namespace Ball2.Tests.EditMode
         [Test]
         public void EnemyOnReticleInRange_AcquiresLock_IconShows()
         {
-            var cfg = DefaultConfig();
+            var cfg = new LockOnConfig();
             // 10 units straight ahead, dead-centre.
             var enemy = new LockOnCandidate(7, new Vector3(0, 0, 10), Vector3.zero);
             var input = new LockOnInput(
@@ -120,7 +107,7 @@ namespace Ball2.Tests.EditMode
         [Test]
         public void EnemyNearReticleWithinAcquisitionAngle_Acquires()
         {
-            var cfg = DefaultConfig();
+            var cfg = new LockOnConfig();
             // 12 units ahead, offset so the aim-to-enemy angle is ~14deg (< 20 threshold).
             // angle = atan2(3, 11.83) ≈ 14.2deg.
             var enemy = new LockOnCandidate(2, new Vector3(3f, 0f, 11.83f), Vector3.zero);
@@ -137,7 +124,7 @@ namespace Ball2.Tests.EditMode
         [Test]
         public void MultipleCandidates_PicksClosestToReticleCentre()
         {
-            var cfg = DefaultConfig();
+            var cfg = new LockOnConfig();
             // A: 5deg off, 10 units.  B: 2deg off, 10 units. B should win (closer to centre).
             var a = new LockOnCandidate(1, new Vector3(0.87f, 0, 10f), Vector3.zero); // ~5deg
             var b = new LockOnCandidate(2, new Vector3(0.35f, 0, 10f), Vector3.zero); // ~2deg
@@ -157,7 +144,7 @@ namespace Ball2.Tests.EditMode
         [Test]
         public void SoftTracking_LockRetained_AndDoesNotSnapPerfectly()
         {
-            var cfg = DefaultConfig();
+            var cfg = new LockOnConfig();
             // Acquire at 10 units ahead.
             var enemy = new LockOnCandidate(1, new Vector3(0, 0, 10), Vector3.zero);
             var acquireInput = new LockOnInput(
@@ -187,7 +174,7 @@ namespace Ball2.Tests.EditMode
         [Test]
         public void SoftTracking_StrengthZero_FrozenAimPoint()
         {
-            var cfg = DefaultConfig();
+            var cfg = new LockOnConfig();
             cfg.TrackingStrength = 0f;
             var enemy = new LockOnCandidate(1, new Vector3(0, 0, 10), Vector3.zero);
             var acquired = LockOnResolver.Resolve(
@@ -205,7 +192,7 @@ namespace Ball2.Tests.EditMode
         [Test]
         public void SoftTracking_StrengthOne_SnapsToEnemy()
         {
-            var cfg = DefaultConfig();
+            var cfg = new LockOnConfig();
             cfg.TrackingStrength = 1f;
             var enemy = new LockOnCandidate(1, new Vector3(0, 0, 10), Vector3.zero);
             var acquired = LockOnResolver.Resolve(
@@ -227,7 +214,7 @@ namespace Ball2.Tests.EditMode
         [Test]
         public void LockBreaks_EnemyLeavesRange()
         {
-            var cfg = DefaultConfig();
+            var cfg = new LockOnConfig();
             var enemy = new LockOnCandidate(1, new Vector3(0, 0, 10), Vector3.zero);
             var acquired = LockOnResolver.Resolve(
                 new LockOnInput(Vector3.zero, AimForward, new[] { enemy }, LockState.None, false), cfg);
@@ -245,7 +232,7 @@ namespace Ball2.Tests.EditMode
         [Test]
         public void LockBreaks_EnemyDodgesOutsideTolerance()
         {
-            var cfg = DefaultConfig();
+            var cfg = new LockOnConfig();
             var enemy = new LockOnCandidate(1, new Vector3(0, 0, 10), Vector3.zero);
             var acquired = LockOnResolver.Resolve(
                 new LockOnInput(Vector3.zero, AimForward, new[] { enemy }, LockState.None, false), cfg);
@@ -264,7 +251,7 @@ namespace Ball2.Tests.EditMode
         [Test]
         public void LockHolds_EnemyStaysWithinDodgeTolerance()
         {
-            var cfg = DefaultConfig();
+            var cfg = new LockOnConfig();
             var enemy = new LockOnCandidate(1, new Vector3(0, 0, 10), Vector3.zero);
             var acquired = LockOnResolver.Resolve(
                 new LockOnInput(Vector3.zero, AimForward, new[] { enemy }, LockState.None, false), cfg);
@@ -280,7 +267,7 @@ namespace Ball2.Tests.EditMode
         [Test]
         public void LockBreaks_BreakRangeLargerThanAcquisitionRange()
         {
-            var cfg = DefaultConfig();
+            var cfg = new LockOnConfig();
             cfg.BreakRange = 25f; // hold band wider than the 18 acquisition range
 
             var enemy = new LockOnCandidate(1, new Vector3(0, 0, 10), Vector3.zero);
@@ -308,7 +295,7 @@ namespace Ball2.Tests.EditMode
         [Test]
         public void CommitOnCharge_DoesNotSwitchToBetterCandidate()
         {
-            var cfg = DefaultConfig();
+            var cfg = new LockOnConfig();
             // Lock enemy A (5deg off, 10 units).
             var a = new LockOnCandidate(1, new Vector3(0.87f, 0, 10f), Vector3.zero); // ~5deg
             var acquired = LockOnResolver.Resolve(
@@ -329,7 +316,7 @@ namespace Ball2.Tests.EditMode
         [Test]
         public void CommitOnCharge_BreakConditionsStillApply()
         {
-            var cfg = DefaultConfig();
+            var cfg = new LockOnConfig();
             var a = new LockOnCandidate(1, new Vector3(0, 0, 10), Vector3.zero);
             var acquired = LockOnResolver.Resolve(
                 new LockOnInput(Vector3.zero, AimForward, new[] { a }, LockState.None, false), cfg);
@@ -349,7 +336,7 @@ namespace Ball2.Tests.EditMode
         [Test]
         public void CommitOnCharge_NotCharging_CanSwitchToBetterCandidate()
         {
-            var cfg = DefaultConfig();
+            var cfg = new LockOnConfig();
             var a = new LockOnCandidate(1, new Vector3(0.87f, 0, 10f), Vector3.zero); // ~5deg
             var acquired = LockOnResolver.Resolve(
                 new LockOnInput(Vector3.zero, AimForward, new[] { a }, LockState.None, false), cfg);
@@ -372,7 +359,7 @@ namespace Ball2.Tests.EditMode
         [Test]
         public void Determinism_IdenticalInputsProduceIdenticalOutputs()
         {
-            var cfg = DefaultConfig();
+            var cfg = new LockOnConfig();
             var enemy = new LockOnCandidate(1, new Vector3(0.5f, -0.3f, 12f), new Vector3(0.1f, 0, 0));
             var input = new LockOnInput(
                 new Vector3(1, 2, 3), AimForward, new[] { enemy }, LockState.None, false);
@@ -388,7 +375,7 @@ namespace Ball2.Tests.EditMode
         [Test]
         public void Determinism_TrackingRepeatedProducesIdenticalOutputs()
         {
-            var cfg = DefaultConfig();
+            var cfg = new LockOnConfig();
             var enemy = new LockOnCandidate(1, new Vector3(0, 0, 10), Vector3.zero);
             var acquired = LockOnResolver.Resolve(
                 new LockOnInput(Vector3.zero, AimForward, new[] { enemy }, LockState.None, false), cfg);
@@ -409,7 +396,7 @@ namespace Ball2.Tests.EditMode
         {
             // Call resolve many times in a loop with the SAME inputs; the result must
             // never drift. This guards against hidden time/frame reads or RNG.
-            var cfg = DefaultConfig();
+            var cfg = new LockOnConfig();
             var enemy = new LockOnCandidate(42, new Vector3(0, 1, 9), Vector3.zero);
             var input = new LockOnInput(
                 new Vector3(0, 0, 0), AimForward, new[] { enemy }, LockState.None, false);
@@ -429,7 +416,7 @@ namespace Ball2.Tests.EditMode
         [Test]
         public void ZeroAimDirection_NoLock()
         {
-            var cfg = DefaultConfig();
+            var cfg = new LockOnConfig();
             var enemy = new LockOnCandidate(1, new Vector3(0, 0, 10), Vector3.zero);
             var input = new LockOnInput(
                 Vector3.zero, Vector3.zero, new[] { enemy }, LockState.None, false);
@@ -442,7 +429,7 @@ namespace Ball2.Tests.EditMode
         [Test]
         public void EnemyOnTopOfPlayer_NotAcquired()
         {
-            var cfg = DefaultConfig();
+            var cfg = new LockOnConfig();
             var enemy = new LockOnCandidate(1, Vector3.zero, Vector3.zero);
             var input = new LockOnInput(
                 Vector3.zero, AimForward, new[] { enemy }, LockState.None, false);

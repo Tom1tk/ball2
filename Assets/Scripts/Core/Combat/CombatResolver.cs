@@ -107,17 +107,10 @@ namespace Ball2.Core.Combat
         /// </summary>
         public static ContactOutcome Resolve(in ContactInput c, CombatConfig cfg)
         {
-            // Normalised normal; degenerate normals (zero length) are treated as no contact.
-            Vector3 normal = c.Normal;
-            float normalLen = normal.magnitude;
-            if (normalLen < 1e-6f)
-            {
+            // Normalised normal; degenerate (zero-length) normals are treated as no contact.
+            Vector3 normal = c.Normal.normalized;
+            if (normal.sqrMagnitude < 1e-12f)
                 return new ContactOutcome(0f, 0f, Vector3.zero, Vector3.zero, false);
-            }
-            if (normalLen > 1.0001f || normalLen < 0.9999f)
-            {
-                normal /= normalLen; // renormalise; callers are expected to pass a unit vector
-            }
 
             // Closing speed along the normal. With Normal pointing B -> A and
             // RelativeVelocity = vA - vB, a closing contact has dot < 0; negate for a

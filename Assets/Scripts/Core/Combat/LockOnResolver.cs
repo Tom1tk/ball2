@@ -157,7 +157,7 @@ namespace Ball2.Core.Combat
                     float aimAngleDeg = AngleDeg(aim, toEnemy);
 
                     // Break conditions: out of break range OR dodged outside tolerance.
-                    if (dist > BreakRangeEffective(cfg) + cfg.Epsilon ||
+                    if (dist > cfg.BreakRange + cfg.Epsilon ||
                         aimAngleDeg > cfg.DodgeToleranceDeg + AimEpsilonDeg)
                     {
                         // Lock broken. While charging we do NOT re-acquire a different target
@@ -266,17 +266,7 @@ namespace Ball2.Core.Combat
         {
             float denom = MathF.Sqrt(a.sqrMagnitude * b.sqrMagnitude);
             if (denom <= 0f) return 90f; // treat degenerate as orthogonal (won't acquire)
-            float cos = Vector3.Dot(a, b) / denom;
-            // Clamp for floating-point safety, then convert to degrees.
-            if (cos > 1f) cos = 1f;
-            else if (cos < -1f) cos = -1f;
-            return MathF.Acos(cos) * Mathf.Rad2Deg;
-        }
-
-        private static float BreakRangeEffective(LockOnConfig cfg)
-        {
-            // BreakRange defaults to Range; honour whatever Tom sets (even if larger/smaller).
-            return cfg.BreakRange;
+            return Vector3.Angle(a, b);
         }
     }
 }
