@@ -136,7 +136,7 @@ namespace Ball2.Tests.EditMode
 ```
 id: B2-004
 lane: A (yml authoring) + one-time human setup
-status: READY (unblocked by B2-002)
+status: DONE (yml authored; human runner-registration prereq pending — Lane C)
 goal: Run the harness automatically on every PR and push to main.
 ```
 **Do:** add `.github/workflows/ci.yml` (provided in this bundle). Primary job uses a **self-hosted runner with native Unity** (no Docker, on-brand for the homelab); a commented `game-ci` job is the hosted alternative.
