@@ -37,6 +37,12 @@ The seeded entries below are live examples of the format.
 - verify: `Tests: 23  Passed: 23  Failed: 0  Skipped: 0  (0.0786671s)` exit 0 (1 canary + 22 lock-on).
 - commit: b693325
 - notes: API surface — `LockOnCandidate`/`LockState`/`LockOnInput`/`LockOnResult` readonly structs + `LockOnConfig` (Q12 public fields). `LockState.None` = targetId -1. Acquisition = in Range + within AcquisitionAngleDeg of aim ray, best = smallest angle then nearest. Tracking = lerp by TrackingStrength (soft, no snap). Break = beyond BreakRange OR aim > DodgeToleranceDeg. Commit-on-charge = no target switch while BoostChargeStarted (break still drops lock; no re-acquire to a different enemy mid-charge). B2-011 (Lane B) renders the icon + applies the boost impulse — it reads `LockOnResult.IconTargetId`/`IconShouldShow` and `NewLock.TrackingPosition`. Did NOT touch the asmdef or B2-007's files.
+### 2026-06-17 - B2-004 - CI on PRs (yml authoring) - DONE (human prereq pending)
+- by: agent (B2-004)
+- did: added `.github/workflows/ci.yml` — primary self-hosted `unity`-labelled job runs `./Tools/run-tests.sh EditMode`, uploads `test-results-EditMode.xml` as artifact (always, even on failure); commented-out `game-ci/unity-test-runner@v4` alternative included.
+- verify: n/a — CI cannot be exercised without a registered runner. YAML parsed + structurally validated locally (triggers, runs-on `[self-hosted, unity]`, chmod, run-tests EditMode, UNITY_BIN set, `if: always()` upload, game-ci job fully commented).
+- commit: (this commit)
+- notes: **HUMAN PREREQUISITE (Lane C, Tom):** register a self-hosted runner labelled `unity` on a box with Unity 6000.4.10f1 + licence, OR uncomment the game-ci job and add `UNITY_LICENSE`/`UNITY_EMAIL`/`UNITY_PASSWORD` secrets. Until then PRs will show the check as pending/no-runner. `UNITY_BIN` is pinned in the workflow but matches the path `run-tests.sh` auto-detects.
 ### 2026-06-17 - B2-002 / B2-003 - headless harness + canary - DONE
 - by: agent
 - did: added `Tools/run-tests.sh`; `CoreInfo.cs` + `CanaryTests.cs`; canary proves the full compile to test to parse to exit path.

@@ -1,0 +1,87 @@
+name: CI
+
+# Runs the Ball2 EditMode test harness on every PR and push to main.
+# Primary job targets a self-hosted runner labelled `unity` with a native
+# Unity install (no Docker). A commented-out game-ci alternative is provided
+# below for users without a self-hosted runner.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Cancel superseded runs on the same ref to save runner time.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  editmode-tests:
+    name: EditMode tests (self-hosted Unity)
+    # Requires a self-hosted runner registered with the `unity` label on a box
+    # that has Unity 6000.4.10f1 installed and licensed. Registration is a
+    # one-time human step (Lane C) — see PR description.
+    runs-on: [self-hosted, unity]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Make harness executable
+        run: chmod +x Tools/run-tests.sh
+
+      # run-tests.sh locates Unity from ProjectVersion.txt and also accepts a
+      # UNITY_BIN override. Set explicitly here for determinism; the path below
+      # is the homelab install location the script would auto-detect anyway.
+      - name: Run EditMode tests
+        env:
+          UNITY_BIN: /opt/unity/editors/6000.4.10f1/Editor/Unity
+        run: ./Tools/run-tests.sh EditMode
+
+      # Always upload results — even when the test step fails — so failures are
+      # inspectable. The job itself goes red on any non-zero script exit.
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-EditMode
+          path: test-results-EditMode.xml
+          if-no-files-found: warn
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # ALTERNATIVE — hosted game-ci runner (no self-hosted box required).
+  # Uncomment this job (and comment out the one above) to run on GitHub-hosted
+  # runners inside the game-ci Docker image instead of on a self-hosted runner.
+  #
+  # Prerequisite (one-time): add repository secrets UNITY_LICENSE, UNITY_EMAIL,
+  # and UNITY_PASSWORD. For a Unity Personal licence these are all required by
+  # game-ci — see https://game.ci/docs/github/test-runner. A Pro licence uses
+  # UNITY_EMAIL / UNITY_PASSWORD / UNITY_SERIAL instead.
+  # ─────────────────────────────────────────────────────────────────────────
+  # editmode-tests-gameci:
+  #   name: EditMode tests (game-ci)
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
+  #
+  #     - name: Run EditMode tests
+  #       id: tests
+  #       uses: game-ci/unity-test-runner@v4
+  #       env:
+  #         UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+  #         UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+  #         UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+  #       with:
+  #         projectPath: .
+  #         testMode: editmode
+  #         githubToken: ${{ secrets.GITHUB_TOKEN }}
+  #
+  #     - name: Upload test results
+  #       if: always()
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: test-results-EditMode-gameci
+  #         path: ${{ steps.tests.outputs.artifactsPath }}
