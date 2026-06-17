@@ -4,7 +4,7 @@
 > An agent takes **one** ticket, works it on a branch against `./Tools/run-tests.sh`, and respects its **Lane** (see `AGENTS.md`).
 > Status keys: `READY` (do now) · `BLOCKED` (waiting on a dependency) · `DONE`.
 
-**Do-now order:** ~~B2-001~~ DONE → B2-002 → B2-003 → B2-004, then B2-007 / B2-010 can run in parallel.
+**Do-now order:** ~~B2-001~~ DONE → ~~B2-002~~ DONE → ~~B2-003~~ DONE → B2-004, then B2-007 / B2-010 can run in parallel.
 
 ---
 
@@ -75,13 +75,13 @@ goal: Split the single Assembly-CSharp into testable assemblies so logic can be 
 ```
 id: B2-002
 lane: A
-status: READY (unblocked by B2-001)
+status: DONE
 goal: A one-command headless test run that emits machine-readable pass/fail — the only valid
       "observe" step for Lane A.
 ```
 **Do:** add `Tools/run-tests.sh` (the file is provided in this bundle — drop it in and `chmod +x`). It locates Unity from `ProjectVersion.txt` (override `UNITY_BIN`), runs the chosen platform's tests, and parses the NUnit3 XML into a summary, exiting non-zero on any failure.
 
-**Note:** The script currently lives at `Assets/Tools/run_tests.sh` (underscore in filename). Its `PROJECT_PATH` calculation uses `$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)`, which resolves to `Assets/` — one level too shallow since it's nested under `Assets/Tools/`. Fix: change `..` to `../..`, or move the script to repo-root `Tools/run-tests.sh` (spec convention). Also consider adding a `run-tests.ps1` PowerShell twin for native Windows use.
+**Work log (2026-06-17):** Moved `Assets/Tools/run_tests.sh` → repo-root `Tools/run-tests.sh` (spec convention; `.meta` dropped — repo-root `Tools/` is outside `Assets/`). The relocation fixes the `PROJECT_PATH` shallow-resolution bug: `$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)` now resolves to the project root, not `Assets/`. Verified `ProjectVersion.txt` lookup returns `6000.4.10f1`. `chmod +x` preserved. Unity 6000.4.10f1 installed at `/opt/unity/editors/6000.4.10f1/Editor/Unity` (auto-located by the script). **Acceptance verified end-to-end with B2-003:** `./Tools/run-tests.sh EditMode` → `Tests: 1  Passed: 1  Failed: 0` exit 0; failing-assertion variant → `Failed: 1` exit 1 with named failure + assertion diff. Does not pass `-quit` with `-runTests`.
 **acceptance:**
 - `./Tools/run-tests.sh EditMode` runs Unity headless, writes `test-results-EditMode.xml`, prints a `Tests: … Passed: … Failed: …` line.
 - Exit code is 0 when all tests pass, non-zero when any fail (verify both, e.g. by temporarily adding a failing assertion).
@@ -94,9 +94,10 @@ goal: A one-command headless test run that emits machine-readable pass/fail — 
 ```
 id: B2-003
 lane: A
-status: BLOCKED (needs B2-002)
+status: DONE
 goal: One trivial Core type + one EditMode test, to prove compile→test→parse→exit-code works.
 ```
+**Work log (2026-06-17):** Created both files verbatim per the `**Do:**` block (`Assets/Scripts/Core/CoreInfo.cs`, `Assets/Tests/EditMode/CanaryTests.cs`). `Ball2.Tests.EditMode.asmdef` already references `Ball2.Core`, so the test resolves `CoreInfo`. Unity 6000.4.10f1 licensed with Unity Personal (`--activate-all --include-personal`; license at `~/.config/unity3d/Unity/licenses/UnityEntitlementLicense.xml`, status Valid, includes `com.unity.editor.headless`). **Acceptance verified:** `./Tools/run-tests.sh EditMode` → `Tests: 1  Passed: 1  Failed: 0  Skipped: 0  (0.0535519s)` exit 0.
 **Do:** create these two files.
 
 `Assets/Scripts/Core/CoreInfo.cs`
@@ -135,7 +136,7 @@ namespace Ball2.Tests.EditMode
 ```
 id: B2-004
 lane: A (yml authoring) + one-time human setup
-status: BLOCKED (needs B2-002)
+status: READY (unblocked by B2-002)
 goal: Run the harness automatically on every PR and push to main.
 ```
 **Do:** add `.github/workflows/ci.yml` (provided in this bundle). Primary job uses a **self-hosted runner with native Unity** (no Docker, on-brand for the homelab); a commented `game-ci` job is the hosted alternative.
@@ -151,7 +152,7 @@ goal: Run the harness automatically on every PR and push to main.
 ```
 id: B2-007
 lane: A
-status: BLOCKED (needs B2-003)
+status: READY (unblocked by B2-003)
 goal: Pure deterministic function resolving a contact into damage + knockback, per spec §3.2.
       Covers ball-to-ball AND ball-to-wall (wall = infinite mass).
 ```
@@ -206,7 +207,7 @@ namespace Ball2.Core.Combat
 ```
 id: B2-010
 lane: A
-status: BLOCKED (needs B2-003)
+status: READY (unblocked by B2-003)
 goal: Pure logic for boost lock-on acquisition/gating/break/commit, per spec §3.3 (Q13).
 ```
 **Do:** implement `Ball2.Core/Combat/LockOnResolver.cs` — given the player's aim ray/position, candidate enemies, current lock state, and whether boost charge has started, return the new lock state. All thresholds in a `LockOnConfig` (Q12).
