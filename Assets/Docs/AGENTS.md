@@ -36,3 +36,10 @@ A single agentic harness with the human in the loop. `conductor` multi-agent del
 
 ## Netcode (when you reach it)
 Fishnet, server-authoritative + client prediction. For predicted collisions you MUST use Fishnet's `NetworkCollision`/`NetworkTrigger` + `PredictionRigidbody` — raw Unity collision callbacks won't reconcile. Keep all combat *outcomes* server-authoritative in `Ball2.Core`.
+## Progress logging (mandatory)
+Whenever you **start, finish, hand off, or block** a ticket, prepend an entry to
+`Assets/Docs/PROGRESS.md` (newest first) **in the same commit as the work**, and flip the
+ticket's `status` in `BALL2_TASKS.md` in that same commit. Record what you did, the exact
+harness summary line as your `verify` result, and the commit SHA. This is not optional
+bookkeeping — it is how the next worker (agent or human) picks up context without
+re-deriving it. See `PROGRESS.md` for the entry format.
