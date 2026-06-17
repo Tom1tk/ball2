@@ -69,6 +69,6 @@ public class CameraFollow : MonoBehaviour
         }
 
         transform.position = Vector3.SmoothDamp(transform.position, desiredPosition, ref dampVelocity, 1f / speed);
-        transform.LookAt(lookTarget);
+        transform.rotation = rotation;
     }
 }

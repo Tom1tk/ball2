@@ -878,7 +878,8 @@ MonoBehaviour:
   sphereMat3: {fileID: 2100000, guid: a6d5d5d337f0af74ba76b003f3db6581, type: 2}
   sphere: {fileID: 719344246486244797}
   debugText: {fileID: 0}
-  maxVelocity: 25
+  maxVelocity: 20
+  airMaxVelocity: 50
   inputForce: 100
   dodgeForce: 25
   dodgeTimer: 0
@@ -889,7 +890,8 @@ MonoBehaviour:
   charging: 0
   playerMagnitudeBeforePhysicsUpdate: 0
   movingSpeedThreshold: 1
-  gravityScale: 0.4
+  gravityScale: 0.8
+  airStrafeForce: 0.5
 --- !u!114 &690539848533661304
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -911,9 +913,9 @@ MonoBehaviour:
   rightLine: {fileID: 3819890565457789378}
   leftCursor: {fileID: 0}
   rightCursor: {fileID: 0}
-  maxRange: 50
-  projectileSpeed: 200
-  returnSpeed: 200
+  maxRange: 80
+  projectileSpeed: 300
+  returnSpeed: 300
   reelAcceleration: 30
   maxReelSpeed: 60
   minRopeLength: 1
@@ -925,6 +927,14 @@ MonoBehaviour:
   stuckAngleThreshold: 170
   indicatorOffset: 1.5
   baseCursorScale: 0.2
+  swingAntiGravity: 0.3
+  releaseBoostMultiplier: 1.2
+  manualAimRadius: 0.08
+  autoAimScanRadius: 30
+  autoAimMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  showManualAimGizmo: 1
 --- !u!114 &1293697565
 MonoBehaviour:
   m_ObjectHideFlags: 0

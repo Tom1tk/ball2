@@ -29,6 +29,11 @@ public class GrappleSystem : MonoBehaviour
     [SerializeField] float baseCursorScale = 0.2f;
     [SerializeField] float swingAntiGravity = 0.3f;
     [SerializeField] float releaseBoostMultiplier = 1.4f;
+    [SerializeField] float antiWallForce = 5f;
+    [Header("Auto-Aim")]
+    [SerializeField] float manualAimRadius = 0.08f;
+    [SerializeField] LayerMask autoAimMask = ~0;
+    [SerializeField] bool showManualAimGizmo = true;
 
     public bool anyHooked { get; private set; }
 
@@ -51,6 +56,9 @@ public class GrappleSystem : MonoBehaviour
     private InputAction reel;
 
     private Vector2 leftCursorDefaultPos, rightCursorDefaultPos;
+    private Vector3 leftAimDir, rightAimDir;
+    private Vector3 _debugLeftTarget, _debugRightTarget;
+    private Texture2D _circleTex;
 
     void Awake()
     {
@@ -60,6 +68,7 @@ public class GrappleSystem : MonoBehaviour
 
         leftState = rightState = HookState.Ready;
 
+        autoAimMask &= ~(1 << gameObject.layer);
         leftCursorDefaultPos = leftCursor.anchoredPosition;
         rightCursorDefaultPos = rightCursor.anchoredPosition;
     }
@@ -99,6 +108,7 @@ public class GrappleSystem : MonoBehaviour
         leftGrapple?.Dispose();
         rightGrapple?.Dispose();
         reel?.Dispose();
+        if (_circleTex != null) Destroy(_circleTex);
     }
 
     void Update()
@@ -143,7 +153,8 @@ public class GrappleSystem : MonoBehaviour
         ref float distance = ref isLeft ? ref leftDistance : ref rightDistance;
         Transform indicator = isLeft ? leftIndicator : rightIndicator;
 
-        fireDir = playerCamera.transform.forward;
+        fireDir = (isLeft ? leftAimDir : rightAimDir);
+        if (fireDir == Vector3.zero) fireDir = playerCamera.transform.forward;
         distance = 0f;
         projectile = Instantiate(hookProjectilePrefab, indicator.position, Quaternion.identity);
         projectile.transform.rotation = Quaternion.LookRotation(fireDir) * Quaternion.Euler(90f, 0f, 0f);
@@ -188,6 +199,7 @@ public class GrappleSystem : MonoBehaviour
 
             case HookState.Hooked:
                 applyRopeConstraint(hookPoint, ref ropeLength);
+                rb.AddForce(hookNormal * antiWallForce, ForceMode.Acceleration);
                 break;
 
             case HookState.Returning:
@@ -332,13 +344,65 @@ public class GrappleSystem : MonoBehaviour
         cursor.localScale = Vector3.one * baseCursorScale * multiplier;
     }
 
-    void updateCursorTargeting()
+    Vector3 findAutoAimTarget(bool leftSide)
     {
-        updateCursorTarget(leftCursor, leftState, leftIndicator, leftCursorDefaultPos);
-        updateCursorTarget(rightCursor, rightState, rightIndicator, rightCursorDefaultPos);
+        Vector3 bestTarget = Vector3.zero;
+        float bestScore = 0f;
+        Vector3 idealDir = (playerCamera.transform.forward + Vector3.up).normalized;
+        const int ySteps = 8, xSteps = 5;
+
+        for (int yi = 0; yi < ySteps; yi++)
+        {
+            float vpY = (yi + 0.5f) / ySteps;
+
+            for (int xi = 0; xi < xSteps; xi++)
+            {
+                float vpX = (xi + 0.5f) / (xSteps * 2f); // 0 to 0.5
+                if (!leftSide) vpX = 1f - vpX;           // mirror to 1.0 to 0.5
+
+                Ray ray = playerCamera.ViewportPointToRay(new Vector3(vpX, vpY, 0));
+                if (!Physics.Raycast(ray, out RaycastHit hit, maxRange, autoAimMask))
+                    continue;
+                if (hit.transform.IsChildOf(transform) || hit.transform == transform)
+                    continue;
+
+                Vector3 point = hit.point;
+                if (point.y <= transform.position.y + 0.5f)
+                    continue;
+
+                point += hit.normal * 0.3f;
+
+                Vector3 toPoint = point - transform.position;
+                if (toPoint.sqrMagnitude > maxRange * maxRange)
+                    continue;
+
+                float score = Vector3.Dot(toPoint, idealDir);
+                if (vpY > 0.66f) score *= 2f; // top-third bonus
+
+                if (score > bestScore)
+                {
+                    bestScore = score;
+                    bestTarget = point;
+                }
+            }
+        }
+
+        return bestTarget;
     }
 
-    void updateCursorTarget(RectTransform cursor, HookState state, Transform indicator, Vector2 defaultPos)
+    void updateCursorTargeting()
+    {
+        Vector2 mousePos = Mouse.current?.position.ReadValue() ?? Vector2.zero;
+        Vector2 mouseViewport = new Vector2(mousePos.x / Screen.width, mousePos.y / Screen.height);
+
+        _debugLeftTarget = findAutoAimTarget(true);
+        _debugRightTarget = findAutoAimTarget(false);
+
+        updateCursorTarget(leftCursor, leftState, leftIndicator, leftCursorDefaultPos, true, mousePos, mouseViewport, ref leftAimDir, _debugLeftTarget);
+        updateCursorTarget(rightCursor, rightState, rightIndicator, rightCursorDefaultPos, false, mousePos, mouseViewport, ref rightAimDir, _debugRightTarget);
+    }
+
+    void updateCursorTarget(RectTransform cursor, HookState state, Transform indicator, Vector2 defaultPos, bool isLeft, Vector2 mousePos, Vector2 mouseViewport, ref Vector3 aimDir, Vector3 autoTarget)
     {
         if (state != HookState.Ready)
         {
@@ -346,17 +410,98 @@ public class GrappleSystem : MonoBehaviour
             return;
         }
 
-        Vector3 fireDir = playerCamera.transform.forward;
-        if (Physics.Raycast(indicator.position, fireDir, out RaycastHit hit, maxRange, grappleMask))
+        // Manual ring: raycast through mouse, check screen-space distance
+        Ray mouseRay = playerCamera.ScreenPointToRay(mousePos);
+        if (Physics.Raycast(mouseRay, out RaycastHit mouseHit, maxRange, grappleMask))
         {
-            Vector2 screenPoint = playerCamera.WorldToScreenPoint(hit.point);
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                (RectTransform)cursor.parent, screenPoint, null, out Vector2 localPoint);
-            cursor.anchoredPosition = localPoint;
+            Vector3 hitViewport = playerCamera.WorldToViewportPoint(mouseHit.point);
+            float screenDist = Vector2.Distance(new Vector2(hitViewport.x, hitViewport.y), mouseViewport);
+            if (screenDist < manualAimRadius)
+            {
+                aimDir = (mouseHit.point - indicator.position).normalized;
+                positionCursorAt(cursor, mouseHit.point);
+                return;
+            }
         }
+
+        // Auto-aim
+        if (autoTarget != Vector3.zero)
+        {
+            aimDir = (autoTarget - indicator.position).normalized;
+            positionCursorAt(cursor, autoTarget);
+            return;
+        }
+
+        // Default: camera-forward raycast from indicator
+        aimDir = playerCamera.transform.forward;
+        if (Physics.Raycast(indicator.position, aimDir, out RaycastHit hit, maxRange, grappleMask))
+            positionCursorAt(cursor, hit.point);
         else
-        {
             cursor.anchoredPosition = defaultPos;
+    }
+
+    void positionCursorAt(RectTransform cursor, Vector3 worldPoint)
+    {
+        Vector2 screenPoint = playerCamera.WorldToScreenPoint(worldPoint);
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(
+            (RectTransform)cursor.parent, screenPoint, null, out Vector2 localPoint);
+        cursor.anchoredPosition = localPoint;
+    }
+
+    void OnDrawGizmos()
+    {
+        if (!showManualAimGizmo) return;
+        Camera cam = playerCamera != null ? playerCamera : Camera.main;
+        if (cam == null) return;
+
+        Gizmos.color = Color.yellow;
+        float fovFactor = Mathf.Tan(cam.fieldOfView * Mathf.Deg2Rad * 0.5f);
+        float aspect = Screen.width > 0 ? (float)Screen.width / Screen.height : 16f / 9f;
+        Vector3 center = cam.transform.position + cam.transform.forward * (maxRange * 0.5f);
+        float worldRadius = manualAimRadius * maxRange * 0.5f * fovFactor * aspect;
+        Gizmos.DrawWireSphere(center, worldRadius);
+    }
+
+    void OnGUI()
+    {
+        if (!showManualAimGizmo || playerCamera == null) return;
+
+        if (_circleTex == null)
+        {
+            int s = 128;
+            _circleTex = new Texture2D(s, s, TextureFormat.RGBA32, false);
+            Color[] p = new Color[s * s];
+            float c = s / 2f, r = s / 2f - 2f;
+            for (int y = 0; y < s; y++)
+            for (int x = 0; x < s; x++)
+            {
+                float d = Mathf.Sqrt((x - c) * (x - c) + (y - c) * (y - c));
+                p[y * s + x] = new Color(1, 1, 0, 1f - Mathf.Clamp01(Mathf.Abs(d - r) / 2f));
+            }
+            _circleTex.Apply();
         }
+
+        Event e = Event.current;
+        Vector2 mp = e.mousePosition;
+        float radius = manualAimRadius * Screen.height;
+        Rect ringRect = new Rect(mp.x - radius, mp.y - radius, radius * 2f, radius * 2f);
+        GUI.color = new Color(1, 1, 0, 0.3f);
+        GUI.DrawTexture(ringRect, _circleTex);
+        GUI.color = Color.white;
+
+        // Debug: draw auto-aim target dots
+        DrawDebugDot(_debugLeftTarget, Color.cyan);
+        DrawDebugDot(_debugRightTarget, Color.magenta);
+    }
+
+    void DrawDebugDot(Vector3 worldPoint, Color color)
+    {
+        if (worldPoint == Vector3.zero || playerCamera == null) return;
+        Vector3 vp = playerCamera.WorldToViewportPoint(worldPoint);
+        if (vp.z < 0f) return;
+        Vector2 sp = new Vector2(vp.x * Screen.width, (1f - vp.y) * Screen.height);
+        GUI.color = color;
+        GUI.DrawTexture(new Rect(sp.x - 4f, sp.y - 4f, 8f, 8f), Texture2D.whiteTexture);
+        GUI.color = Color.white;
     }
 }

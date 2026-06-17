@@ -41,6 +41,7 @@ public class BallMovement : MonoBehaviour
     Text debugText;
 
     public float maxVelocity;
+    [SerializeField] float airMaxVelocity = 50f;
     public float inputForce;
     public float dodgeForce;
     public float dodgeTimer;
@@ -130,6 +131,11 @@ public class BallMovement : MonoBehaviour
         }
 
         //spriteAnim.SetFloat("speed", rb.velocity.magnitude);
+
+        bool grounded = Physics.Raycast(transform.position + Vector3.down * 0.55f, Vector3.down, 0.65f);
+        float cap = grounded ? maxVelocity : airMaxVelocity;
+        if (rb.linearVelocity.magnitude > cap)
+            rb.linearVelocity = rb.linearVelocity.normalized * cap;
 
         if(displayDebugText)
         {
