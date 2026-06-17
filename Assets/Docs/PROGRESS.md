@@ -30,6 +30,13 @@ The seeded entries below are live examples of the format.
 - notes: conventions are binding on callers — `Normal` points B→A, `RelativeVelocity = vA−vB`, closing speed `vn = -dot(Rel,Normal)`. Wall = `MassB = +inf` (NaN-guarded branch; symmetric `MassA=+inf` also handled). Damage ball-ball ∝ opponent's inverse-mass share of `vn`; equal-mass equal-speed is symmetric. Perfect hit = `vn ≥ PerfectHitMinSpeed` AND angle(Rel,−Normal) ≤ `PerfectHitMaxAngleDeg`. All tuning in `CombatConfig` (defaults are M2 placeholders). **B2-008 (wire to collisions) is now unblocked.**
 
 
+
+### 2026-06-17 - B2-010 - lock-on resolver - DONE
+- by: agent (B2-010)
+- did: implemented `Assets/Scripts/Core/Combat/LockOnResolver.cs` (pure/deterministic `LockOnResolver.Resolve` + `LockOnConfig`); 22 EditMode tests in `Assets/Tests/EditMode/LockOnResolverTests.cs` covering all 6 acceptance criteria (no-lock/normal boost, acquisition+icon, soft tracking respects TrackingStrength, break on range/dodge, commit-on-charge, determinism).
+- verify: `Tests: 23  Passed: 23  Failed: 0  Skipped: 0  (0.0786671s)` exit 0 (1 canary + 22 lock-on).
+- commit: b693325
+- notes: API surface — `LockOnCandidate`/`LockState`/`LockOnInput`/`LockOnResult` readonly structs + `LockOnConfig` (Q12 public fields). `LockState.None` = targetId -1. Acquisition = in Range + within AcquisitionAngleDeg of aim ray, best = smallest angle then nearest. Tracking = lerp by TrackingStrength (soft, no snap). Break = beyond BreakRange OR aim > DodgeToleranceDeg. Commit-on-charge = no target switch while BoostChargeStarted (break still drops lock; no re-acquire to a different enemy mid-charge). B2-011 (Lane B) renders the icon + applies the boost impulse — it reads `LockOnResult.IconTargetId`/`IconShouldShow` and `NewLock.TrackingPosition`. Did NOT touch the asmdef or B2-007's files.
 ### 2026-06-17 - B2-002 / B2-003 - headless harness + canary - DONE
 - by: agent
 - did: added `Tools/run-tests.sh`; `CoreInfo.cs` + `CanaryTests.cs`; canary proves the full compile to test to parse to exit path.

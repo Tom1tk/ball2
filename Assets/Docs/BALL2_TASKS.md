@@ -212,9 +212,15 @@ namespace Ball2.Core.Combat
 ```
 id: B2-010
 lane: A
-status: READY (unblocked by B2-003)
+status: DONE (unblocked by B2-003)
 goal: Pure logic for boost lock-on acquisition/gating/break/commit, per spec §3.3 (Q13).
 ```
+**Work log (2026-06-17):**
+- Implemented `Assets/Scripts/Core/Combat/LockOnResolver.cs`: pure/deterministic static `LockOnResolver.Resolve` + `LockOnConfig` (Q12: Range 18, AcquisitionAngleDeg 20, TrackingStrength 0.35, DodgeToleranceDeg 45, BreakRange 18, Epsilon). Struct surface: `LockOnCandidate` (id/position/velocity), `LockState` (targetId -1=none, trackingPosition), `LockOnInput` (player pos, unit aim dir, candidates, current lock, boostChargeStarted), `LockOnResult` (new lock, iconTargetId, iconShouldShow).
+- Acquisition = in Range AND within AcquisitionAngleDeg of aim ray, pick smallest aim-angle then nearest distance. Soft tracking = lerp trackingPosition toward enemy by TrackingStrength (no snap below 1). Break = enemy beyond BreakRange OR aim > DodgeToleranceDeg. Commit-on-charge = while boostChargeStarted, never switch target (break still drops the lock; no re-acquire to a different enemy mid-charge).
+- 22 EditMode tests in `Assets/Tests/EditMode/LockOnResolverTests.cs` covering every acceptance criterion + edge cases (zero aim, enemy-on-player, break-range band, strength 0/1, no-charging switch allowed). Determinism asserted via repeated-call equality (1000-iter loop).
+- **Acceptance verified:** `./Tools/run-tests.sh EditMode` → `Tests: 23  Passed: 23  Failed: 0  Skipped: 0  (0.0786671s)` exit 0 (1 canary + 22 lock-on).
+- Branch: `B2-010-lockon-resolver`. PR opened for Tom.
 **Do:** implement `Ball2.Core/Combat/LockOnResolver.cs` — given the player's aim ray/position, candidate enemies, current lock state, and whether boost charge has started, return the new lock state. All thresholds in a `LockOnConfig` (Q12).
 **acceptance (EditMode tests):**
 - No candidate near the reticle / out of (short) range → no lock; boost treated as normal (lock state = none).
