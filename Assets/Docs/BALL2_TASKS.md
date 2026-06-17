@@ -152,7 +152,7 @@ goal: Run the harness automatically on every PR and push to main.
 ```
 id: B2-007
 lane: A
-status: READY (unblocked by B2-003)
+status: DONE
 goal: Pure deterministic function resolving a contact into damage + knockback, per spec §3.2.
       Covers ball-to-ball AND ball-to-wall (wall = infinite mass).
 ```
@@ -200,6 +200,11 @@ namespace Ball2.Core.Combat
 - **Determinism:** identical inputs → byte-identical outputs across repeated calls; no `UnityEngine.Random`, no time/frame dependence.
 **out_of_scope:** the MonoBehaviour collision wiring, FX, and the wall-impact *combo sequencing* (that's B2-008).
 **verify:** `./Tools/run-tests.sh EditMode`
+**Work log (2026-06-17):**
+- Implemented `Assets/Scripts/Core/Combat/CombatResolver.cs`: `ContactInput`/`ContactOutcome` readonly structs, `CombatConfig` (all tuning as public fields w/ defaults), `CombatResolver.Resolve(in ContactInput, CombatConfig) -> ContactOutcome` — pure, deterministic, no MonoBehaviour/Random/time.
+- Model: closing speed `vn = -dot(RelativeVelocity, Normal)` (Normal = B→A, RelativeVelocity = vA−vB) gates on `DamageThresholdSpeed`. Ball-ball damage ∝ opponent's inverse-mass share of the closing speed (lighter/faster ball deals more, takes less); equal-mass equal-speed is the symmetric midpoint. Wall (`MassB=+inf`) is a NaN-guarded branch: wall takes 0 damage/impulse, ball takes damage ∝ its own `vn`, impulse reflects along Normal. Perfect hit = `vn ≥ PerfectHitMinSpeed` AND approach angle (between RelativeVelocity and −Normal) ≤ `PerfectHitMaxAngleDeg`.
+- `Assets/Tests/EditMode/CombatResolverTests.cs`: 14 tests covering every acceptance criterion (glancing, separating, head-on symmetric, both mass-differential orientations, wall damage/reflect/NaN-guard, perfect-hit inside/outside/below-min/wall, determinism ×50 ball-ball + wall).
+- **Acceptance verified:** `./Tools/run-tests.sh EditMode` → `Tests: 15  Passed: 15  Failed: 0  Skipped: 0  (0.0829902s)` exit 0 (15 = 1 canary + 14 combat). Green on first cycle.
 
 ---
 
