@@ -26,7 +26,7 @@ The seeded entries below are live examples of the format.
 - by: agent (B2-007)
 - did: pure deterministic `CombatResolver.Resolve` (ball-ball + ball-wall) in `Assets/Scripts/Core/Combat/CombatResolver.cs`; 14 EditMode tests in `CombatResolverTests.cs` covering every acceptance criterion.
 - verify: `./Tools/run-tests.sh EditMode` → `Tests: 15  Passed: 15  Failed: 0  Skipped: 0  (0.0829902s)` exit 0. Green first cycle.
-- commit: 47e7817
+- commit: e234db4
 - notes: conventions are binding on callers — `Normal` points B→A, `RelativeVelocity = vA−vB`, closing speed `vn = -dot(Rel,Normal)`. Wall = `MassB = +inf` (NaN-guarded branch; symmetric `MassA=+inf` also handled). Damage ball-ball ∝ opponent's inverse-mass share of `vn`; equal-mass equal-speed is symmetric. Perfect hit = `vn ≥ PerfectHitMinSpeed` AND angle(Rel,−Normal) ≤ `PerfectHitMaxAngleDeg`. All tuning in `CombatConfig` (defaults are M2 placeholders). **B2-008 (wire to collisions) is now unblocked.**
 
 
