@@ -29,7 +29,6 @@ namespace Ball2.Gameplay
 
         [Header("Tuning (Q12)")]
         [SerializeField] LockOnConfig config = new LockOnConfig();
-        [SerializeField] string enemyTag = "Enemy";
 
         readonly LockOnCandidate[] _candidateBuffer = new LockOnCandidate[16];
         int _candidateCount;
@@ -55,12 +54,26 @@ namespace Ball2.Gameplay
         /// rendering the hover icon.</summary>
         public Vector3 LockedEnemyPosition { get; private set; }
 
+        int _lastLoggedCount = -1;
+
         void Update()
         {
             if (aimSource == null) return;
             if (config == null) return;
 
             _candidateCount = GatherCandidates(_candidateBuffer);
+            if (_candidateCount != _lastLoggedCount)
+            {
+                _lastLoggedCount = _candidateCount;
+                if (_candidateCount > 0)
+                {
+                    float d = Vector3.Distance(transform.position, _candidateBuffer[0].Position);
+                    float a = Vector3.Angle(aimSource.forward, _candidateBuffer[0].Position - transform.position);
+                    Debug.Log($"[LockOn] {_candidateCount} enemy(s) found. Nearest: {d:F1}u, {a:F1}deg off reticle. Range={config.Range}, Angle={config.AcquisitionAngleDeg}deg");
+                }
+                else Debug.LogWarning("[LockOn] 0 enemies found via FindObjectsByType<EnemyAI>");
+            }
+
             LockOnInput input = new LockOnInput(
                 transform.position,
                 aimSource.forward,
@@ -101,8 +114,18 @@ namespace Ball2.Gameplay
 
         void OnDrawGizmos()
         {
+            for (int i = 0; i < _candidateCount; i++)
+            {
+                Gizmos.color = Color.magenta;
+                Gizmos.DrawWireSphere(_candidateBuffer[i].Position, 0.5f);
+            }
             Gizmos.color = HasLock ? Color.green : Color.yellow;
             Gizmos.DrawWireSphere(transform.position, 1.2f);
+            if (aimSource != null)
+            {
+                Gizmos.color = Color.cyan;
+                Gizmos.DrawRay(transform.position, aimSource.forward * 5f);
+            }
         }
 
         void LateUpdate()

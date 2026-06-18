@@ -102,11 +102,11 @@ namespace Ball2.Core.Combat
     public sealed class LockOnConfig
     {
         /// <summary>Max distance from player at which a lock can be acquired.</summary>
-        public float Range = 18f;
+        public float Range = 30f;
 
         /// <summary>Max angle (degrees) between the aim ray and the direction to an enemy
         /// for the enemy to qualify as a lock candidate.</summary>
-        public float AcquisitionAngleDeg = 20f;
+        public float AcquisitionAngleDeg = 45f;
 
         /// <summary>Soft-tracking lerp factor in [0,1]. 0 = no tracking (frozen aim point),
         /// 1 = snaps perfectly to enemy. The boost homing stays "soft" below 1.</summary>
@@ -118,7 +118,7 @@ namespace Ball2.Core.Combat
 
         /// <summary>Distance beyond which the lock breaks. Defaults to Range so a target
         /// that leaves acquisition range also breaks the lock; raise for a wider hold band.</summary>
-        public float BreakRange = 18f;
+        public float BreakRange = 30f;
 
         /// <summary>Epsilon for floating-point comparisons (distances, cosines).</summary>
         public float Epsilon = 1e-5f;
