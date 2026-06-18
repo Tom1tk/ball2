@@ -55,6 +55,8 @@ namespace Ball2.Gameplay
         public Vector3 LockedEnemyPosition { get; private set; }
 
         int _lastLoggedCount = -1;
+        float _logTimer;
+        bool _wasLockedLastFrame;
 
         void Update()
         {
@@ -62,14 +64,17 @@ namespace Ball2.Gameplay
             if (config == null) return;
 
             _candidateCount = GatherCandidates(_candidateBuffer);
-            if (_candidateCount != _lastLoggedCount)
+
+            _logTimer -= Time.deltaTime;
+            if (_logTimer <= 0f)
             {
-                _lastLoggedCount = _candidateCount;
+                _logTimer = 1f;
                 if (_candidateCount > 0)
                 {
                     float d = Vector3.Distance(transform.position, _candidateBuffer[0].Position);
                     float a = Vector3.Angle(aimSource.forward, _candidateBuffer[0].Position - transform.position);
-                    Debug.Log($"[LockOn] {_candidateCount} enemy(s) found. Nearest: {d:F1}u, {a:F1}deg off reticle. Range={config.Range}, Angle={config.AcquisitionAngleDeg}deg");
+                    string locked = HasLock ? " LOCKED" : "";
+                    Debug.Log($"[LockOn]{locked} {_candidateCount} enemy(s). Nearest: {d:F1}u, {a:F1}deg off reticle. Range={config.Range}, Angle={config.AcquisitionAngleDeg}deg");
                 }
                 else Debug.LogWarning("[LockOn] 0 enemies found via FindObjectsByType<EnemyAI>");
             }
@@ -83,6 +88,15 @@ namespace Ball2.Gameplay
                 _boostChargeStarted);
             _lastResult = LockOnResolver.Resolve(in input, config);
             _currentLock = _lastResult.NewLock;
+
+            if (_lastResult.NewLock.HasLock != _wasLockedLastFrame)
+            {
+                _wasLockedLastFrame = _lastResult.NewLock.HasLock;
+                if (_lastResult.NewLock.HasLock)
+                    Debug.Log($"[LockOn] ACQUIRED lock on enemy {_lastResult.NewLock.TargetId} at {LockedEnemyPosition}");
+                else
+                    Debug.Log("[LockOn] LOCK LOST");
+            }
 
             if (_lastResult.NewLock.HasLock)
             {
@@ -131,11 +145,15 @@ namespace Ball2.Gameplay
         void LateUpdate()
         {
             float dt = Time.deltaTime;
+            Vector3 origin = transform.position + Vector3.up * 0.5f;
+            for (int i = 0; i < _candidateCount; i++)
+            {
+                Debug.DrawLine(origin, _candidateBuffer[i].Position, Color.white * 0.3f, dt);
+            }
             if (HasLock && _lastResult.IconShouldShow)
             {
                 Vector3 enemyPos = LockedEnemyPosition;
                 Vector3 trackingPos = TrackingPosition;
-                Vector3 origin = transform.position + Vector3.up * 0.5f;
 
                 Debug.DrawLine(origin, trackingPos, Color.green, dt);
                 Debug.DrawLine(trackingPos, enemyPos, new Color(0.5f, 1f, 0.5f, 0.3f), dt);
