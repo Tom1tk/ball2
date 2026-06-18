@@ -56,7 +56,7 @@ namespace Ball2.Gameplay
 
         int _lastLoggedCount = -1;
         float _logTimer;
-        bool _wasLockedLastFrame;
+        bool _hadLockLastFrame;
 
         void Update()
         {
@@ -64,20 +64,6 @@ namespace Ball2.Gameplay
             if (config == null) return;
 
             _candidateCount = GatherCandidates(_candidateBuffer);
-
-            _logTimer -= Time.deltaTime;
-            if (_logTimer <= 0f)
-            {
-                _logTimer = 1f;
-                if (_candidateCount > 0)
-                {
-                    float d = Vector3.Distance(transform.position, _candidateBuffer[0].Position);
-                    float a = Vector3.Angle(aimSource.forward, _candidateBuffer[0].Position - transform.position);
-                    string locked = HasLock ? " LOCKED" : "";
-                    Debug.Log($"[LockOn]{locked} {_candidateCount} enemy(s). Nearest: {d:F1}u, {a:F1}deg off reticle. Range={config.Range}, Angle={config.AcquisitionAngleDeg}deg");
-                }
-                else Debug.LogWarning("[LockOn] 0 enemies found via FindObjectsByType<EnemyAI>");
-            }
 
             LockOnInput input = new LockOnInput(
                 transform.position,
@@ -88,15 +74,6 @@ namespace Ball2.Gameplay
                 _boostChargeStarted);
             _lastResult = LockOnResolver.Resolve(in input, config);
             _currentLock = _lastResult.NewLock;
-
-            if (_lastResult.NewLock.HasLock != _wasLockedLastFrame)
-            {
-                _wasLockedLastFrame = _lastResult.NewLock.HasLock;
-                if (_lastResult.NewLock.HasLock)
-                    Debug.Log($"[LockOn] ACQUIRED lock on enemy {_lastResult.NewLock.TargetId} at {LockedEnemyPosition}");
-                else
-                    Debug.Log("[LockOn] LOCK LOST");
-            }
 
             if (_lastResult.NewLock.HasLock)
             {
@@ -109,6 +86,37 @@ namespace Ball2.Gameplay
                     }
                 }
             }
+
+            if (_lastResult.NewLock.HasLock != _hadLockLastFrame)
+            {
+                _hadLockLastFrame = _lastResult.NewLock.HasLock;
+                if (_lastResult.NewLock.HasLock)
+                    Debug.Log($"[LockOn] >>> ACQUIRED lock on enemy {_lastResult.NewLock.TargetId} at {LockedEnemyPosition}");
+                else
+                    Debug.Log("[LockOn] LOCK LOST");
+            }
+
+            _logTimer -= Time.deltaTime;
+            if (_logTimer <= 0f)
+            {
+                _logTimer = 1f;
+                string locked = HasLock ? " LOCKED" : "";
+                if (_candidateCount > 0)
+                {
+                    Vector3 aim = aimSource.forward;
+                    float d = Vector3.Distance(transform.position, _candidateBuffer[0].Position);
+                    float a = Vector3.Angle(aim, _candidateBuffer[0].Position - transform.position);
+                    Debug.Log($"[LockOn]{locked} C={_candidateCount} D={d:F1}u A={a:F1}deg Aim=({aim.x:F2},{aim.y:F2},{aim.z:F2}) R={config.Range} Acq={config.AcquisitionAngleDeg} Brk={config.BreakRange} Dodge={config.DodgeToleranceDeg}");
+                }
+                else Debug.LogWarning("[LockOn] 0 enemies via FindObjectsByType<EnemyAI>");
+            }
+        }
+
+            string locked = _lastResult.NewLock.HasLock ? " [LOCKED]" : " [no lock]";
+            Vector3 aim = aimSource.forward;
+            float dist0 = _candidateCount > 0 ? Vector3.Distance(transform.position, _candidateBuffer[0].Position) : 0f;
+            float ang0 = _candidateCount > 0 ? Vector3.Angle(aim, _candidateBuffer[0].Position - transform.position) : 0f;
+            Debug.Log($"[Resolve]{locked} C={_candidateCount} Aim=({aim.x:F2},{aim.y:F2},{aim.z:F2}) EnemyDist={dist0:F1} AimAngleDiff={ang0:F1} Range={config.Range} AcqAngle={config.AcquisitionAngleDeg} Break={config.BreakRange} Dodge={config.DodgeToleranceDeg}");
         }
 
         int GatherCandidates(LockOnCandidate[] buffer)
