@@ -112,13 +112,6 @@ namespace Ball2.Gameplay
             }
         }
 
-            string locked = _lastResult.NewLock.HasLock ? " [LOCKED]" : " [no lock]";
-            Vector3 aim = aimSource.forward;
-            float dist0 = _candidateCount > 0 ? Vector3.Distance(transform.position, _candidateBuffer[0].Position) : 0f;
-            float ang0 = _candidateCount > 0 ? Vector3.Angle(aim, _candidateBuffer[0].Position - transform.position) : 0f;
-            Debug.Log($"[Resolve]{locked} C={_candidateCount} Aim=({aim.x:F2},{aim.y:F2},{aim.z:F2}) EnemyDist={dist0:F1} AimAngleDiff={ang0:F1} Range={config.Range} AcqAngle={config.AcquisitionAngleDeg} Break={config.BreakRange} Dodge={config.DodgeToleranceDeg}");
-        }
-
         int GatherCandidates(LockOnCandidate[] buffer)
         {
             EnemyAI[] enemies = FindObjectsByType<EnemyAI>(FindObjectsSortMode.None);

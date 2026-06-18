@@ -55,8 +55,8 @@ namespace Ball2.Tests.EditMode
         [Test]
         public void EnemyOutOfRange_NoLock()
         {
-            var cfg = new LockOnConfig();
-            // 30 units ahead — beyond the 18 unit range.
+            var cfg = new LockOnConfig { Range = 15f };
+            // 30 units ahead — beyond the 15 unit range.
             var enemy = new LockOnCandidate(1, new Vector3(0, 0, 30), Vector3.zero);
             var input = new LockOnInput(
                 Vector3.zero, AimForward, new[] { enemy }, LockState.None, false);
@@ -220,10 +220,11 @@ namespace Ball2.Tests.EditMode
                 new LockOnInput(Vector3.zero, AimForward, new[] { enemy }, LockState.None, false), cfg);
             Assert.IsTrue(acquired.NewLock.HasLock);
 
-            // Enemy flies 30 units away — beyond break range (18). Aim still on it.
+            var cfg2 = new LockOnConfig { Range = 20f, BreakRange = 15f };
+            // Enemy flies 30 units away — beyond break range (15) and out of range (20).
             var farEnemy = new LockOnCandidate(1, new Vector3(0, 0, 30), Vector3.zero);
             var result = LockOnResolver.Resolve(
-                new LockOnInput(Vector3.zero, AimForward, new[] { farEnemy }, acquired.NewLock, false), cfg);
+                new LockOnInput(Vector3.zero, AimForward, new[] { farEnemy }, acquired.NewLock, false), cfg2);
 
             Assert.IsFalse(result.NewLock.HasLock, "lock must break when enemy leaves break range");
             Assert.IsFalse(result.IconShouldShow);
@@ -268,7 +269,8 @@ namespace Ball2.Tests.EditMode
         public void LockBreaks_BreakRangeLargerThanAcquisitionRange()
         {
             var cfg = new LockOnConfig();
-            cfg.BreakRange = 25f; // hold band wider than the 18 acquisition range
+            cfg.Range = 20f;
+            cfg.BreakRange = 25f; // hold band wider than acquisition range
 
             var enemy = new LockOnCandidate(1, new Vector3(0, 0, 10), Vector3.zero);
             var acquired = LockOnResolver.Resolve(
@@ -280,7 +282,7 @@ namespace Ball2.Tests.EditMode
                 new LockOnInput(Vector3.zero, AimForward, new[] { at22 }, acquired.NewLock, false), cfg);
             Assert.IsTrue(hold.NewLock.HasLock, "should hold within break range");
 
-            // 27 units: beyond break range — lock breaks.
+            // 27 units: beyond break range — lock breaks and cannot re-acquire (out of range).
             var at27 = new LockOnCandidate(1, new Vector3(0, 0, 27), Vector3.zero);
             var broken = LockOnResolver.Resolve(
                 new LockOnInput(Vector3.zero, AimForward, new[] { at27 }, acquired.NewLock, false), cfg);
@@ -316,12 +318,12 @@ namespace Ball2.Tests.EditMode
         [Test]
         public void CommitOnCharge_BreakConditionsStillApply()
         {
-            var cfg = new LockOnConfig();
+            var cfg = new LockOnConfig { BreakRange = 15f };
             var a = new LockOnCandidate(1, new Vector3(0, 0, 10), Vector3.zero);
             var acquired = LockOnResolver.Resolve(
                 new LockOnInput(Vector3.zero, AimForward, new[] { a }, LockState.None, false), cfg);
 
-            // Charging, and A leaves range. Lock breaks — and does NOT re-acquire B,
+            // Charging, and A leaves range (30 > BreakRange=15). Lock breaks — and does NOT re-acquire B,
             // because we are mid-charge (commit-on-charge forbids switching).
             var aFar = new LockOnCandidate(1, new Vector3(0, 0, 30), Vector3.zero);
             var b = new LockOnCandidate(2, new Vector3(0, 0, 10), Vector3.zero);
