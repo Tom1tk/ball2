@@ -21,14 +21,15 @@ public class HealthScript : MonoBehaviour
         healthRegenTimer = 0f;
     }
 
-    public void takeDmg()
+    public void takeDmg(float damage)
     {
-        health = health - 1;
+        health -= Mathf.CeilToInt(damage);
         materialSwitch();
         SpriteAnim.SetTrigger("angry");
 
-        if(health == 0)
+        if(health <= 0)
         {
+            health = 0;
             died = true;
         }
     }

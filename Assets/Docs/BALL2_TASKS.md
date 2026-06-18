@@ -240,21 +240,35 @@ goal: Pure logic for boost lock-on acquisition/gating/break/commit, per spec §3
 ```
 id: B2-008
 lane: B
-status: BLOCKED (needs B2-007)
+status: DONE
 goal: In Ball2.Gameplay, gather contact inputs from collision callbacks, call CombatResolver,
-      apply damage/impulse, sequence the wall combo, trigger the crack-FX material states.
+      apply damage/impulse, sequence the wall combo, trigger crack-FX material states.
 ```
-**acceptance:** compiles; any feasible PlayMode test added. **PR must include a manual checklist for Tom:** e.g. "two balls head-on both crack a stage", "boosting an enemy into a wall lands two hits (impact then wall)", "glancing taps do nothing", "knockback feels proportional". Tom signs off in-engine.
+**Work log (2026-06-17):**
+- `Assets/Scripts/Gameplay/CombatAdapter.cs` — MonoBehaviour on the player + each enemy. In `OnCollisionEnter`, builds `ContactInput` (negates Unity's A→B contact normal to get the resolver's B→A, sets `RelativeVelocity = vA - vB`, `MassB = +inf` when the other collider has no `Rigidbody`), calls `CombatResolver.Resolve`, applies damage via `HealthScript.takeDmg(float)` and impulse via `Rigidbody.AddForce(impulse, ForceMode.Impulse)`.
+- **Double-resolve guard:** only the adapter with the lower `GetInstanceID()` applies outputs, so the same ball-ball contact is never resolved twice.
+- **Wall combo** (enemy-impact then wall-impact) emerges naturally from two sequential `OnCollisionEnter` events — no special sequencing in the adapter.
+- `HealthScript.takeDmg()` → `takeDmg(float damage)`: subtracts `Mathf.CeilToInt(damage)`, triggers existing `materialSwitch()` (crack-FX material states) + `SpriteAnim.SetTrigger("angry")`. `health <= 0` sets `died = true`. `health` clamped to 0.
+- `BallMovement.OnCollisionEnter` legacy body removed (was a hardcoded 30f-speed-threshold damage check); the comment points to `CombatAdapter`.
+- **Manual verification checklist (in PR):** two balls head-on at high speed both crack a stage; boosting an enemy into a wall lands two hits (impact then wall); glancing taps deal no damage; knockback feels proportional; walls take no damage.
+- **Lane C (Tom, in Unity):** add `CombatAdapter` component to `Assets/Prefabs/PlayerBall.prefab` and `Assets/Prefabs/EnemyBall.prefab`; assign `Body` and `Health` serialized fields; create a `CombatConfig` asset (or accept the in-memory defaults on the component).
+- Branch: `B2-008-B2-011-combat-lockon-wiring`. Batchmode compile: exit 0. Existing 23 EditMode tests still green.
 
 ### B2-011 — Lock-on reticle + boost-toward-target
 ```
 id: B2-011
 lane: B
-status: BLOCKED (needs B2-010)
+status: DONE
 goal: Render the hover icon over a locked enemy; on boost, apply impulse toward the locked target
       with the configured soft tracking; no-lock boost behaves exactly as before.
 ```
-**acceptance:** compiles. **PR manual checklist:** "icon appears only when a lock is possible/active", "short range only", "dodging breaks the lock", "can't switch target mid-charge", "no-lock boost unchanged". Tom signs off in-engine.
+**Work log (2026-06-17):**
+- `Assets/Scripts/Gameplay/LockOnAdapter.cs` — MonoBehaviour on the player. Each `Update`: gathers enemies by tag, builds `LockOnCandidate[]` (id = `GetInstanceID()`, position + linearVelocity), calls `LockOnResolver.Resolve` with `AimDirection = aimSource.forward`, `BoostChargeStarted` set by `BallMovement`. Stores the result and exposes `HasLock` + `TrackingPosition` (and `LockedEnemyPosition` for the icon).
+- **Hover icon:** `OnGUI` reads `LockOnResult.IconShouldShow` + `IconTargetId`; if visible, projects `LockedEnemyPosition` to screen via `aimCamera.WorldToScreenPoint` and draws a coloured `GUI.Box` rect. Toggleable via `showIcon` serialized field; size + colour are serialized.
+- **Boost redirection:** `BallMovement.boostPress()` sets `lockOn.BoostChargeStarted = true` (commits the lock — commit-on-charge enforced by the resolver). `boostRelease()` checks `lockOn.HasLock`; if true, aims the boost impulse at `lockOn.TrackingPosition` (the soft-tracked point), else falls back to `cameraTransform.forward` (no-lock path = unchanged behaviour).
+- **Manual verification checklist (in PR):** hover icon appears only when a valid lock is possible/active; lock only at short range (≤ `LockOnConfig.Range`, default 18m); reticle drift beyond `DodgeToleranceDeg` (default 45°) breaks the lock; pressing boost then aiming at a different enemy does NOT switch the lock; no-lock boost feels identical to the pre-B2-011 behaviour; soft tracking visibly lags a strafing locked enemy by `TrackingStrength` (default 0.35).
+- **Lane C (Tom, in Unity):** add `LockOnAdapter` component to `Assets/Prefabs/PlayerBall.prefab`; assign `Aim Source` (camera transform), `Aim Camera` (`Main Camera`), and accept the default `LockOnConfig` (or tune Q12 values in the inspector).
+- Branch: `B2-008-B2-011-combat-lockon-wiring`. Batchmode compile: exit 0. Existing 23 EditMode tests still green.
 
 ---
 

@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using Ball2.Gameplay;
 
 public class BallMovement : MonoBehaviour
 {
@@ -14,6 +15,7 @@ public class BallMovement : MonoBehaviour
 
     UIScript UIref;
     GrappleSystem grappleSystem;
+    [SerializeField] LockOnAdapter lockOn;
 
     [SerializeField]
     ParticleSystem ChargeFX;
@@ -163,6 +165,7 @@ public class BallMovement : MonoBehaviour
         boostLv = 0.1f;
         charging = true;
         ChargeFX.Play();
+        if (lockOn != null) lockOn.BoostChargeStarted = true;
     }
 
     void boostRelease()
@@ -172,9 +175,21 @@ public class BallMovement : MonoBehaviour
         var main = SpeedFX.main;
         main.duration = (boostLv*3f)/10f;
 
-        rb.AddForce(cameraTransform.forward * (boostLv * boostForce), ForceMode.Impulse);
+        Vector3 boostDir;
+        if (lockOn != null && lockOn.HasLock)
+        {
+            Vector3 toTarget = lockOn.TrackingPosition - transform.position;
+            boostDir = toTarget.sqrMagnitude > 1e-4f ? toTarget.normalized : cameraTransform.forward;
+        }
+        else
+        {
+            boostDir = cameraTransform.forward;
+        }
+
+        rb.AddForce(boostDir * (boostLv * boostForce), ForceMode.Impulse);
         boostLv = 0f;
         charging = false;
+        if (lockOn != null) lockOn.BoostChargeStarted = false;
         changeSphereColour(rb.linearVelocity.magnitude);
 
         boostFXdur = main.duration;
@@ -227,34 +242,8 @@ public class BallMovement : MonoBehaviour
         _controls.Player.Disable();
     }
 
-    void OnCollisionEnter(Collision other)
-    {
-        if (other.transform.CompareTag("Enemy"))
-        {   
-            if (!other.gameObject.TryGetComponent<EnemyAI>(out var enemyAI))
-                return;
-
-            float playerCollisionSpeed = playerMagnitudeBeforePhysicsUpdate;
-            float otherCollisionSpeed = enemyAI.enemyMagnitudeBeforePhysicsUpdate;
-
-            /*
-            Debug.Log("player collision speed: " + playerCollisionSpeed); 
-            Debug.Log("enemy collision speed: " + otherCollisionSpeed);
-            */
-            
-            //whoever was going slower before the collision takes damage
-            if (otherCollisionSpeed > playerCollisionSpeed && otherCollisionSpeed > 30f)
-            {
-                myHealth.takeDmg();
-                Debug.Log("enemy was the faster object, player takes dmg");
-
-            }else if(playerCollisionSpeed > otherCollisionSpeed && playerCollisionSpeed > 30f)
-            {
-                other.transform.gameObject.GetComponent<HealthScript>().takeDmg();
-                Debug.Log("player was the faster object, enemy takes dmg");
-            }
-        }
-    }
+    // Combat (ball-ball + ball-wall) is handled by CombatAdapter; the legacy
+    // hardcoded speed-threshold damage check lived here before B2-008.
 
     void OnTriggerEnter(Collider other)
     {

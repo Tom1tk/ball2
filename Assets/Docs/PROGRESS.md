@@ -22,6 +22,20 @@ The seeded entries below are live examples of the format.
 ---
 
 ## Log
+### 2026-06-17 - B2-008 - wire combat resolver to collisions - DONE
+- by: agent (B2-008/B2-011)
+- did: wrote `Assets/Scripts/Gameplay/CombatAdapter.cs` (collision-callback → `ContactInput` → `CombatResolver.Resolve` → `health.takeDmg(float)` + `rb.AddForce(impulse, Impulse)`; lower-`GetInstanceID()` dedup; wall = `MassB = +inf` via "no Rigidbody on other collider"). `HealthScript.takeDmg()` → `takeDmg(float damage)`. Removed legacy `BallMovement.OnCollisionEnter` body. Wall combo emerges naturally from sequential events.
+- verify: batchmode compile exit 0; existing 23 EditMode tests still green (no Core/Gameplay test changes).
+- commit: (this commit)
+- notes: Lane C — Tom adds `CombatAdapter` to `PlayerBall.prefab` + `EnemyBall.prefab` and wires `Body`/`Health` fields. PR includes manual verification checklist (head-on crack both, boost-into-wall double-hit, glancing taps, knockback feel).
+
+### 2026-06-17 - B2-011 - lock-on reticle + boost-toward-target - DONE
+- by: agent (B2-008/B2-011)
+- did: wrote `Assets/Scripts/Gameplay/LockOnAdapter.cs` (gathers enemies by tag → `LockOnInput` → `LockOnResolver.Resolve`; exposes `HasLock`/`TrackingPosition`; `OnGUI` hover icon from `IconShouldShow` + `IconTargetId`; commit-on-charge via `BoostChargeStarted` set from `BallMovement.boostPress`). Modified `BallMovement.boostRelease()`: if `lockOn.HasLock`, aim at `TrackingPosition`, else `cameraTransform.forward` (unchanged no-lock path).
+- verify: batchmode compile exit 0; existing 23 EditMode tests still green.
+- commit: (this commit)
+- notes: Lane C — Tom adds `LockOnAdapter` to `PlayerBall.prefab`; wires `Aim Source` (camera transform) + `Aim Camera` (`Main Camera`). PR includes manual checklist (icon shows only on valid lock, short range, dodge breaks lock, no target-switch mid-charge, no-lock boost unchanged, soft tracking visible on strafing enemy).
+
 ### 2026-06-17 - B2-007 - momentum-differential combat resolver - DONE
 - by: agent (B2-007)
 - did: pure deterministic `CombatResolver.Resolve` (ball-ball + ball-wall) in `Assets/Scripts/Core/Combat/CombatResolver.cs`; 14 EditMode tests in `CombatResolverTests.cs` covering every acceptance criterion.
