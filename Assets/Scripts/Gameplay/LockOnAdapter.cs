@@ -26,16 +26,10 @@ namespace Ball2.Gameplay
     {
         [Header("References")]
         [SerializeField] Transform aimSource;
-        [SerializeField] Camera aimCamera;
 
         [Header("Tuning (Q12)")]
         [SerializeField] LockOnConfig config = new LockOnConfig();
         [SerializeField] string enemyTag = "Enemy";
-
-        [Header("Icon")]
-        [SerializeField] bool showIcon = true;
-        [SerializeField] float iconSize = 24f;
-        [SerializeField] Color iconColor = new Color(1f, 0.85f, 0.2f, 0.9f);
 
         readonly LockOnCandidate[] _candidateBuffer = new LockOnCandidate[16];
         int _candidateCount;
@@ -110,21 +104,28 @@ namespace Ball2.Gameplay
             Gizmos.DrawWireSphere(transform.position, 1.2f);
         }
 
-        void OnGUI()
+        void LateUpdate()
         {
-            if (!showIcon) return;
-            if (!_lastResult.IconShouldShow) return;
-            if (aimCamera == null) return;
+            float dt = Time.deltaTime;
+            if (HasLock && _lastResult.IconShouldShow)
+            {
+                Vector3 enemyPos = LockedEnemyPosition;
+                Vector3 trackingPos = TrackingPosition;
+                Vector3 origin = transform.position + Vector3.up * 0.5f;
 
-            Vector3 screenPos = aimCamera.WorldToScreenPoint(LockedEnemyPosition);
-            if (screenPos.z <= 0f) return;
+                Debug.DrawLine(origin, trackingPos, Color.green, dt);
+                Debug.DrawLine(trackingPos, enemyPos, new Color(0.5f, 1f, 0.5f, 0.3f), dt);
 
-            float y = Screen.height - screenPos.y;
-            Rect r = new Rect(screenPos.x - iconSize * 0.5f, y - iconSize * 0.5f, iconSize, iconSize);
-            Color prev = GUI.color;
-            GUI.color = iconColor;
-            GUI.Box(r, GUIContent.none);
-            GUI.color = prev;
+                float crossSize = 0.4f;
+                Debug.DrawLine(enemyPos - Vector3.right * crossSize, enemyPos + Vector3.right * crossSize, Color.green, dt);
+                Debug.DrawLine(enemyPos - Vector3.up * crossSize, enemyPos + Vector3.up * crossSize, Color.green, dt);
+                Debug.DrawLine(enemyPos - Vector3.forward * crossSize, enemyPos + Vector3.forward * crossSize, Color.green, dt);
+
+                float dotSize = 0.15f;
+                Debug.DrawLine(trackingPos - Vector3.right * dotSize, trackingPos + Vector3.right * dotSize, Color.yellow, dt);
+                Debug.DrawLine(trackingPos - Vector3.up * dotSize, trackingPos + Vector3.up * dotSize, Color.yellow, dt);
+                Debug.DrawLine(trackingPos - Vector3.forward * dotSize, trackingPos + Vector3.forward * dotSize, Color.yellow, dt);
+            }
         }
     }
 }
