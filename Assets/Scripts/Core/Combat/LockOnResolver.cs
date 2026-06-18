@@ -271,7 +271,7 @@ namespace Ball2.Core.Combat
         private static bool IsUnitLength(Vector3 v, float eps)
         {
             float mag = v.magnitude;
-            return mag > eps && Math.Abs(mag - 1f) <= 1e-3f;
+            return mag > eps && Math.Abs(mag - 1f) <= 0.01f;
         }
 
         /// <summary>Angle in degrees between two vectors; 0 if either is degenerate.</summary>

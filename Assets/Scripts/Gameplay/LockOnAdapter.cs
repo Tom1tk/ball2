@@ -67,7 +67,7 @@ namespace Ball2.Gameplay
 
             LockOnInput input = new LockOnInput(
                 transform.position,
-                aimSource.forward,
+                aimSource.forward.normalized,
                 _candidateBuffer,
                 _candidateCount,
                 _currentLock,
