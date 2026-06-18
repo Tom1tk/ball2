@@ -114,7 +114,7 @@ namespace Ball2.Core.Combat
 
         /// <summary>Max angle (degrees) the aim may drift from a locked target before the
         /// lock breaks (the "dodge" tolerance — target slips the reticle).</summary>
-        public float DodgeToleranceDeg = 45f;
+        public float DodgeToleranceDeg = 90f;
 
         /// <summary>Distance beyond which the lock breaks. Defaults to Range so a target
         /// that leaves acquisition range also breaks the lock; raise for a wider hold band.</summary>

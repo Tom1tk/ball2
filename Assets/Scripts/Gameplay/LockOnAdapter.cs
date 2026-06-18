@@ -75,6 +75,9 @@ namespace Ball2.Gameplay
             _lastResult = LockOnResolver.Resolve(in input, config);
             _currentLock = _lastResult.NewLock;
 
+            if (Time.frameCount % 30 == 0)
+                Debug.Log($"[Resolve] HasLock={_lastResult.NewLock.HasLock} TargetId={_lastResult.NewLock.TargetId} Icon={_lastResult.IconShouldShow} TrackingPos={_lastResult.NewLock.TrackingPosition} InputCount={input.CandidateCount} BoostCharging={_boostChargeStarted} PrevHadLock={_hadLockLastFrame}");
+
             if (_lastResult.NewLock.HasLock)
             {
                 for (int i = 0; i < _candidateCount; i++)
