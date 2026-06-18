@@ -48,6 +48,7 @@ namespace Ball2.Core.Combat
         public readonly Vector3 PlayerPosition;
         public readonly Vector3 AimDirection;               // assumed unit-length
         public readonly LockOnCandidate[] Candidates;       // may be null/empty
+        public readonly int CandidateCount;                 // valid count within Candidates buffer
         public readonly LockState CurrentLock;
         public readonly bool BoostChargeStarted;
 
@@ -57,10 +58,21 @@ namespace Ball2.Core.Combat
             LockOnCandidate[] candidates,
             LockState currentLock,
             bool boostChargeStarted)
+            : this(playerPosition, aimDirection, candidates, candidates?.Length ?? 0, currentLock, boostChargeStarted)
+        { }
+
+        public LockOnInput(
+            Vector3 playerPosition,
+            Vector3 aimDirection,
+            LockOnCandidate[] candidates,
+            int candidateCount,
+            LockState currentLock,
+            bool boostChargeStarted)
         {
             PlayerPosition = playerPosition;
             AimDirection = aimDirection;
             Candidates = candidates;
+            CandidateCount = candidateCount;
             CurrentLock = currentLock;
             BoostChargeStarted = boostChargeStarted;
         }
@@ -151,7 +163,7 @@ namespace Ball2.Core.Combat
             if (input.CurrentLock.HasLock)
             {
                 LockOnCandidate lockedEnemy;
-                if (TryFindCandidate(input.Candidates, input.CurrentLock.TargetId, out lockedEnemy))
+                if (TryFindCandidate(input.Candidates, input.CandidateCount, input.CurrentLock.TargetId, out lockedEnemy))
                 {
                     float dist = Vector3.Distance(input.PlayerPosition, lockedEnemy.Position);
                     Vector3 toEnemy = lockedEnemy.Position - input.PlayerPosition;
@@ -200,7 +212,7 @@ namespace Ball2.Core.Combat
             LockOnCandidate best = default;
             bool found = false;
 
-            for (int i = 0; i < input.Candidates.Length; i++)
+            for (int i = 0; i < input.CandidateCount; i++)
             {
                 LockOnCandidate c = input.Candidates[i];
                 float dist = Vector3.Distance(input.PlayerPosition, c.Position);
@@ -242,9 +254,9 @@ namespace Ball2.Core.Combat
         private static bool CandidatesIsEmpty(LockOnCandidate[] candidates)
             => candidates == null || candidates.Length == 0;
 
-        private static bool TryFindCandidate(LockOnCandidate[] candidates, int id, out LockOnCandidate found)
+        private static bool TryFindCandidate(LockOnCandidate[] candidates, int count, int id, out LockOnCandidate found)
         {
-            for (int i = 0; i < candidates.Length; i++)
+            for (int i = 0; i < count; i++)
             {
                 if (candidates[i].Id == id)
                 {

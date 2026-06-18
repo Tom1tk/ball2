@@ -65,6 +65,7 @@ namespace Ball2.Gameplay
                 transform.position,
                 aimSource.forward,
                 _candidateBuffer,
+                _candidateCount,
                 _currentLock,
                 _boostChargeStarted);
             _lastResult = LockOnResolver.Resolve(in input, config);
