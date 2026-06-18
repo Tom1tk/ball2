@@ -10,7 +10,7 @@ public class HealthScript : MonoBehaviour
     public float combatTimer, combatCD;
     public GameObject BallGameObject;
     public Material BallDmg0, BallDmg1 ,BallDmg2, BallDmg3, BallBroken;
-    public Animator SpriteAnim;
+    //public Animator SpriteAnim;
     UIScript UIref;
     
     void Awake()
@@ -25,7 +25,7 @@ public class HealthScript : MonoBehaviour
     {
         health -= Mathf.CeilToInt(damage);
         materialSwitch();
-        SpriteAnim.SetTrigger("angry");
+        //SpriteAnim.SetTrigger("angry");
 
         if(health <= 0)
         {

@@ -69,7 +69,7 @@ public class EnemyAI : MonoBehaviour
         //since the NavMeshAgent doesnt update its own position, we have to do it manually as the first corner [0]
         enemyAgent.nextPosition = rb.position;
 
-        enemyAgent.Warp(rb.position);
+        //enemyAgent.Warp(rb.position);
 
         
         // Check if the ball is grounded.
@@ -92,10 +92,10 @@ public class EnemyAI : MonoBehaviour
         {
             if (wanderPointCreated == false)
             {
-                StartCoroutine(createWanderPoint());
+                //StartCoroutine(createWanderPoint());
             }
 
-            Wander();
+            //Wander();
 
         }
 

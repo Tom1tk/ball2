@@ -718,6 +718,8 @@ GameObject:
   - component: {fileID: 7542105212534121668}
   - component: {fileID: 7542105212534121679}
   - component: {fileID: 690539848533661304}
+  - component: {fileID: 1553962221430697368}
+  - component: {fileID: 6220051660239814332}
   - component: {fileID: 1293697565}
   m_Layer: 6
   m_Name: PlayerBall
@@ -869,6 +871,7 @@ MonoBehaviour:
   displayDebugText: 1
   rb: {fileID: 7542105212534121668}
   spriteAnim: {fileID: 0}
+  lockOn: {fileID: 6220051660239814332}
   ChargeFX: {fileID: 7542105212464428757}
   SpeedFX: {fileID: 0}
   DodgeFX: {fileID: 883115353627017533}
@@ -929,12 +932,52 @@ MonoBehaviour:
   baseCursorScale: 0.2
   swingAntiGravity: 0.3
   releaseBoostMultiplier: 1.2
+  antiWallForce: 5
   manualAimRadius: 0.08
-  autoAimScanRadius: 30
   autoAimMask:
     serializedVersion: 2
     m_Bits: 4294967295
   showManualAimGizmo: 1
+--- !u!114 &1553962221430697368
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7542105212534121670}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fb631f37dd1a12a41b80af87fc00297e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Ball2.Gameplay::Ball2.Gameplay.CombatAdapter
+  config:
+    DamageThresholdSpeed: 5
+    DamagePerSpeed: 1
+    KnockbackPerSpeed: 1
+    PerfectHitMinSpeed: 15
+    PerfectHitMaxAngleDeg: 10
+  body: {fileID: 7542105212534121668}
+  health: {fileID: 1293697565}
+--- !u!114 &6220051660239814332
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7542105212534121670}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 57f2eeceba1ebea4fb241a0ee02f0352, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Ball2.Gameplay::Ball2.Gameplay.LockOnAdapter
+  aimSource: {fileID: 0}
+  config:
+    Range: 20
+    AcquisitionAngleDeg: 60
+    TrackingStrength: 0.35
+    DodgeToleranceDeg: 45
+    BreakRange: 30
+    Epsilon: 0.00001
 --- !u!114 &1293697565
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -961,7 +1004,6 @@ MonoBehaviour:
   BallDmg2: {fileID: 2100000, guid: 2f9ce415841da5742b86f622748589e9, type: 2}
   BallDmg3: {fileID: 2100000, guid: 024a4d1e653d93a49bf573be9d8afb8b, type: 2}
   BallBroken: {fileID: 2100000, guid: 1cf6ad53171b5274e8aa85ee733dd73b, type: 2}
-  SpriteAnim: {fileID: 9116306258559789047}
 --- !u!1001 &1075825374475952957
 PrefabInstance:
   m_ObjectHideFlags: 0
