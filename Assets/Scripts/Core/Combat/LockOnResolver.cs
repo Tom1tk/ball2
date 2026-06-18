@@ -21,12 +21,12 @@ namespace Ball2.Core.Combat
     }
 
     /// <summary>
-    /// The lock state carried frame-to-frame by the caller. -1 Id means no lock.
+    /// The lock state carried frame-to-frame by the caller. TargetId=int.MinValue means no lock.
     /// TrackingPosition is the soft-tracked aim point (lags the real enemy position).
     /// </summary>
     public readonly struct LockState
     {
-        public readonly int TargetId;                       // -1 = none
+        public readonly int TargetId;                       // int.MinValue = none
         public readonly Vector3 TrackingPosition;
 
         public LockState(int targetId, Vector3 trackingPosition)
@@ -35,9 +35,9 @@ namespace Ball2.Core.Combat
             TrackingPosition = trackingPosition;
         }
 
-        public bool HasLock => TargetId >= 0;
+        public bool HasLock => TargetId != int.MinValue;
 
-        public static LockState None => new LockState(-1, Vector3.zero);
+        public static LockState None => new LockState(int.MinValue, Vector3.zero);
     }
 
     /// <summary>

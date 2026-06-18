@@ -30,7 +30,7 @@ namespace Ball2.Tests.EditMode
             var result = LockOnResolver.Resolve(in input, cfg);
 
             Assert.IsFalse(result.NewLock.HasLock, "should have no lock");
-            Assert.AreEqual(-1, result.NewLock.TargetId);
+            Assert.AreEqual(int.MinValue, result.NewLock.TargetId);
             Assert.IsFalse(result.IconShouldShow);
             Assert.AreEqual(-1, result.IconTargetId);
         }
@@ -233,7 +233,7 @@ namespace Ball2.Tests.EditMode
         [Test]
         public void LockBreaks_EnemyDodgesOutsideTolerance()
         {
-            var cfg = new LockOnConfig();
+            var cfg = new LockOnConfig { DodgeToleranceDeg = 45f };
             var enemy = new LockOnCandidate(1, new Vector3(0, 0, 10), Vector3.zero);
             var acquired = LockOnResolver.Resolve(
                 new LockOnInput(Vector3.zero, AimForward, new[] { enemy }, LockState.None, false), cfg);
@@ -338,7 +338,7 @@ namespace Ball2.Tests.EditMode
         [Test]
         public void CommitOnCharge_NotCharging_CanSwitchToBetterCandidate()
         {
-            var cfg = new LockOnConfig();
+            var cfg = new LockOnConfig { DodgeToleranceDeg = 45f };
             var a = new LockOnCandidate(1, new Vector3(0.87f, 0, 10f), Vector3.zero); // ~5deg
             var acquired = LockOnResolver.Resolve(
                 new LockOnInput(Vector3.zero, AimForward, new[] { a }, LockState.None, false), cfg);
