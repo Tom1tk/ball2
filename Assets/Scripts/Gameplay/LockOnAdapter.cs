@@ -30,11 +30,30 @@ namespace Ball2.Gameplay
         [Header("Tuning (Q12)")]
         [SerializeField] LockOnConfig config = new LockOnConfig();
 
+        [Header("Lock Indicator")]
+        [SerializeField] Sprite lockIconSprite;
+        [SerializeField] Color lockIconColor = Color.green;
+        [SerializeField] float lockIconSize = 1.2f;
+        [SerializeField] float lockIconYOffset = 1.5f;
+
         readonly LockOnCandidate[] _candidateBuffer = new LockOnCandidate[16];
         int _candidateCount;
         LockState _currentLock = LockState.None;
         LockOnResult _lastResult;
         bool _boostChargeStarted;
+        GameObject _lockIcon;
+        SpriteRenderer _lockIconRenderer;
+
+        void Start()
+        {
+            _lockIcon = new GameObject("LockIndicator");
+            _lockIcon.hideFlags = HideFlags.HideAndDontSave;
+            _lockIconRenderer = _lockIcon.AddComponent<SpriteRenderer>();
+            _lockIconRenderer.sprite = lockIconSprite;
+            _lockIconRenderer.color = lockIconColor;
+            _lockIcon.AddComponent<SpriteFaceCamera>();
+            _lockIcon.SetActive(false);
+        }
 
         /// <summary>True while the player is holding boost charge; commit-on-charge
         /// is enforced while this is true (set by BallMovement on boost press).</summary>
@@ -159,6 +178,15 @@ namespace Ball2.Gameplay
                 Vector3 enemyPos = LockedEnemyPosition;
                 Vector3 trackingPos = TrackingPosition;
 
+                if (lockIconSprite != null)
+                {
+                    Transform t = _lockIcon.transform;
+                    t.position = enemyPos + Vector3.up * lockIconYOffset;
+                    t.localScale = Vector3.one * lockIconSize;
+                    _lockIconRenderer.color = lockIconColor;
+                    _lockIcon.SetActive(true);
+                }
+
                 Debug.DrawLine(origin, trackingPos, Color.green, dt);
                 Debug.DrawLine(trackingPos, enemyPos, new Color(0.5f, 1f, 0.5f, 0.3f), dt);
 
@@ -171,6 +199,10 @@ namespace Ball2.Gameplay
                 Debug.DrawLine(trackingPos - Vector3.right * dotSize, trackingPos + Vector3.right * dotSize, Color.yellow, dt);
                 Debug.DrawLine(trackingPos - Vector3.up * dotSize, trackingPos + Vector3.up * dotSize, Color.yellow, dt);
                 Debug.DrawLine(trackingPos - Vector3.forward * dotSize, trackingPos + Vector3.forward * dotSize, Color.yellow, dt);
+            }
+            else if (_lockIcon != null)
+            {
+                _lockIcon.SetActive(false);
             }
         }
     }
