@@ -86,6 +86,7 @@ namespace Ball2.Core.Combat
     /// <summary>
     /// All tuning for lock-on. Q12 — Tom tunes at M2.
     /// </summary>
+    [System.Serializable]
     public sealed class LockOnConfig
     {
         /// <summary>Max distance from player at which a lock can be acquired.</summary>

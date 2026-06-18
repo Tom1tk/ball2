@@ -62,6 +62,7 @@ namespace Ball2.Core.Combat
     /// Fields are public for inspector/serializer friendliness; defaults are sensible
     /// placeholders for Tom to feel out at M2.
     /// </summary>
+    [System.Serializable]
     public sealed class CombatConfig
     {
         // Relative normal closing speed below this deals no damage and no impulse.

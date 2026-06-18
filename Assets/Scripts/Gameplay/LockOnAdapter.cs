@@ -91,7 +91,7 @@ namespace Ball2.Gameplay
 
         int GatherCandidates(LockOnCandidate[] buffer)
         {
-            GameObject[] enemies = GameObject.FindGameObjectsWithTag(enemyTag);
+            EnemyAI[] enemies = FindObjectsByType<EnemyAI>(FindObjectsSortMode.None);
             int n = Mathf.Min(enemies.Length, buffer.Length);
             for (int i = 0; i < n; i++)
             {
@@ -102,6 +102,12 @@ namespace Ball2.Gameplay
                     rb != null ? rb.linearVelocity : Vector3.zero);
             }
             return n;
+        }
+
+        void OnDrawGizmos()
+        {
+            Gizmos.color = HasLock ? Color.green : Color.yellow;
+            Gizmos.DrawWireSphere(transform.position, 1.2f);
         }
 
         void OnGUI()
