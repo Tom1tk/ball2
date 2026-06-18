@@ -54,9 +54,9 @@ public class EnemyAI : MonoBehaviour
         boostStarted = false;
         wanderPointCreated = false;
 
-        enemyAgent.updatePosition = false;
-        enemyAgent.updateRotation = false;
-        enemyAgent.updateUpAxis = false;
+        //enemyAgent.updatePosition = false;
+        //enemyAgent.updateRotation = false;
+        //enemyAgent.updateUpAxis = false;
     }
     void FixedUpdate() 
     {
@@ -67,11 +67,11 @@ public class EnemyAI : MonoBehaviour
         //enemyAgent.SetDestination(player.position);
 
         //since the NavMeshAgent doesnt update its own position, we have to do it manually as the first corner [0]
-        enemyAgent.nextPosition = rb.position;
+        //enemyAgent.nextPosition = rb.position;
 
-        enemyAgent.Warp(rb.position);
+        //enemyAgent.Warp(rb.position);
 
-        
+
         // Check if the ball is grounded.
         // The sphere radius is 0.5f, so starting a raycast at 0.55f below the center 
         // and shooting it 0.15f down avoids hitting the ball's own collider.
@@ -139,20 +139,20 @@ public class EnemyAI : MonoBehaviour
 
     void Wander()
     {
-        NavMeshPath wanderPath = new NavMeshPath();
+        //NavMeshPath wanderPath = new NavMeshPath();
 
-        enemyAgent.CalculatePath(wanderPoint, cachedPath);
-        enemyAgent.SetPath(cachedPath);
+        //enemyAgent.CalculatePath(wanderPoint, cachedPath);
+        //enemyAgent.SetPath(cachedPath);
 
         // Safety check on cachedPath corners
-        if (cachedPath.corners.Length >= 2)
-        {
-            // Finds direction from agent to destination as Vector3
-            Vector3 wanderDirection = (cachedPath.corners[1] - this.transform.position).normalized;
-            //adds force in that direction
-            rb.AddForce(wanderDirection * inputForce / 2f);
-        }
-        else
+        //if (cachedPath.corners.Length >= 2)
+        //{
+        //    // Finds direction from agent to destination as Vector3
+        //    Vector3 wanderDirection = (cachedPath.corners[1] - this.transform.position).normalized;
+        //    //adds force in that direction
+        //    rb.AddForce(wanderDirection * inputForce / 2f);
+        //}
+        //else
         {
             // Fallback: move directly towards the wanderPoint if path is too short or invalid
             Vector3 wanderDirection = (wanderPoint - this.transform.position).normalized;
@@ -168,19 +168,19 @@ public class EnemyAI : MonoBehaviour
 
     void ChasePlayer()
     {
-        NavMeshPath pathToPlayer = new NavMeshPath();
+        //NavMeshPath pathToPlayer = new NavMeshPath();
 
-        enemyAgent.CalculatePath(player.position, cachedPath);
-        enemyAgent.SetPath(cachedPath);
+        //enemyAgent.CalculatePath(player.position, cachedPath);
+        //enemyAgent.SetPath(cachedPath);
 
 
-        if (cachedPath.corners.Length >= 2)
-        {
-            // Since the first corner is the enemy location, use the second corner [1]
-            Vector3 ChaseDirection = (cachedPath.corners[1] - this.transform.position).normalized;
-            rb.AddForce(ChaseDirection * inputForce);
-        }
-        else if (player != null)
+        //if (cachedPath.corners.Length >= 2)
+        //{
+        //    // Since the first corner is the enemy location, use the second corner [1]
+        //    Vector3 ChaseDirection = (cachedPath.corners[1] - this.transform.position).normalized;
+        //    rb.AddForce(ChaseDirection * inputForce);
+        //}
+        //else if (player != null)
         {
             // Fallback: move directly towards the player
             Vector3 ChaseDirection = (player.position - this.transform.position).normalized;
@@ -239,27 +239,27 @@ public class EnemyAI : MonoBehaviour
 
     void DrawPath()
     {
-        var nav = GetComponent<NavMeshAgent>();
-        if(nav == null || nav.path == null)
-            return;
-    
-        var line = this.GetComponent<LineRenderer>();
-        if(line == null)
-        {
-            line = this.gameObject.AddComponent<LineRenderer>();
-            line.material = new Material(Shader.Find("Sprites/Default")) {color = Color.yellow};
-            line.startWidth =  0.25f;
-            line.startColor = Color.red;
-        }
-    
-        var path = nav.path;
-    
-        line.positionCount = path.corners.Length;
-    
-        for( int i = 0; i < path.corners.Length; i++ )
-        {
-            line.SetPosition( i, path.corners[ i ] );
-        }
+        //var nav = GetComponent<NavMeshAgent>();
+        //if(nav == null || nav.path == null)
+        //    return;
+
+        //var line = this.GetComponent<LineRenderer>();
+        //if(line == null)
+        //{
+        //    line = this.gameObject.AddComponent<LineRenderer>();
+        //    line.material = new Material(Shader.Find("Sprites/Default")) {color = Color.yellow};
+        //    line.startWidth =  0.25f;
+        //    line.startColor = Color.red;
+        //}
+
+        //var path = nav.path;
+
+        //line.positionCount = path.corners.Length;
+
+        //for( int i = 0; i < path.corners.Length; i++ )
+        //{
+        //    line.SetPosition( i, path.corners[ i ] );
+        //}
 
         /*
         Draws a yellow line from the center of the actor to the clicked location with the code in the Update()
