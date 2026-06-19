@@ -5,6 +5,8 @@ using UnityEngine.AI;
 
 public class EnemyAI : MonoBehaviour
 {
+    [SerializeField]
+    private bool aiEnabled = true;
     public bool displayNavPath;
 
     [Header("Player reference")]
@@ -64,12 +66,14 @@ public class EnemyAI : MonoBehaviour
 
         pathUpdateTimer += Time.fixedDeltaTime;
 
-        //enemyAgent.SetDestination(player.position);
+        if (!aiEnabled) return;
+
+        enemyAgent.SetDestination(player.position);
 
         //since the NavMeshAgent doesnt update its own position, we have to do it manually as the first corner [0]
         enemyAgent.nextPosition = rb.position;
 
-        //enemyAgent.Warp(rb.position);
+        enemyAgent.Warp(rb.position);
 
         
         // Check if the ball is grounded.
@@ -92,10 +96,10 @@ public class EnemyAI : MonoBehaviour
         {
             if (wanderPointCreated == false)
             {
-                //StartCoroutine(createWanderPoint());
+                StartCoroutine(createWanderPoint());
             }
 
-            //Wander();
+            Wander();
 
         }
 

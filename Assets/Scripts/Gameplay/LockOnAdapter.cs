@@ -34,7 +34,8 @@ namespace Ball2.Gameplay
         [SerializeField] Sprite lockIconSprite;
         [SerializeField] Color lockIconColor = Color.green;
         [SerializeField] float lockIconSize = 1.2f;
-        [SerializeField] float lockIconYOffset = 1.5f;
+        [SerializeField] float enemyRadius = 2f;
+        [SerializeField] float iconSurfaceOffset = 0.1f;
 
         readonly LockOnCandidate[] _candidateBuffer = new LockOnCandidate[16];
         int _candidateCount;
@@ -43,6 +44,7 @@ namespace Ball2.Gameplay
         bool _boostChargeStarted;
         GameObject _lockIcon;
         SpriteRenderer _lockIconRenderer;
+        Camera _camera;
 
         void Start()
         {
@@ -52,6 +54,7 @@ namespace Ball2.Gameplay
             _lockIconRenderer.sprite = lockIconSprite;
             _lockIconRenderer.color = lockIconColor;
             _lockIcon.AddComponent<SpriteFaceCamera>();
+            _camera = Camera.main;
             _lockIcon.SetActive(false);
         }
 
@@ -181,7 +184,9 @@ namespace Ball2.Gameplay
                 if (lockIconSprite != null)
                 {
                     Transform t = _lockIcon.transform;
-                    t.position = enemyPos + Vector3.up * lockIconYOffset;
+                    Vector3 camPos = _camera != null ? _camera.transform.position : transform.position;
+                    Vector3 toCamera = (camPos - enemyPos).normalized;
+                    t.position = enemyPos + toCamera * (enemyRadius + iconSurfaceOffset);
                     t.localScale = Vector3.one * lockIconSize;
                     _lockIconRenderer.color = lockIconColor;
                     _lockIcon.SetActive(true);
