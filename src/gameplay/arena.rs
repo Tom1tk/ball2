@@ -166,9 +166,8 @@ pub fn spawn_world(
         );
     }
 
-    // Floating platforms/slabs.
+    // Floating platforms/slabs. The central spawn shaft is deliberately clear.
     for (pos, size) in [
-        (Vec3::new(0.0, 26.0, 0.0), Vec3::new(20.0, 1.0, 20.0)),
         (Vec3::new(-26.0, 36.0, 16.0), Vec3::new(18.0, 1.0, 18.0)),
         (Vec3::new(26.0, 44.0, -16.0), Vec3::new(18.0, 1.0, 18.0)),
         (Vec3::new(0.0, 50.0, 26.0), Vec3::new(24.0, 1.0, 24.0)),
