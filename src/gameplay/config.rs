@@ -15,6 +15,8 @@ pub struct CombatSettings(pub CombatConfig);
 pub struct BallConfig {
     /// Physics radius. The Unity prefab root is scaled 2x with a 0.5 collider radius.
     pub radius: f32,
+    /// Visual shell radius. Unity renders a radius-1 sphere at 2x root scale.
+    pub shell_radius: f32,
     /// Inner visual sphere radius (Unity child sphere is 0.4 local at 2x root).
     pub core_radius: f32,
     pub max_velocity: f32,
@@ -39,6 +41,7 @@ impl Default for BallConfig {
     fn default() -> Self {
         Self {
             radius: 1.0,
+            shell_radius: 1.0,
             core_radius: 0.4,
             max_velocity: 20.0,
             air_max_velocity: 50.0,

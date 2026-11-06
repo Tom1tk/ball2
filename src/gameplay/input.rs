@@ -50,7 +50,6 @@ pub fn read_player_input(
         debug.show_debug_text = !debug.show_debug_text;
         debug.show_aim_gizmos = debug.show_debug_text;
     }
-
     if *state.get() != GameState::Playing {
         input.clear_all();
         return;

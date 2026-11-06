@@ -90,6 +90,8 @@ pub struct GrappleAssets {
     pub projectile_material: Handle<StandardMaterial>,
     pub indicator_mesh: Handle<Mesh>,
     pub indicator_material: Handle<StandardMaterial>,
+    pub rope_meshes: [Handle<Mesh>; 2],
+    pub rope_material: Handle<StandardMaterial>,
 }
 
 pub fn setup_grapple_assets(
@@ -102,25 +104,51 @@ pub fn setup_grapple_assets(
         return;
     }
 
-    let projectile_mesh = meshes.add(Sphere::new(0.12).mesh().ico(2).unwrap());
+    // Unity HookProjectile: built-in cylinder scaled (0.1, 0.3, 0.1), so
+    // radius 0.05 and length 0.6, with the built-in default material.
+    let projectile_mesh = meshes.add(Cylinder::new(0.05, 0.6));
     let projectile_material = materials.add(StandardMaterial {
-        base_color: Color::srgb(1.0, 0.9, 0.2),
-        emissive: LinearRgba::rgb(3.0, 2.0, 0.2),
+        base_color: Color::WHITE,
+        perceptual_roughness: 0.5,
+        metallic: 0.0,
         ..default()
     });
 
-    let indicator_mesh = meshes.add(Sphere::new(0.14).mesh().ico(2).unwrap());
+    // Unity left/right indicators: built-in cube at 0.2 local under the 2x
+    // PlayerBall root, i.e. 0.4 m, with the built-in default material.
+    let indicator_mesh = meshes.add(Cuboid::new(0.4, 0.4, 0.4));
     let indicator_material = materials.add(StandardMaterial {
-        base_color: Color::srgb(0.9, 0.95, 1.0),
-        emissive: LinearRgba::rgb(1.2, 1.5, 2.0),
+        base_color: Color::WHITE,
+        perceptual_roughness: 0.5,
+        metallic: 0.0,
         ..default()
     });
+
+    let rope_material = materials.add(StandardMaterial {
+        base_color: Color::WHITE,
+        unlit: true,
+        cull_mode: None,
+        ..default()
+    });
+    let rope_meshes = [meshes.add(empty_rope_mesh()), meshes.add(empty_rope_mesh())];
+
+    for (is_left, mesh) in [(true, &rope_meshes[0]), (false, &rope_meshes[1])] {
+        commands.spawn((
+            RopeVisual { is_left },
+            Mesh3d(mesh.clone()),
+            MeshMaterial3d(rope_material.clone()),
+            Transform::IDENTITY,
+            Visibility::Hidden,
+        ));
+    }
 
     commands.insert_resource(GrappleAssets {
         projectile_mesh,
         projectile_material,
         indicator_mesh,
         indicator_material,
+        rope_meshes,
+        rope_material,
     });
 }
 
@@ -150,7 +178,10 @@ pub fn update_grapple_aiming(
     let camera_right = camera_transform.right().as_vec3().normalize_or_zero();
     let filter = SpatialQueryFilter::default().with_excluded_entities([player_entity]);
     let ideal_dir = (camera_forward + Vec3::Y).normalize_or_zero();
-    let cursor = window.cursor_position();
+    // Unity uses CursorLockMode.Locked while playing, so the manual-aim ray
+    // always starts at the window centre regardless of where the OS cursor
+    // happened to be when the pause menu was dismissed.
+    let cursor = Some(window.size() * 0.5);
 
     let cfg = grapple.config.clone();
     let left_indicator = player_pos - camera_right * cfg.indicator_offset;
@@ -325,7 +356,7 @@ pub fn update_grapple(
     assets: Res<GrappleAssets>,
     mut commands: Commands,
     mut grapple: ResMut<GrappleState>,
-    mut player_query: Query<(Entity, &Transform, Forces, &mut BallState), With<Player>>,
+    mut player_query: Query<(Entity, &Transform, Forces, &mut BallState, &Health), With<Player>>,
     camera_query: Query<&GlobalTransform, With<Camera>>,
     mut projectiles: Query<
         &mut Transform,
@@ -348,11 +379,14 @@ pub fn update_grapple(
     if *state.get() != GameState::Playing {
         return;
     }
-    let Ok((player_entity, player_transform, mut forces, mut ball_state)) =
+    let Ok((player_entity, player_transform, mut forces, mut ball_state, health)) =
         player_query.single_mut()
     else {
         return;
     };
+    if health.dead {
+        return;
+    }
     let camera_transform = camera_query.iter().next();
     let camera_forward = camera_transform
         .map(|t| t.forward().as_vec3())
@@ -636,15 +670,143 @@ fn advance_hook(
     }
 }
 
-/// Draw rope lines and debug aim markers with Bevy gizmos.
+fn empty_rope_mesh() -> Mesh {
+    use bevy::asset::RenderAssetUsages;
+    use bevy::mesh::Indices;
+    use bevy::render::render_resource::PrimitiveTopology;
+
+    Mesh::new(
+        PrimitiveTopology::TriangleList,
+        RenderAssetUsages::MAIN_WORLD | RenderAssetUsages::RENDER_WORLD,
+    )
+    .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, vec![[0.0f32; 3]; 4])
+    .with_inserted_attribute(Mesh::ATTRIBUTE_NORMAL, vec![[0.0f32, 0.0, 1.0]; 4])
+    .with_inserted_attribute(
+        Mesh::ATTRIBUTE_UV_0,
+        vec![[0.0f32, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]],
+    )
+    .with_inserted_indices(Indices::U32(vec![0, 1, 2, 0, 2, 3]))
+}
+
+/// Rebuild the two world-space ribbon meshes that replace Unity's
+/// `LineRenderer`s. Unity uses `alignment = View` and a 0.5361 m width.
+pub fn update_rope_visuals(
+    grapple: Res<GrappleState>,
+    assets: Res<GrappleAssets>,
+    player_query: Query<(&Transform, &Health), With<Player>>,
+    projectile_query: Query<&Transform, With<HookProjectile>>,
+    camera_query: Query<&GlobalTransform, With<Camera>>,
+    mut ropes: Query<(&RopeVisual, &mut Visibility), Without<HookIndicator>>,
+    mut indicators: Query<(&HookIndicator, &mut Visibility), Without<RopeVisual>>,
+    mut meshes: ResMut<Assets<Mesh>>,
+) {
+    use bevy::mesh::Indices;
+
+    let Ok((player_transform, player_health)) = player_query.single() else {
+        return;
+    };
+
+    // Unity disables the PlayerBall GameObject, which also hides the child
+    // LeftIndicator/RightIndicator transforms and LineRenderers.
+    if player_health.dead {
+        for (_, mut visibility) in &mut ropes {
+            *visibility = Visibility::Hidden;
+        }
+        for (_, mut visibility) in &mut indicators {
+            *visibility = Visibility::Hidden;
+        }
+        return;
+    }
+    for (_, mut visibility) in &mut indicators {
+        *visibility = Visibility::Visible;
+    }
+    let camera_transform = camera_query.iter().next();
+    let camera_right = camera_transform
+        .map(|t| t.right().as_vec3())
+        .unwrap_or(Vec3::X);
+    let camera_position = camera_transform
+        .map(|t| t.translation())
+        .unwrap_or(Vec3::ZERO);
+    let player_pos = player_transform.translation;
+    let cfg = &grapple.config;
+
+    let left_indicator = player_pos - camera_right * cfg.indicator_offset;
+    let right_indicator = player_pos + camera_right * cfg.indicator_offset;
+
+    for (rope, mut visibility) in &mut ropes {
+        let (hook, start) = if rope.is_left {
+            (&grapple.left, left_indicator)
+        } else {
+            (&grapple.right, right_indicator)
+        };
+
+        let end = if hook.state == HookState::Hooked {
+            Some(hook.hook_point)
+        } else if let Some(projectile) = hook.projectile {
+            projectile_query
+                .get(projectile)
+                .ok()
+                .map(|transform| transform.translation)
+        } else {
+            None
+        };
+
+        let Some(end) = end else {
+            *visibility = Visibility::Hidden;
+            continue;
+        };
+        *visibility = Visibility::Visible;
+
+        let along = end - start;
+        if along.length_squared() < 1e-8 {
+            continue;
+        }
+        let view = camera_position - start;
+        let mut side = along.cross(view).normalize_or_zero();
+        if side.length_squared() < 1e-8 {
+            side = camera_right.normalize_or_zero();
+        }
+        let side = side * (0.536_133_5 * 0.5);
+        let positions = vec![
+            (start - side).to_array(),
+            (start + side).to_array(),
+            (end + side).to_array(),
+            (end - side).to_array(),
+        ];
+
+        let index = if rope.is_left { 0 } else { 1 };
+        let Some(mut mesh) = meshes.get_mut(&assets.rope_meshes[index]) else {
+            continue;
+        };
+        mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, positions.clone());
+        mesh.insert_attribute(
+            Mesh::ATTRIBUTE_NORMAL,
+            vec![
+                [0.0, 0.0, 1.0],
+                [0.0, 0.0, 1.0],
+                [0.0, 0.0, 1.0],
+                [0.0, 0.0, 1.0],
+            ],
+        );
+        mesh.insert_attribute(
+            Mesh::ATTRIBUTE_UV_0,
+            vec![[0.0f32, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]],
+        );
+        mesh.insert_indices(Indices::U32(vec![0, 1, 2, 0, 2, 3]));
+    }
+}
+
+/// Draw debug-only aim markers with Bevy gizmos (F3).
 pub fn draw_grapple_gizmos(
     grapple: Res<GrappleState>,
     debug: Res<DebugSettings>,
     player_query: Query<&Transform, With<Player>>,
-    projectile_query: Query<&Transform, With<HookProjectile>>,
     camera_query: Query<&GlobalTransform, With<Camera>>,
     mut gizmos: Gizmos,
 ) {
+    if !debug.show_aim_gizmos {
+        return;
+    }
     let Ok(player_transform) = player_query.single() else {
         return;
     };
@@ -662,51 +824,25 @@ pub fn draw_grapple_gizmos(
         (&grapple.left, left_indicator),
         (&grapple.right, right_indicator),
     ] {
-        let end = if hook.state == HookState::Hooked {
-            Some(hook.hook_point)
-        } else if let Some(projectile) = hook.projectile {
-            projectile_query
-                .get(projectile)
-                .ok()
-                .map(|transform| transform.translation)
+        if let Some(target) = hook.auto_target {
+            gizmos.sphere(
+                Isometry3d::from_translation(target),
+                0.25,
+                Color::srgb(0.1, 1.0, 1.0),
+            );
+        }
+        if let Some(cursor) = hook.cursor_world {
+            gizmos.line(start, cursor, Color::srgb(1.0, 1.0, 0.0));
+        }
+    }
+
+    gizmos.cross(
+        Isometry3d::from_translation(player_pos),
+        0.6,
+        if grapple.any_hooked() {
+            Color::srgb(0.2, 1.0, 0.2)
         } else {
-            None
-        };
-
-        if let Some(end) = end {
-            gizmos.line(start, end, Color::srgb(0.85, 0.95, 1.0));
-            if hook.state == HookState::Hooked {
-                gizmos.cross(
-                    Isometry3d::from_translation(hook.hook_point),
-                    0.35,
-                    Color::srgb(1.0, 0.85, 0.2),
-                );
-            }
-        }
-
-        if debug.show_aim_gizmos {
-            if let Some(target) = hook.auto_target {
-                gizmos.sphere(
-                    Isometry3d::from_translation(target),
-                    0.25,
-                    Color::srgb(0.1, 1.0, 1.0),
-                );
-            }
-            if let Some(cursor) = hook.cursor_world {
-                gizmos.line(start, cursor, Color::srgb(1.0, 1.0, 0.0));
-            }
-        }
-    }
-
-    if debug.show_aim_gizmos {
-        gizmos.cross(
-            Isometry3d::from_translation(player_pos),
-            0.6,
-            if grapple.any_hooked() {
-                Color::srgb(0.2, 1.0, 0.2)
-            } else {
-                Color::srgb(1.0, 1.0, 0.2)
-            },
-        );
-    }
+            Color::srgb(1.0, 1.0, 0.2)
+        },
+    );
 }

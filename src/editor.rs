@@ -19,10 +19,7 @@ impl Plugin for EditorPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<EditorOpen>()
             .add_plugins(EguiPlugin::default())
-            .add_plugins(
-                WorldInspectorPlugin::default()
-                    .run_if(|open: Res<EditorOpen>| open.0),
-            )
+            .add_plugins(WorldInspectorPlugin::default().run_if(|open: Res<EditorOpen>| open.0))
             .add_systems(PreUpdate, toggle_editor)
             .add_systems(Startup, log_editor_hint);
     }

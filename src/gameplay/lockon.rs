@@ -36,7 +36,7 @@ impl Default for PlayerLockOn {
 pub fn update_lockon(
     state: Res<State<GameState>>,
     mut lockon: ResMut<PlayerLockOn>,
-    player_query: Query<&Transform, With<Player>>,
+    player_query: Query<(&Transform, &Health), With<Player>>,
     camera_query: Query<&GlobalTransform, With<Camera>>,
     enemy_query: Query<(Entity, &Transform, &LinearVelocity, &Health), With<Enemy>>,
 ) {
@@ -44,9 +44,16 @@ pub fn update_lockon(
         return;
     }
 
-    let Ok(player_transform) = player_query.single() else {
+    let Ok((player_transform, player_health)) = player_query.single() else {
         return;
     };
+    if player_health.dead {
+        lockon.current = LockState::NONE;
+        lockon.result = LockOnResult::none();
+        lockon.tracking_position = None;
+        lockon.locked_enemy_position = None;
+        return;
+    }
     let Ok(camera_transform) = camera_query.single() else {
         return;
     };
@@ -72,7 +79,6 @@ pub fn update_lockon(
         lockon.boost_charge_started,
     );
     let result = LockOnResolver::resolve(&input, &lockon.config);
-
     lockon.current = result.new_lock;
     lockon.result = result;
     lockon.tracking_position = if result.new_lock.has_lock() {

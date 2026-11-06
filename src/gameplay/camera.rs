@@ -1,7 +1,7 @@
 //! Third-person camera ported from `CameraFollow.cs`.
 //!
-//! Unity's camera looks down +Z; Bevy cameras look down -Z, so the orbit is
-//! expressed with the camera placed behind at +Z. The smoothing, sphere-cast
+//! Unity's camera looks down +Z; after converting the scene into Bevy's
+//! basis the camera sits behind at +Z and looks down -Z. The smoothing, sphere-cast
 //! collision, lazy/reactive speed blend and pitch clamps match the source.
 
 use avian3d::prelude::*;
@@ -40,7 +40,8 @@ pub fn camera_follow(
         return;
     }
 
-    // Unity yaw/pitch are in degrees; positive pitch orbits the camera upward.
+    // Keep Unity's yaw/pitch values (degrees, positive pitch above the
+    // target), but express the rotation in Bevy's mirrored basis.
     let sensitivity = cfg.sensitivity.to_radians();
     follow.yaw += mouse.delta.x * sensitivity;
     follow.pitch -= mouse.delta.y * sensitivity;
@@ -48,7 +49,9 @@ pub fn camera_follow(
         .pitch
         .clamp(cfg.min_pitch.to_radians(), cfg.max_pitch.to_radians());
 
-    let rotation = Quat::from_rotation_y(follow.yaw) * Quat::from_rotation_x(-follow.pitch);
+    let rotation = Quat::from_rotation_y(-follow.yaw) * Quat::from_rotation_x(-follow.pitch);
+    // Unity `rotation * Vector3.back` becomes `rotation * +Z` after the
+    // handedness conversion; the camera sits behind at +Z and looks -Z.
     let dir_to_camera = rotation * Vec3::Z;
 
     let look_target = player_tf.translation + Vec3::Y * cfg.vertical_offset;
@@ -98,7 +101,8 @@ pub fn camera_follow(
     );
 
     camera_tf.translation = smoothed;
-    camera_tf.look_at(look_target, Vec3::Y);
+    // Unity keeps its authored pitch/yaw instead of continuously re-aiming.
+    camera_tf.rotation = rotation;
 }
 
 /// Unity `Mathf.SmoothDamp` (critically damped spring).

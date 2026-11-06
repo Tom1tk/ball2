@@ -7,7 +7,7 @@ fn main() {
     app.add_plugins(DefaultPlugins.set(WindowPlugin {
         primary_window: Some(Window {
             title: "BALL2 - The Baller".to_string(),
-            resolution: (1600, 900).into(),
+            resolution: (1920, 1080).into(),
             resizable: true,
             ..default()
         }),

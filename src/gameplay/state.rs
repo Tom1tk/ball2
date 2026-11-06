@@ -8,7 +8,6 @@ pub enum GameState {
     #[default]
     Playing,
     Paused,
-    GameOver,
     Restarting,
 }
 
@@ -29,14 +28,6 @@ pub fn handle_state_input(
                 next.set(GameState::Playing);
             }
             if keys.just_pressed(KeyCode::KeyR) {
-                next.set(GameState::Restarting);
-            }
-            if keys.just_pressed(KeyCode::KeyQ) {
-                exit.write(AppExit::Success);
-            }
-        }
-        GameState::GameOver => {
-            if keys.just_pressed(KeyCode::KeyR) || keys.just_pressed(KeyCode::Enter) {
                 next.set(GameState::Restarting);
             }
             if keys.just_pressed(KeyCode::KeyQ) {
@@ -71,22 +62,12 @@ pub fn enter_paused(
     mut cursor: Query<&mut CursorOptions, With<Window>>,
 ) {
     time.pause();
-    cursor_set(&mut cursor, true, CursorGrabMode::None);
+    // Unity UIScript.showPauseUI uses CursorLockMode.Confined: the cursor is
+    // visible but cannot leave the game window while the menu is open.
+    cursor_set(&mut cursor, true, CursorGrabMode::Confined);
 }
 
 pub fn exit_paused(mut time: ResMut<Time<Virtual>>) {
-    time.unpause();
-}
-
-pub fn enter_game_over(
-    mut time: ResMut<Time<Virtual>>,
-    mut cursor: Query<&mut CursorOptions, With<Window>>,
-) {
-    time.pause();
-    cursor_set(&mut cursor, true, CursorGrabMode::None);
-}
-
-pub fn exit_game_over(mut time: ResMut<Time<Virtual>>) {
     time.unpause();
 }
 

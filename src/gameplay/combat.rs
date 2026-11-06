@@ -27,6 +27,7 @@ pub fn resolve_ball_collisions(
             Forces,
             &PrePhysicsVelocity,
             &Mass,
+            &BallState,
         ),
         With<Ball>,
     >,
@@ -66,8 +67,8 @@ pub fn resolve_ball_collisions(
             let Ok([a, b]) = balls.get_many_mut([body1, body2]) else {
                 continue;
             };
-            let (_, transform_a, mut health_a, mut forces_a, pre_a, mass_a) = a;
-            let (_, transform_b, mut health_b, mut forces_b, pre_b, mass_b) = b;
+            let (_, transform_a, mut health_a, mut forces_a, pre_a, mass_a, _) = a;
+            let (_, transform_b, mut health_b, mut forces_b, pre_b, mass_b, _) = b;
 
             if health_a.dead || health_b.dead {
                 continue;
@@ -107,10 +108,6 @@ pub fn resolve_ball_collisions(
             if outcome.impulse_b != Vec3::ZERO {
                 forces_b.apply_linear_impulse(outcome.impulse_b);
             }
-
-            if outcome.perfect_hit {
-                stats.perfect_hit_flash = 0.35;
-            }
             stats.last_damage = stats
                 .last_damage
                 .max(outcome.damage_a.max(outcome.damage_b));
@@ -119,10 +116,18 @@ pub fn resolve_ball_collisions(
             let ball_entity = if ball1 { body1 } else { body2 };
             let ball_is_collider1 = ball_entity == collider1 || ball_entity == body1;
 
-            let Ok((_, _transform, mut health, mut forces, pre, mass)) = balls.get_mut(ball_entity)
+            let Ok((_, _transform, mut health, mut forces, pre, mass, state)) =
+                balls.get_mut(ball_entity)
             else {
                 continue;
             };
+            // Unity's authored enemy spawn is 1.3 m above the floor; its
+            // post-solver collision velocity is separating, so the landing
+            // deals no damage. Skip wall damage while the spawn settle is in
+            // progress, then use the pre-step velocity for real impacts.
+            if state.contact_grace > 0.0 {
+                continue;
+            }
 
             if health.dead {
                 continue;
@@ -154,13 +159,7 @@ pub fn resolve_ball_collisions(
             if outcome.impulse_a != Vec3::ZERO {
                 forces.apply_linear_impulse(outcome.impulse_a);
             }
-
-            if outcome.perfect_hit {
-                stats.perfect_hit_flash = 0.35;
-            }
             stats.last_damage = stats.last_damage.max(outcome.damage_a);
         }
     }
-
-    let _ = &collisions;
 }

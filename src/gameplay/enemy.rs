@@ -80,13 +80,14 @@ pub fn enemy_ai(
         ),
         With<Enemy>,
     >,
-    player_query: Query<&Transform, (With<Player>, Without<Enemy>)>,
+    player_query: Query<(&Transform, &Health), (With<Player>, Without<Enemy>)>,
     spatial: SpatialQuery,
 ) {
-    let Ok(player_transform) = player_query.single() else {
+    let Ok((player_transform, player_health)) = player_query.single() else {
         return;
     };
     let player_position = player_transform.translation;
+    let player_alive = !player_health.dead;
     let dt = time.delta_secs();
 
     for (entity, transform, mut forces, mut ai, mut state, health) in &mut enemies {
@@ -100,16 +101,17 @@ pub fn enemy_ai(
         let distance = position.distance(player_position);
         let grounded = is_grounded(&spatial, entity, position);
 
-        ai.can_see_player = distance <= cfg.detection_range;
-        ai.can_attack_player = distance <= cfg.boost_attack_range;
+        // Unity uses Physics.CheckSphere, so the player's 1 m collider extends
+        // both detection ranges by its radius.
+        // Unity's CheckSphere stops detecting the player when HealthScript
+        // deactivates the PlayerBall GameObject on death.
+        ai.can_see_player = player_alive && distance <= cfg.detection_range + 1.0;
+        ai.can_attack_player = player_alive && distance <= cfg.boost_attack_range + 1.0;
 
         // Boost attack takes priority and locks out normal steering until the cooldown ends.
         if ai.boost_started {
             if ai.charge_timer > 0.0 {
                 ai.charge_timer -= dt;
-                let velocity = forces.linear_velocity_mut();
-                velocity.x = 0.0;
-                velocity.z = 0.0;
 
                 if ai.charge_timer <= 0.0 && !ai.attacked {
                     ai.attacked = true;
@@ -158,13 +160,8 @@ pub fn enemy_ai(
             }
         }
 
-        // The source leaves maxVelocity unused; applying it keeps the AI from
-        // accelerating without bound in the port.
-        let velocity = forces.linear_velocity();
-        if velocity.length() > cfg.max_velocity {
-            *forces.linear_velocity_mut() = velocity.normalize_or_zero() * cfg.max_velocity;
-        }
-
+        // Unity never reads `maxVelocity` in EnemyAI; the serialized field is
+        // left unused. Do not clamp here or boost speed becomes 15 m/s.
         let velocity = forces.linear_velocity();
         state.speed = velocity.length();
         state.grounded = grounded;

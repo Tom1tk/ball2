@@ -11,7 +11,6 @@ use super::config::BallConfig;
 use super::grapple::GrappleState;
 use super::input::PlayerInput;
 use super::lockon::PlayerLockOn;
-use super::state::GameState;
 
 pub fn player_movement(
     time: Res<Time<Fixed>>,
@@ -45,6 +44,10 @@ pub fn player_movement(
         movement.speed = state.speed;
         return;
     }
+
+    // Unity BallMovement compensates the non-1 gravityScale with an upward
+    // acceleration: Physics.gravity.magnitude * (1 - gravityScale).
+    forces.apply_linear_acceleration(Vec3::Y * cfg.gravity * (1.0 - cfg.gravity_scale));
 
     let dt = time.delta_secs();
     let position = transform.translation;
@@ -151,6 +154,16 @@ pub fn is_grounded(spatial: &SpatialQuery, entity: Entity, position: Vec3) -> bo
         .is_some()
 }
 
+/// Tick the spawn-contact grace on the fixed clock. Using render-frame delta
+/// here would let a long first frame (shader compilation) consume the entire
+/// window before the authored enemy drop reaches the floor.
+pub fn tick_contact_grace(time: Res<Time<Fixed>>, mut balls: Query<&mut BallState>) {
+    let dt = time.delta_secs();
+    for mut state in &mut balls {
+        state.contact_grace = (state.contact_grace - dt).max(0.0);
+    }
+}
+
 pub fn record_pre_physics_velocity(
     mut query: Query<(&LinearVelocity, &mut PrePhysicsVelocity), With<Ball>>,
 ) {
@@ -163,65 +176,47 @@ pub fn update_ball_visuals(
     time: Res<Time>,
     cfg: Res<BallConfig>,
     mut materials: ResMut<Assets<StandardMaterial>>,
-    mut visuals: Query<(&mut Health, &BallState, &BallVisual)>,
-    mut fx_query: Query<(&mut Transform, &mut Visibility), With<ChargeFx>>,
+    mut visuals: Query<(&mut Health, &BallState, &BallVisual, Option<&Player>)>,
 ) {
     let dt = time.delta_secs();
-    let mut t = 0.0;
 
-    for (mut health, state, visual) in &mut visuals {
+    for (mut health, state, visual, is_player) in &mut visuals {
         health.flash = (health.flash - dt).max(0.0);
-        t += dt;
 
-        let base = health.damage_color();
-        let srgba = base.to_srgba();
-        let flash = health.flash;
-
+        // Unity HealthScript.materialSwitch picks the shell material by the
+        // absolute health value; DMGbroken is fully transparent.
+        let tier = health.damage_tier.min(4);
         if let Some(mut material) = materials.get_mut(&visual.shell_material) {
-            material.base_color = Color::srgba(srgba.red, srgba.green, srgba.blue, 0.39);
-            material.emissive = LinearRgba::rgb(flash * 2.5, flash * 1.5, flash * 1.0);
+            material.base_color_texture = Some(visual.shell_textures[tier].clone());
+            let alpha = if tier == 4 { 0.0 } else { 0.392 };
+            material.base_color = Color::srgba(1.0, 1.0, 1.0, alpha);
         }
 
-        let core_color = if health.dead {
-            Color::srgb(0.04, 0.035, 0.05)
-        } else if state.charging {
-            Color::srgb(1.0, 0.18, 0.85)
-        } else if state.speed > cfg.moving_speed_threshold {
-            Color::srgb(0.1, 0.95, 1.0)
-        } else {
-            Color::srgb(0.75, 0.95, 1.0)
-        };
-        let core_linear = core_color.to_linear();
-        if let Some(mut material) = materials.get_mut(&visual.core_material) {
-            material.base_color = core_color;
-            material.emissive = LinearRgba::rgb(
-                core_linear.red * 1.8,
-                core_linear.green * 1.8,
-                core_linear.blue * 1.8,
-            );
-        }
-
-        if let Ok((mut fx_transform, mut visibility)) = fx_query.get_mut(visual.charge_fx) {
-            if state.charging && !health.dead {
-                *visibility = Visibility::Visible;
-                let pulse = 1.0 + (t * 9.0).sin() * 0.08;
-                fx_transform.scale = Vec3::splat(pulse);
+        // Unity BallMovement.changeSphereColour: charging = SimpleRed,
+        // moving faster than 1 m/s = SimpleGreen, otherwise SimpleBlue. This
+        // only exists on the player; EnemyBall has no BallMovement and keeps
+        // its SimpleBlue core.
+        if is_player.is_some() {
+            let core_color = if state.charging {
+                Color::srgb(1.0, 0.0, 0.059_367_18)
+            } else if state.speed > cfg.moving_speed_threshold {
+                Color::srgb(0.0, 1.0, 0.138_429_64)
             } else {
-                *visibility = Visibility::Hidden;
+                Color::srgb(0.0, 0.604_660_03, 1.0)
+            };
+            if let Some(mut material) = materials.get_mut(&visual.core_material) {
+                material.base_color = core_color;
             }
-        }
-
-        if let Some(mut material) = materials.get_mut(&visual.charge_material) {
-            material.emissive = LinearRgba::rgb(2.5, 0.3, 1.8);
         }
     }
 }
 
+/// Unity's `HealthScript.died` flag has no death/game-over reaction: the ball
+/// keeps its broken (transparent) material and enemies simply despawn. This
+/// system only performs the enemy cleanup that exists in the scene scripts.
 pub fn process_deaths(
     mut commands: Commands,
     mut stats: ResMut<GameStats>,
-    mut next_state: ResMut<NextState<GameState>>,
-    state: Res<State<GameState>>,
     mut query: Query<(Entity, &mut Health, Option<&Player>, Option<&Enemy>), With<Ball>>,
 ) {
     for (entity, mut health, is_player, is_enemy) in &mut query {
@@ -232,10 +227,17 @@ pub fn process_deaths(
         health.death_processed = true;
 
         if is_player.is_some() {
-            stats.outcome = Some(Outcome::Defeat);
-            if *state.get() == GameState::Playing {
-                next_state.set(GameState::GameOver);
-            }
+            // Unity SetActive(false): HealthScript disables the PlayerBall
+            // GameObject, which hides the whole hierarchy and disables both
+            // the body and its collider. Visibility is explicitly Hidden on
+            // the root; the core child inherits it.
+            commands.entity(entity).insert((
+                RigidBodyDisabled,
+                ColliderDisabled,
+                Visibility::Hidden,
+                LinearVelocity::ZERO,
+                AngularVelocity::ZERO,
+            ));
         }
 
         if is_enemy.is_some() {
@@ -245,13 +247,6 @@ pub fn process_deaths(
             commands.entity(entity).insert(DespawnAfter {
                 timer: Timer::from_seconds(1.5, TimerMode::Once),
             });
-
-            if stats.enemies_alive == 0 {
-                stats.outcome = Some(Outcome::Victory);
-                if *state.get() == GameState::Playing {
-                    next_state.set(GameState::GameOver);
-                }
-            }
         }
     }
 }
@@ -269,79 +264,14 @@ pub fn tick_despawn(
     }
 }
 
-pub fn tick_ball_fx(
-    time: Res<Time>,
-    mut stats: ResMut<GameStats>,
-    mut trail: ResMut<SpeedTrail>,
-    query: Query<&Transform, With<Player>>,
-) {
+pub fn tick_ball_fx(time: Res<Time>, mut stats: ResMut<GameStats>) {
     let dt = time.delta_secs();
-    stats.perfect_hit_flash = (stats.perfect_hit_flash - dt).max(0.0);
     stats.dodge_fx_timer = (stats.dodge_fx_timer - dt).max(0.0);
-
-    if stats.speed_fx_timer > 0.0 {
-        stats.speed_fx_timer = (stats.speed_fx_timer - dt).max(0.0);
-        trail.active = 0.35;
-    }
-
-    if trail.active > 0.0 {
-        trail.active = (trail.active - dt).max(0.0);
-        if let Some(transform) = query.iter().next() {
-            trail.points.push(transform.translation);
-            if trail.points.len() > 40 {
-                trail.points.remove(0);
-            }
-        }
-    } else if !trail.points.is_empty() {
-        trail.points.clear();
-    }
+    stats.speed_fx_timer = (stats.speed_fx_timer - dt).max(0.0);
 }
 
 pub fn spin_pickups(time: Res<Time>, mut query: Query<(&mut Transform, &Spin)>) {
     for (mut transform, spin) in &mut query {
         transform.rotate_y(spin.radians_per_second * time.delta_secs());
-    }
-}
-
-/// Simplified dodge/perfect-hit feedback in place of the Unity particles.
-pub fn draw_player_fx(
-    stats: Res<GameStats>,
-    player_query: Query<&Transform, With<Player>>,
-    mut gizmos: Gizmos,
-) {
-    let Ok(player) = player_query.single() else {
-        return;
-    };
-    let position = player.translation;
-
-    if stats.dodge_fx_timer > 0.0 {
-        let progress = 1.0 - (stats.dodge_fx_timer / 0.25).clamp(0.0, 1.0);
-        let radius = 1.0 + progress * 1.8;
-        gizmos.circle(
-            Isometry3d::from_translation(position),
-            radius,
-            Color::srgba(1.0, 0.7, 0.15, 1.0 - progress),
-        );
-    }
-
-    if stats.perfect_hit_flash > 0.0 {
-        gizmos.cross(
-            Isometry3d::from_translation(position),
-            1.4,
-            Color::srgba(1.0, 0.95, 0.4, stats.perfect_hit_flash / 0.35),
-        );
-    }
-}
-
-/// Simplified port of Unity's SpeedFX particle trail: draw the recorded path
-/// while the boost-release trail timer is alive.
-pub fn draw_speed_trail(trail: Res<SpeedTrail>, mut gizmos: Gizmos) {
-    if trail.points.len() < 2 || trail.active <= 0.0 {
-        return;
-    }
-    let alpha = (trail.active / 0.35).clamp(0.0, 1.0);
-    let color = Color::srgba(0.25, 0.85, 1.0, alpha * 0.7);
-    for pair in trail.points.windows(2) {
-        gizmos.line(pair[0], pair[1], color);
     }
 }
