@@ -105,27 +105,11 @@ pub struct BallVisual {
 #[derive(Component)]
 pub struct PhaseFx;
 
-#[derive(Component, Clone, Copy, Debug)]
+#[derive(Component, Clone, Copy, Debug, Default)]
 pub struct BallState {
     pub speed: f32,
     pub charging: bool,
     pub grounded: bool,
-    /// Port-only settling window. Unity's collision callbacks receive
-    /// post-solver velocities, so the authored 1.3 m enemy spawn drop does not
-    /// damage the enemy on landing; suppressing wall damage while the balls
-    /// settle reproduces that outcome.
-    pub contact_grace: f32,
-}
-
-impl Default for BallState {
-    fn default() -> Self {
-        Self {
-            speed: 0.0,
-            charging: false,
-            grounded: false,
-            contact_grace: 1.0,
-        }
-    }
 }
 
 #[derive(Component, Clone, Copy, Debug, Default)]

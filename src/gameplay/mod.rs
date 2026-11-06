@@ -106,7 +106,6 @@ impl Plugin for Ball2Plugin {
                     grapple::update_grapple,
                     ball::player_movement,
                     enemy::enemy_ai,
-                    ball::tick_contact_grace,
                     ball::record_pre_physics_velocity,
                     input::consume_fixed_input,
                 )

@@ -77,9 +77,10 @@ ECS world.
 - [x] Restart cleanup and respawn, including the deceptively named `PhaseFX` child
 
 All Unity prefab tuning values live in `src/gameplay/config.rs` as Bevy
-resources, and the pure resolver configs live in `src/core/`. Wall impacts use
-the pre-physics contact momentum, matching the Unity `CombatAdapter`; high-speed
-wall/ceiling hits are dangerous, as in the source project.
+resources, and the pure resolver configs live in `src/core/`. Ball-ball contact
+damage uses the pre-solver contact momentum. Static arena collisions are left to
+the physics material and deal no combat damage, matching the Unity project where
+only opponent hits damaged the balls.
 
 ### Known deviations / reference gaps
 

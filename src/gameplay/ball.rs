@@ -154,16 +154,6 @@ pub fn is_grounded(spatial: &SpatialQuery, entity: Entity, position: Vec3) -> bo
         .is_some()
 }
 
-/// Tick the spawn-contact grace on the fixed clock. Using render-frame delta
-/// here would let a long first frame (shader compilation) consume the entire
-/// window before the authored enemy drop reaches the floor.
-pub fn tick_contact_grace(time: Res<Time<Fixed>>, mut balls: Query<&mut BallState>) {
-    let dt = time.delta_secs();
-    for mut state in &mut balls {
-        state.contact_grace = (state.contact_grace - dt).max(0.0);
-    }
-}
-
 pub fn record_pre_physics_velocity(
     mut query: Query<(&LinearVelocity, &mut PrePhysicsVelocity), With<Ball>>,
 ) {

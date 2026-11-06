@@ -1,8 +1,9 @@
 //! Collision-callback adapter ported from `CombatAdapter.cs`.
 //!
-//! One collision event resolves both participants. Ball-ball uses sphere centres
-//! for the B->A normal; ball-wall uses Avian's contact manifold normal. Damage
-//! and impulses are applied through the pure `CombatResolver`.
+//! Only ball-ball contacts are resolved into combat damage and knockback.
+//! Static arena contacts are left entirely to Avian's physics response: in the
+//! Unity project only opponent hits damaged the balls, and using the pre-step
+//! velocity for walls would make every fast floor/wall landing lethal.
 
 use std::collections::HashSet;
 
@@ -19,18 +20,7 @@ pub fn resolve_ball_collisions(
     collisions: Collisions,
     cfg: Res<CombatSettings>,
     mut stats: ResMut<GameStats>,
-    mut balls: Query<
-        (
-            &Ball,
-            &Transform,
-            &mut Health,
-            Forces,
-            &PrePhysicsVelocity,
-            &Mass,
-            &BallState,
-        ),
-        With<Ball>,
-    >,
+    mut balls: Query<(&Transform, &mut Health, Forces, &PrePhysicsVelocity, &Mass), With<Ball>>,
     pickups: Query<(), With<Pickup>>,
 ) {
     let mut seen: HashSet<(Entity, Entity)> = HashSet::new();
@@ -45,9 +35,16 @@ pub fn resolve_ball_collisions(
             continue;
         }
 
+        // Static arena contacts have only one ball body. Leave them to the
+        // physics material and never apply combat damage: in the Unity project
+        // only opponent collisions damaged the balls.
         let ball1 = balls.contains(body1);
         let ball2 = balls.contains(body2);
-        if !ball1 && !ball2 {
+        if !ball1 || !ball2 {
+            continue;
+        }
+
+        if body1 == body2 {
             continue;
         }
 
@@ -60,106 +57,54 @@ pub fn resolve_ball_collisions(
             continue;
         }
 
-        if ball1 && ball2 {
-            if body1 == body2 {
-                continue;
-            }
-            let Ok([a, b]) = balls.get_many_mut([body1, body2]) else {
-                continue;
-            };
-            let (_, transform_a, mut health_a, mut forces_a, pre_a, mass_a, _) = a;
-            let (_, transform_b, mut health_b, mut forces_b, pre_b, mass_b, _) = b;
+        let Ok([a, b]) = balls.get_many_mut([body1, body2]) else {
+            continue;
+        };
+        let (transform_a, mut health_a, mut forces_a, pre_a, mass_a) = a;
+        let (transform_b, mut health_b, mut forces_b, pre_b, mass_b) = b;
 
-            if health_a.dead || health_b.dead {
-                continue;
-            }
-
-            // Prefer the actual contact normal; fall back to the sphere-centre
-            // direction if the manifold is not available.
-            let normal = collisions
-                .get(collider1, collider2)
-                .and_then(|pair| pair.manifolds.first())
-                .map(|manifold| {
-                    if body1 == collider1 {
-                        -manifold.normal
-                    } else {
-                        manifold.normal
-                    }
-                })
-                .unwrap_or_else(|| {
-                    (transform_a.translation - transform_b.translation).normalize_or_zero()
-                });
-            if normal == Vec3::ZERO {
-                continue;
-            }
-
-            let input = ContactInput::new(pre_a.0 - pre_b.0, normal, mass_a.0, mass_b.0);
-            let outcome = CombatResolver::resolve(&input, &cfg.0);
-
-            if outcome.damage_a > 0.0 {
-                health_a.take_dmg(outcome.damage_a);
-            }
-            if outcome.damage_b > 0.0 {
-                health_b.take_dmg(outcome.damage_b);
-            }
-            if outcome.impulse_a != Vec3::ZERO {
-                forces_a.apply_linear_impulse(outcome.impulse_a);
-            }
-            if outcome.impulse_b != Vec3::ZERO {
-                forces_b.apply_linear_impulse(outcome.impulse_b);
-            }
-            stats.last_damage = stats
-                .last_damage
-                .max(outcome.damage_a.max(outcome.damage_b));
-        } else {
-            // Exactly one ball; the other collider is treated as an immovable wall.
-            let ball_entity = if ball1 { body1 } else { body2 };
-            let ball_is_collider1 = ball_entity == collider1 || ball_entity == body1;
-
-            let Ok((_, _transform, mut health, mut forces, pre, mass, state)) =
-                balls.get_mut(ball_entity)
-            else {
-                continue;
-            };
-            // Unity's authored enemy spawn is 1.3 m above the floor; its
-            // post-solver collision velocity is separating, so the landing
-            // deals no damage. Skip wall damage while the spawn settle is in
-            // progress, then use the pre-step velocity for real impacts.
-            if state.contact_grace > 0.0 {
-                continue;
-            }
-
-            if health.dead {
-                continue;
-            }
-
-            // Contact manifold normal points collider1 -> collider2.
-            let normal = collisions
-                .get(collider1, collider2)
-                .and_then(|pair| pair.manifolds.first())
-                .map(|manifold| {
-                    if ball_is_collider1 {
-                        -manifold.normal
-                    } else {
-                        manifold.normal
-                    }
-                })
-                .unwrap_or_else(|| -pre.0.normalize_or_zero());
-
-            if normal == Vec3::ZERO {
-                continue;
-            }
-
-            let input = ContactInput::new(pre.0, normal, mass.0, f32::INFINITY);
-            let outcome = CombatResolver::resolve(&input, &cfg.0);
-
-            if outcome.damage_a > 0.0 {
-                health.take_dmg(outcome.damage_a);
-            }
-            if outcome.impulse_a != Vec3::ZERO {
-                forces.apply_linear_impulse(outcome.impulse_a);
-            }
-            stats.last_damage = stats.last_damage.max(outcome.damage_a);
+        if health_a.dead || health_b.dead {
+            continue;
         }
+
+        // Prefer the actual contact normal; fall back to the sphere-centre
+        // direction if the manifold is not available.
+        let normal = collisions
+            .get(collider1, collider2)
+            .and_then(|pair| pair.manifolds.first())
+            .map(|manifold| {
+                if body1 == collider1 {
+                    -manifold.normal
+                } else {
+                    manifold.normal
+                }
+            })
+            .unwrap_or_else(|| {
+                (transform_a.translation - transform_b.translation).normalize_or_zero()
+            });
+        if normal == Vec3::ZERO {
+            continue;
+        }
+
+        // Use the velocities recorded at the start of this physics step so the
+        // solver's separating post-impact velocities do not hide the hit.
+        let input = ContactInput::new(pre_a.0 - pre_b.0, normal, mass_a.0, mass_b.0);
+        let outcome = CombatResolver::resolve(&input, &cfg.0);
+
+        if outcome.damage_a > 0.0 {
+            health_a.take_dmg(outcome.damage_a);
+        }
+        if outcome.damage_b > 0.0 {
+            health_b.take_dmg(outcome.damage_b);
+        }
+        if outcome.impulse_a != Vec3::ZERO {
+            forces_a.apply_linear_impulse(outcome.impulse_a);
+        }
+        if outcome.impulse_b != Vec3::ZERO {
+            forces_b.apply_linear_impulse(outcome.impulse_b);
+        }
+        stats.last_damage = stats
+            .last_damage
+            .max(outcome.damage_a.max(outcome.damage_b));
     }
 }
