@@ -7,7 +7,7 @@ use avian3d::prelude::*;
 use bevy::prelude::*;
 
 use super::components::*;
-use super::config::{BallConfig, HealthSettings};
+use super::config::BallConfig;
 use super::grapple::GrappleState;
 use super::input::PlayerInput;
 use super::lockon::PlayerLockOn;
@@ -17,7 +17,6 @@ pub fn player_movement(
     time: Res<Time<Fixed>>,
     input: Res<PlayerInput>,
     cfg: Res<BallConfig>,
-    health_settings: Res<HealthSettings>,
     grapple: Res<GrappleState>,
     mut lockon: ResMut<PlayerLockOn>,
     mut stats: ResMut<GameStats>,
@@ -141,8 +140,6 @@ pub fn player_movement(
     // Keep the damage model's "momentum at contact" independent of the solver.
     state.speed = forces.linear_velocity().length();
     state.charging = movement.charging;
-
-    let _ = health_settings; // currently only used by spawn/death, kept for symmetry
 }
 
 /// Unity's grounded ray: origin 0.55 below centre, length 0.65.
