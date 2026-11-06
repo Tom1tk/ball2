@@ -34,12 +34,20 @@ sudo pacman -S --needed base-devel pkgconf alsa-lib libx11 libxkbcommon wayland 
 
 - [x] `CombatResolver` momentum-differential damage/knockback (pure Rust, 18 tests)
 - [x] `LockOnResolver` acquisition, soft tracking, break and commit-on-charge (pure Rust, 19 tests)
-- [ ] Player controller (reduced gravity, strafe, boost, dodge, caps)
-- [ ] Dual grapple hooks (projectiles, rope constraint, reel, release boost, swing anti-gravity)
-- [ ] Health/damage states and death handling
-- [ ] Lock-on boost assist
-- [ ] Enemy AI (wander / chase / boost attack)
-- [ ] Third-person camera with collision
-- [ ] HUD, pause menu and arena
+- [x] Player controller (reduced gravity, strafe, boost, dodge, speed caps)
+- [x] Dual grapple hooks (projectiles, rope constraint, reel, release boost, swing anti-gravity)
+- [x] Health/damage states, material damage colours, enemy/player death
+- [x] Lock-on boost assist
+- [x] Enemy AI (wander / chase / boost attack)
+- [x] Third-person camera with sphere-cast collision
+- [x] Arena, strawberry pickups, HUD, pause/game-over overlay and restart
 
-The original Unity project is preserved for reference outside this repository.
+The game starts directly in the arena. All Unity prefab tuning values live in
+`src/gameplay/config.rs` as Bevy resources and in the pure resolver configs, so
+feel can be adjusted without touching the systems. Wall impacts use the
+pre-physics contact momentum, which makes high-speed wall/ceiling hits
+dangerous; lower `CombatSettings` or the ball speed caps to soften that.
+
+The AI keeps Unity's detection/chase/wander/boost state machine, but steers
+directly toward its target instead of using a NavMesh. The original Unity
+project is preserved for reference outside this repository.

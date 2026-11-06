@@ -54,7 +54,10 @@ impl Plugin for Ball2Plugin {
             .add_systems(OnExit(GameState::Paused), state::exit_paused)
             .add_systems(OnEnter(GameState::GameOver), state::enter_game_over)
             .add_systems(OnExit(GameState::GameOver), state::exit_game_over)
-            .add_systems(OnEnter(GameState::Restarting), (arena::despawn_world, state::enter_restarting).chain())
+            .add_systems(
+                OnEnter(GameState::Restarting),
+                (arena::despawn_world, state::enter_restarting).chain(),
+            )
             .add_systems(
                 Update,
                 (

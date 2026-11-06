@@ -4,7 +4,6 @@
 use bevy::prelude::*;
 
 use crate::core::combat::CombatConfig;
-use crate::core::lockon::LockOnConfig;
 
 /// Bevy resource wrapper for the engine-independent combat tuning.
 #[derive(Resource, Clone, Copy, Debug, Default)]
@@ -158,19 +157,6 @@ impl Default for GrappleConfig {
             anti_wall_force: 5.0,
             manual_aim_radius: 0.08,
             gravity_magnitude: 40.0,
-        }
-    }
-}
-
-#[derive(Resource, Clone, Debug)]
-pub struct LockOnSettings {
-    pub config: LockOnConfig,
-}
-
-impl Default for LockOnSettings {
-    fn default() -> Self {
-        Self {
-            config: LockOnConfig::default(),
         }
     }
 }

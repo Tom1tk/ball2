@@ -149,8 +149,7 @@ pub fn enemy_ai(
                         bounds.floor_y + 1.0,
                         rng.random_range(-bounds.half_extents.z..bounds.half_extents.z) * 0.8,
                     );
-                    ai.wander_timer =
-                        rng.random_range(cfg.min_wander_time..cfg.max_wander_time);
+                    ai.wander_timer = rng.random_range(cfg.min_wander_time..cfg.max_wander_time);
                 } else {
                     ai.wander_timer -= dt;
                 }

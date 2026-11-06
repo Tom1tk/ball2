@@ -167,24 +167,13 @@ impl CombatResolver {
         let impulse_a = normal * impulse_mag;
         let impulse_b = -normal * impulse_mag;
 
-        ContactOutcome::new(
-            damage_a,
-            damage_b,
-            impulse_a,
-            impulse_b,
-            perfect_hit,
-        )
+        ContactOutcome::new(damage_a, damage_b, impulse_a, impulse_b, perfect_hit)
     }
 }
 
 /// Perfect hit = at least `perfect_hit_min_speed` closing speed, and the approach
 /// direction (`relative_velocity`) within `perfect_hit_max_angle_deg` of `-normal`.
-fn compute_perfect_hit(
-    relative_velocity: Vec3,
-    normal: Vec3,
-    vn: f32,
-    cfg: &CombatConfig,
-) -> bool {
+fn compute_perfect_hit(relative_velocity: Vec3, normal: Vec3, vn: f32, cfg: &CombatConfig) -> bool {
     if vn < cfg.perfect_hit_min_speed {
         return false;
     }
@@ -229,10 +218,7 @@ mod tests {
     }
 
     fn assert_vec3_eq(a: Vec3, b: Vec3, tol: f32, msg: &str) {
-        assert!(
-            (a - b).abs().max_element() <= tol,
-            "{msg}: {a:?} != {b:?}"
-        );
+        assert!((a - b).abs().max_element() <= tol, "{msg}: {a:?} != {b:?}");
     }
 
     #[test]
@@ -325,7 +311,12 @@ mod tests {
         assert!(o.damage_b.is_finite());
         assert!(o.impulse_a.x.is_finite());
         assert!(o.impulse_b.x.is_finite());
-        assert_vec3_eq(normal * 30.0, o.impulse_a, TOL, "Ball reflects along +normal");
+        assert_vec3_eq(
+            normal * 30.0,
+            o.impulse_a,
+            TOL,
+            "Ball reflects along +normal",
+        );
     }
 
     #[test]
@@ -446,7 +437,12 @@ mod tests {
 
         assert_eq!(0.0, o.damage_a);
         assert!((15.0 - o.damage_b).abs() <= TOL);
-        assert_vec3_eq(-normal * 30.0, o.impulse_b, TOL, "B reflects away from wall");
+        assert_vec3_eq(
+            -normal * 30.0,
+            o.impulse_b,
+            TOL,
+            "B reflects away from wall",
+        );
         assert!(o.damage_b.is_finite());
     }
 

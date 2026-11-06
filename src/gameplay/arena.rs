@@ -10,10 +10,7 @@ use super::grapple::{GrappleAssets, GrappleState};
 use super::lockon::PlayerLockOn;
 use super::state::GameState;
 
-pub fn setup_persistent(
-    mut commands: Commands,
-    mut clear_color: ResMut<ClearColor>,
-) {
+pub fn setup_persistent(mut commands: Commands, mut clear_color: ResMut<ClearColor>) {
     clear_color.0 = Color::srgb(0.015, 0.02, 0.045);
 
     commands.insert_resource(GlobalAmbientLight {
@@ -159,7 +156,14 @@ pub fn spawn_world(
         (Vec3::new(38.0, 30.0, 4.0), Vec3::new(10.0, 60.0, 10.0)),
         (Vec3::new(0.0, 1.0, -20.0), Vec3::new(20.0, 2.0, 20.0)),
     ] {
-        spawn_block(&mut commands, &cube, &pillar_mat, pos, size, static_material);
+        spawn_block(
+            &mut commands,
+            &cube,
+            &pillar_mat,
+            pos,
+            size,
+            static_material,
+        );
     }
 
     // Floating platforms/slabs.
@@ -186,7 +190,14 @@ pub fn spawn_world(
         (Vec3::new(-12.0, 46.0, 8.0), Vec3::new(4.0, 4.0, 4.0)),
         (Vec3::new(8.0, 54.0, -8.0), Vec3::new(4.0, 4.0, 4.0)),
     ] {
-        spawn_block(&mut commands, &cube, &accent_mat, pos, size, static_material);
+        spawn_block(
+            &mut commands,
+            &cube,
+            &accent_mat,
+            pos,
+            size,
+            static_material,
+        );
     }
 
     // Player.
@@ -196,43 +207,33 @@ pub fn spawn_world(
         &shell_mesh,
         &core_mesh,
         &charge_mesh,
-        Team::Player,
         Vec3::new(0.0, ball_cfg.radius + 0.05, 0.0),
         health_settings.player_max_health,
         Color::srgb(0.1, 0.75, 1.0),
         ball_cfg.gravity_scale,
         &ball_cfg,
     );
-    commands.entity(player).insert((
-        Player,
-        BallMovement::default(),
-    ));
+    commands
+        .entity(player)
+        .insert((Player, BallMovement::default()));
 
     // Grapple indicator meshes are world entities (they follow the player).
-    let left_indicator = commands
-        .spawn((
-            GameWorld,
-            HookIndicator { is_left: true },
-            Mesh3d(grapple_assets.indicator_mesh.clone()),
-            MeshMaterial3d(grapple_assets.indicator_material.clone()),
-            Transform::from_xyz(-1.5, 3.0, 0.0),
-            Visibility::Visible,
-        ))
-        .id();
-    let right_indicator = commands
-        .spawn((
-            GameWorld,
-            HookIndicator { is_left: false },
-            Mesh3d(grapple_assets.indicator_mesh.clone()),
-            MeshMaterial3d(grapple_assets.indicator_material.clone()),
-            Transform::from_xyz(1.5, 3.0, 0.0),
-            Visibility::Visible,
-        ))
-        .id();
-    grapple.visuals = Some(crate::gameplay::grapple::GrappleVisuals {
-        left_indicator,
-        right_indicator,
-    });
+    commands.spawn((
+        GameWorld,
+        HookIndicator { is_left: true },
+        Mesh3d(grapple_assets.indicator_mesh.clone()),
+        MeshMaterial3d(grapple_assets.indicator_material.clone()),
+        Transform::from_xyz(-1.5, 3.0, 0.0),
+        Visibility::Visible,
+    ));
+    commands.spawn((
+        GameWorld,
+        HookIndicator { is_left: false },
+        Mesh3d(grapple_assets.indicator_mesh.clone()),
+        MeshMaterial3d(grapple_assets.indicator_material.clone()),
+        Transform::from_xyz(1.5, 3.0, 0.0),
+        Visibility::Visible,
+    ));
 
     // Enemies.
     for (x, z) in [(-20.0, 20.0), (20.0, -20.0), (-15.0, -35.0)] {
@@ -243,17 +244,13 @@ pub fn spawn_world(
             &shell_mesh,
             &core_mesh,
             &charge_mesh,
-            Team::Enemy,
             position,
             health_settings.enemy_max_health,
             Color::srgb(1.0, 0.28, 0.12),
             1.0,
             &ball_cfg,
         );
-        commands.entity(enemy).insert((
-            Enemy,
-            EnemyAi::new(),
-        ));
+        commands.entity(enemy).insert((Enemy, EnemyAi::new()));
     }
     stats.enemies_max = 3;
     stats.enemies_alive = 3;
@@ -317,7 +314,6 @@ fn spawn_ball(
     shell_mesh: &Handle<Mesh>,
     core_mesh: &Handle<Mesh>,
     charge_mesh: &Handle<Mesh>,
-    team: Team,
     position: Vec3,
     max_health: i32,
     intact_color: Color,
@@ -348,7 +344,7 @@ fn spawn_ball(
     let entity = commands
         .spawn((
             GameWorld,
-            Ball { team },
+            Ball,
             RigidBody::Dynamic,
             Collider::sphere(ball_cfg.radius),
             Mass(1.0),
@@ -406,7 +402,6 @@ fn spawn_ball(
         core_material,
         charge_fx,
         charge_material,
-        core_radius: ball_cfg.core_radius,
     });
 
     let _ = core;
@@ -462,9 +457,7 @@ pub fn pickup_collisions(
         let Some(pickup) = entities.iter().copied().find(|e| pickups.contains(*e)) else {
             continue;
         };
-        let other_is_player = entities
-            .iter()
-            .any(|e| *e == player_entity && *e != pickup);
+        let other_is_player = entities.iter().any(|e| *e == player_entity && *e != pickup);
         if !other_is_player || consumed.contains(&pickup) {
             continue;
         }

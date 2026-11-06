@@ -16,9 +16,7 @@ fn main() {
             }),
             ..default()
         }))
-        .add_plugins(
-            PhysicsPlugins::default().set(PhysicsInterpolationPlugin::interpolate_all()),
-        )
+        .add_plugins(PhysicsPlugins::default().set(PhysicsInterpolationPlugin::interpolate_all()))
         .insert_resource(Gravity(Vec3::NEG_Y * 40.0))
         .insert_resource(Time::<Fixed>::from_hz(50.0))
         .add_plugins(Ball2Plugin)

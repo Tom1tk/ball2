@@ -74,8 +74,7 @@ pub fn read_player_input(
     input.release_left |= mouse.just_released(MouseButton::Left);
     input.release_right |= mouse.just_released(MouseButton::Right);
 
-    input.reel_held =
-        keys.pressed(KeyCode::ShiftLeft) || keys.pressed(KeyCode::ShiftRight);
+    input.reel_held = keys.pressed(KeyCode::ShiftLeft) || keys.pressed(KeyCode::ShiftRight);
 }
 
 pub fn consume_fixed_input(mut input: ResMut<PlayerInput>) {

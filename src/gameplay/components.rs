@@ -11,16 +11,9 @@ pub struct Player;
 #[derive(Component)]
 pub struct Enemy;
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-pub enum Team {
-    Player,
-    Enemy,
-}
-
-#[derive(Component, Clone, Copy, Debug)]
-pub struct Ball {
-    pub team: Team,
-}
+/// Marker for anything that uses the ball physics/combat/health model.
+#[derive(Component)]
+pub struct Ball;
 
 #[derive(Component, Clone, Debug)]
 pub struct Health {
@@ -77,14 +70,6 @@ impl Health {
             _ => Color::srgb(1.0, 0.08, 0.05),
         }
     }
-
-    pub fn health_fraction(&self) -> f32 {
-        if self.max <= 0 {
-            0.0
-        } else {
-            self.current as f32 / self.max as f32
-        }
-    }
 }
 
 #[derive(Component)]
@@ -93,7 +78,6 @@ pub struct BallVisual {
     pub core_material: Handle<StandardMaterial>,
     pub charge_fx: Entity,
     pub charge_material: Handle<StandardMaterial>,
-    pub core_radius: f32,
 }
 
 #[derive(Component, Clone, Copy, Debug, Default)]
@@ -144,10 +128,7 @@ pub struct DespawnAfter {
 }
 
 #[derive(Component)]
-pub struct HookProjectile {
-    pub owner: Entity,
-    pub is_left: bool,
-}
+pub struct HookProjectile;
 
 #[derive(Component)]
 pub struct HookIndicator {

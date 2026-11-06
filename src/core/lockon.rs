@@ -168,10 +168,7 @@ impl LockOnResolver {
         }
 
         if input.current_lock.has_lock() {
-            if let Some(locked) = find_candidate(
-                &input.candidates,
-                input.current_lock.target_id,
-            ) {
+            if let Some(locked) = find_candidate(&input.candidates, input.current_lock.target_id) {
                 let dist = input.player_position.distance(locked.position);
                 let to_enemy = locked.position - input.player_position;
                 let aim_angle_deg = angle_deg(aim, to_enemy);
@@ -291,13 +288,7 @@ mod tests {
     #[test]
     fn no_candidates_no_lock_boost_normal() {
         let cfg = LockOnConfig::default();
-        let input = LockOnInput::new(
-            Vec3::ZERO,
-            AIM_FORWARD,
-            vec![],
-            LockState::NONE,
-            false,
-        );
+        let input = LockOnInput::new(Vec3::ZERO, AIM_FORWARD, vec![], LockState::NONE, false);
         let result = LockOnResolver::resolve(&input, &cfg);
 
         assert!(!result.new_lock.has_lock());
@@ -313,13 +304,7 @@ mod tests {
             ..Default::default()
         };
         let enemy = LockOnCandidate::new(1, Vec3::new(0.0, 0.0, 30.0), Vec3::ZERO);
-        let input = LockOnInput::new(
-            Vec3::ZERO,
-            AIM_FORWARD,
-            vec![enemy],
-            LockState::NONE,
-            false,
-        );
+        let input = LockOnInput::new(Vec3::ZERO, AIM_FORWARD, vec![enemy], LockState::NONE, false);
         let result = LockOnResolver::resolve(&input, &cfg);
 
         assert!(!result.new_lock.has_lock());
@@ -330,13 +315,7 @@ mod tests {
     fn enemy_off_reticle_no_lock() {
         let cfg = LockOnConfig::default();
         let enemy = LockOnCandidate::new(1, Vec3::new(10.0, 0.0, 0.0), Vec3::ZERO);
-        let input = LockOnInput::new(
-            Vec3::ZERO,
-            AIM_FORWARD,
-            vec![enemy],
-            LockState::NONE,
-            false,
-        );
+        let input = LockOnInput::new(Vec3::ZERO, AIM_FORWARD, vec![enemy], LockState::NONE, false);
         let result = LockOnResolver::resolve(&input, &cfg);
 
         assert!(!result.new_lock.has_lock());
@@ -347,13 +326,7 @@ mod tests {
     fn enemy_on_reticle_in_range_acquires_lock_icon_shows() {
         let cfg = LockOnConfig::default();
         let enemy = LockOnCandidate::new(7, Vec3::new(0.0, 0.0, 10.0), Vec3::ZERO);
-        let input = LockOnInput::new(
-            Vec3::ZERO,
-            AIM_FORWARD,
-            vec![enemy],
-            LockState::NONE,
-            false,
-        );
+        let input = LockOnInput::new(Vec3::ZERO, AIM_FORWARD, vec![enemy], LockState::NONE, false);
         let result = LockOnResolver::resolve(&input, &cfg);
 
         assert!(result.new_lock.has_lock());
@@ -366,13 +339,7 @@ mod tests {
     fn enemy_near_reticle_within_acquisition_angle_acquires() {
         let cfg = LockOnConfig::default();
         let enemy = LockOnCandidate::new(2, Vec3::new(3.0, 0.0, 11.83), Vec3::ZERO);
-        let input = LockOnInput::new(
-            Vec3::ZERO,
-            AIM_FORWARD,
-            vec![enemy],
-            LockState::NONE,
-            false,
-        );
+        let input = LockOnInput::new(Vec3::ZERO, AIM_FORWARD, vec![enemy], LockState::NONE, false);
         let result = LockOnResolver::resolve(&input, &cfg);
 
         assert!(result.new_lock.has_lock());
@@ -385,13 +352,7 @@ mod tests {
         let cfg = LockOnConfig::default();
         let a = LockOnCandidate::new(1, Vec3::new(0.87, 0.0, 10.0), Vec3::ZERO);
         let b = LockOnCandidate::new(2, Vec3::new(0.35, 0.0, 10.0), Vec3::ZERO);
-        let input = LockOnInput::new(
-            Vec3::ZERO,
-            AIM_FORWARD,
-            vec![a, b],
-            LockState::NONE,
-            false,
-        );
+        let input = LockOnInput::new(Vec3::ZERO, AIM_FORWARD, vec![a, b], LockState::NONE, false);
         let result = LockOnResolver::resolve(&input, &cfg);
 
         assert_eq!(2, result.new_lock.target_id);
@@ -406,7 +367,10 @@ mod tests {
             &cfg,
         );
         assert!(acquired.new_lock.has_lock());
-        assert_eq!(Vec3::new(0.0, 0.0, 10.0), acquired.new_lock.tracking_position);
+        assert_eq!(
+            Vec3::new(0.0, 0.0, 10.0),
+            acquired.new_lock.tracking_position
+        );
 
         let moved = LockOnCandidate::new(1, Vec3::new(1.0, 0.0, 10.0), Vec3::ZERO);
         let tracked = LockOnResolver::resolve(
@@ -451,7 +415,10 @@ mod tests {
         );
 
         assert!(tracked.new_lock.has_lock());
-        assert_eq!(Vec3::new(0.0, 0.0, 10.0), tracked.new_lock.tracking_position);
+        assert_eq!(
+            Vec3::new(0.0, 0.0, 10.0),
+            tracked.new_lock.tracking_position
+        );
     }
 
     #[test]
@@ -476,7 +443,10 @@ mod tests {
             &cfg,
         );
 
-        assert_eq!(Vec3::new(5.0, 0.0, 10.0), tracked.new_lock.tracking_position);
+        assert_eq!(
+            Vec3::new(5.0, 0.0, 10.0),
+            tracked.new_lock.tracking_position
+        );
     }
 
     #[test]
@@ -496,13 +466,7 @@ mod tests {
         };
         let far = LockOnCandidate::new(1, Vec3::new(0.0, 0.0, 30.0), Vec3::ZERO);
         let result = LockOnResolver::resolve(
-            &LockOnInput::new(
-                Vec3::ZERO,
-                AIM_FORWARD,
-                vec![far],
-                acquired.new_lock,
-                false,
-            ),
+            &LockOnInput::new(Vec3::ZERO, AIM_FORWARD, vec![far], acquired.new_lock, false),
             &cfg2,
         );
 
@@ -615,13 +579,7 @@ mod tests {
 
         let b = LockOnCandidate::new(2, Vec3::new(0.0, 0.0, 10.0), Vec3::ZERO);
         let result = LockOnResolver::resolve(
-            &LockOnInput::new(
-                Vec3::ZERO,
-                AIM_FORWARD,
-                vec![a, b],
-                acquired.new_lock,
-                true,
-            ),
+            &LockOnInput::new(Vec3::ZERO, AIM_FORWARD, vec![a, b], acquired.new_lock, true),
             &cfg,
         );
 
@@ -689,11 +647,7 @@ mod tests {
     #[test]
     fn determinism_identical_inputs_produce_identical_outputs() {
         let cfg = LockOnConfig::default();
-        let enemy = LockOnCandidate::new(
-            1,
-            Vec3::new(0.5, -0.3, 12.0),
-            Vec3::new(0.1, 0.0, 0.0),
-        );
+        let enemy = LockOnCandidate::new(1, Vec3::new(0.5, -0.3, 12.0), Vec3::new(0.1, 0.0, 0.0));
         let input = LockOnInput::new(
             Vec3::new(1.0, 2.0, 3.0),
             AIM_FORWARD,
@@ -740,13 +694,7 @@ mod tests {
     fn determinism_no_frame_or_time_dependence() {
         let cfg = LockOnConfig::default();
         let enemy = LockOnCandidate::new(42, Vec3::new(0.0, 1.0, 9.0), Vec3::ZERO);
-        let input = LockOnInput::new(
-            Vec3::ZERO,
-            AIM_FORWARD,
-            vec![enemy],
-            LockState::NONE,
-            false,
-        );
+        let input = LockOnInput::new(Vec3::ZERO, AIM_FORWARD, vec![enemy], LockState::NONE, false);
 
         let first = LockOnResolver::resolve(&input, &cfg);
         for i in 0..1000 {
@@ -759,13 +707,7 @@ mod tests {
     fn zero_aim_direction_no_lock() {
         let cfg = LockOnConfig::default();
         let enemy = LockOnCandidate::new(1, Vec3::new(0.0, 0.0, 10.0), Vec3::ZERO);
-        let input = LockOnInput::new(
-            Vec3::ZERO,
-            Vec3::ZERO,
-            vec![enemy],
-            LockState::NONE,
-            false,
-        );
+        let input = LockOnInput::new(Vec3::ZERO, Vec3::ZERO, vec![enemy], LockState::NONE, false);
         let result = LockOnResolver::resolve(&input, &cfg);
 
         assert!(!result.new_lock.has_lock());
@@ -775,13 +717,7 @@ mod tests {
     fn enemy_on_top_of_player_not_acquired() {
         let cfg = LockOnConfig::default();
         let enemy = LockOnCandidate::new(1, Vec3::ZERO, Vec3::ZERO);
-        let input = LockOnInput::new(
-            Vec3::ZERO,
-            AIM_FORWARD,
-            vec![enemy],
-            LockState::NONE,
-            false,
-        );
+        let input = LockOnInput::new(Vec3::ZERO, AIM_FORWARD, vec![enemy], LockState::NONE, false);
         let result = LockOnResolver::resolve(&input, &cfg);
 
         assert!(!result.new_lock.has_lock());

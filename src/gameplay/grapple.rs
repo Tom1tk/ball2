@@ -57,12 +57,6 @@ impl Default for Hook {
     }
 }
 
-#[derive(Clone, Copy, Debug)]
-pub struct GrappleVisuals {
-    pub left_indicator: Entity,
-    pub right_indicator: Entity,
-}
-
 #[derive(Resource)]
 pub struct GrappleState {
     pub config: GrappleConfig,
@@ -70,7 +64,6 @@ pub struct GrappleState {
     pub right: Hook,
     pub is_reeling: bool,
     pub reel_velocity: f32,
-    pub visuals: Option<GrappleVisuals>,
 }
 
 impl Default for GrappleState {
@@ -81,7 +74,6 @@ impl Default for GrappleState {
             right: Hook::default(),
             is_reeling: false,
             reel_velocity: 0.0,
-            visuals: None,
         }
     }
 }
@@ -128,7 +120,6 @@ pub fn setup_grapple_assets(
 }
 
 pub fn update_grapple_aiming(
-    time: Res<Time>,
     state: Res<State<GameState>>,
     mut grapple: ResMut<GrappleState>,
     player_query: Query<(Entity, &Transform), With<Player>>,
@@ -190,9 +181,6 @@ pub fn update_grapple_aiming(
         camera_forward,
         ideal_dir,
     );
-
-    // The Update loop in Unity advances nothing; aiming is purely recomputed.
-    let _ = time;
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -228,8 +216,7 @@ fn update_aim_for_side(
                 let point = ray.origin + *ray.direction * hit.distance;
                 if let Ok(hit_viewport) = camera.world_to_viewport(camera_transform, point) {
                     let size = window.size().max(Vec2::ONE);
-                    let screen_distance =
-                        (hit_viewport / size).distance(cursor_pos / size);
+                    let screen_distance = (hit_viewport / size).distance(cursor_pos / size);
                     if screen_distance < cfg.manual_aim_radius {
                         hook.aim_dir = (point - indicator_pos).normalize_or_zero();
                         hook.cursor_world = Some(point);
@@ -298,13 +285,8 @@ fn find_auto_aim_target(
             let Ok(ray) = camera.viewport_to_world(camera_transform, viewport) else {
                 continue;
             };
-            let Some(hit) = spatial.cast_ray(
-                ray.origin,
-                ray.direction,
-                max_range,
-                true,
-                filter,
-            ) else {
+            let Some(hit) = spatial.cast_ray(ray.origin, ray.direction, max_range, true, filter)
+            else {
                 continue;
             };
             let hit_point = ray.origin + *ray.direction * hit.distance;
@@ -337,18 +319,23 @@ pub fn update_grapple(
     assets: Res<GrappleAssets>,
     mut commands: Commands,
     mut grapple: ResMut<GrappleState>,
-    mut player_query: Query<
-        (Entity, &Transform, Forces, &mut BallState),
-        With<Player>,
-    >,
+    mut player_query: Query<(Entity, &Transform, Forces, &mut BallState), With<Player>>,
     camera_query: Query<&GlobalTransform, With<Camera>>,
     mut projectiles: Query<
         &mut Transform,
-        (With<HookProjectile>, Without<Player>, Without<HookIndicator>),
+        (
+            With<HookProjectile>,
+            Without<Player>,
+            Without<HookIndicator>,
+        ),
     >,
     mut indicators: Query<
         (&HookIndicator, &mut Transform),
-        (With<HookIndicator>, Without<Player>, Without<HookProjectile>),
+        (
+            With<HookIndicator>,
+            Without<Player>,
+            Without<HookProjectile>,
+        ),
     >,
     spatial: SpatialQuery,
 ) {
@@ -393,11 +380,8 @@ pub fn update_grapple(
     // callbacks; these flags are the fixed-step snapshot of those events.
     let left_released_hooked = handle_fire_release(
         &mut grapple.left,
-        true,
         input.fire_left,
         input.release_left,
-        &cfg,
-        player_entity,
         left_indicator_pos,
         camera_forward,
         &assets,
@@ -405,11 +389,8 @@ pub fn update_grapple(
     );
     let right_released_hooked = handle_fire_release(
         &mut grapple.right,
-        false,
         input.fire_right,
         input.release_right,
-        &cfg,
-        player_entity,
         right_indicator_pos,
         camera_forward,
         &assets,
@@ -424,7 +405,6 @@ pub fn update_grapple(
         &mut grapple.left,
         &cfg,
         dt,
-        player_pos,
         left_indicator_pos,
         &spatial,
         &filter,
@@ -435,7 +415,6 @@ pub fn update_grapple(
         &mut grapple.right,
         &cfg,
         dt,
-        player_pos,
         right_indicator_pos,
         &spatial,
         &filter,
@@ -469,8 +448,7 @@ pub fn update_grapple(
     let left_hooked = grapple.left.state == HookState::Hooked;
     let right_hooked = grapple.right.state == HookState::Hooked;
     if !grapple.is_reeling || (!left_hooked && !right_hooked) {
-        grapple.reel_velocity =
-            (grapple.reel_velocity - cfg.reel_acceleration * 2.0 * dt).max(0.0);
+        grapple.reel_velocity = (grapple.reel_velocity - cfg.reel_acceleration * 2.0 * dt).max(0.0);
     } else {
         grapple.reel_velocity =
             (grapple.reel_velocity + cfg.reel_acceleration * dt).min(cfg.max_reel_speed);
@@ -517,9 +495,7 @@ pub fn update_grapple(
 
     // Swing anti-gravity.
     if grapple.any_hooked() {
-        forces.apply_linear_acceleration(
-            Vec3::Y * cfg.gravity_magnitude * cfg.swing_anti_gravity,
-        );
+        forces.apply_linear_acceleration(Vec3::Y * cfg.gravity_magnitude * cfg.swing_anti_gravity);
     }
 
     ball_state.speed = forces.linear_velocity().length();
@@ -528,11 +504,8 @@ pub fn update_grapple(
 #[allow(clippy::too_many_arguments)]
 fn handle_fire_release(
     hook: &mut Hook,
-    is_left: bool,
     fire: bool,
     release: bool,
-    cfg: &GrappleConfig,
-    owner: Entity,
     indicator_pos: Vec3,
     camera_forward: Vec3,
     assets: &GrappleAssets,
@@ -552,10 +525,7 @@ fn handle_fire_release(
         let entity = commands
             .spawn((
                 GameWorld,
-                HookProjectile {
-                    owner,
-                    is_left,
-                },
+                HookProjectile,
                 Mesh3d(assets.projectile_mesh.clone()),
                 MeshMaterial3d(assets.projectile_material.clone()),
                 Transform::from_translation(indicator_pos),
@@ -570,7 +540,6 @@ fn handle_fire_release(
         hook.state = HookState::Returning;
     }
 
-    let _ = cfg;
     released_hooked
 }
 
@@ -579,13 +548,16 @@ fn advance_hook(
     hook: &mut Hook,
     cfg: &GrappleConfig,
     dt: f32,
-    player_pos: Vec3,
     indicator_pos: Vec3,
     spatial: &SpatialQuery,
     filter: &SpatialQueryFilter,
     projectiles: &mut Query<
         &mut Transform,
-        (With<HookProjectile>, Without<Player>, Without<HookIndicator>),
+        (
+            With<HookProjectile>,
+            Without<Player>,
+            Without<HookIndicator>,
+        ),
     >,
     commands: &mut Commands,
 ) {
@@ -656,8 +628,6 @@ fn advance_hook(
             transform.translation += to_target.normalize_or_zero() * return_step;
         }
     }
-
-    let _ = player_pos;
 }
 
 /// Draw rope lines and debug aim markers with Bevy gizmos.
@@ -682,7 +652,10 @@ pub fn draw_grapple_gizmos(
     let left_indicator = player_pos - camera_right * cfg.indicator_offset;
     let right_indicator = player_pos + camera_right * cfg.indicator_offset;
 
-    for (hook, start) in [(&grapple.left, left_indicator), (&grapple.right, right_indicator)] {
+    for (hook, start) in [
+        (&grapple.left, left_indicator),
+        (&grapple.right, right_indicator),
+    ] {
         let end = if hook.state == HookState::Hooked {
             Some(hook.hook_point)
         } else if let Some(projectile) = hook.projectile {

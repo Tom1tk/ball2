@@ -45,14 +45,12 @@ pub struct OverlayText;
 
 pub fn setup_ui(mut commands: Commands) {
     commands
-        .spawn((
-            Node {
-                position_type: PositionType::Absolute,
-                width: Val::Percent(100.0),
-                height: Val::Percent(100.0),
-                ..default()
-            },
-        ))
+        .spawn((Node {
+            position_type: PositionType::Absolute,
+            width: Val::Percent(100.0),
+            height: Val::Percent(100.0),
+            ..default()
+        },))
         .with_children(|root| {
             root.spawn((
                 Node {

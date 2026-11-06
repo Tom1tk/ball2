@@ -47,7 +47,11 @@ pub fn handle_state_input(
     }
 }
 
-fn cursor_set(cursor: &mut Query<&mut CursorOptions, With<Window>>, visible: bool, grab: CursorGrabMode) {
+fn cursor_set(
+    cursor: &mut Query<&mut CursorOptions, With<Window>>,
+    visible: bool,
+    grab: CursorGrabMode,
+) {
     for mut options in cursor.iter_mut() {
         options.visible = visible;
         options.grab_mode = grab;

@@ -105,8 +105,7 @@ pub fn resolve_ball_collisions(
             let ball_entity = if ball1 { body1 } else { body2 };
             let ball_is_collider1 = ball_entity == collider1 || ball_entity == body1;
 
-            let Ok((_, _transform, mut health, mut forces, pre, mass)) =
-                balls.get_mut(ball_entity)
+            let Ok((_, _transform, mut health, mut forces, pre, mass)) = balls.get_mut(ball_entity)
             else {
                 continue;
             };

@@ -18,7 +18,10 @@ pub fn camera_follow(
     mouse: Res<AccumulatedMouseMotion>,
     cfg: Res<CameraConfig>,
     mut camera_query: Query<(&mut Transform, &mut CameraFollow), (With<Camera>, Without<Player>)>,
-    player_query: Query<(Entity, &Transform, Option<&LinearVelocity>), (With<Player>, Without<Camera>)>,
+    player_query: Query<
+        (Entity, &Transform, Option<&LinearVelocity>),
+        (With<Player>, Without<Camera>),
+    >,
     spatial: SpatialQuery,
 ) {
     if *state.get() != GameState::Playing {
@@ -79,7 +82,9 @@ pub fn camera_follow(
     if let Some(velocity) = player_velocity {
         if velocity.0.length_squared() > 0.01 {
             let cam_to_target = (player_tf.translation - camera_tf.translation).normalize_or_zero();
-            let dot = cam_to_target.dot(velocity.0.normalize_or_zero()).clamp(0.0, 1.0);
+            let dot = cam_to_target
+                .dot(velocity.0.normalize_or_zero())
+                .clamp(0.0, 1.0);
             speed = cfg.reactive_speed.lerp(cfg.lazy_speed, dot);
         }
     }

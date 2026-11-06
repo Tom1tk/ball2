@@ -7,9 +7,9 @@ use avian3d::prelude::*;
 use bevy::prelude::*;
 
 use super::components::*;
-use super::input::PlayerInput;
 use super::config::{BallConfig, HealthSettings};
 use super::grapple::GrappleState;
+use super::input::PlayerInput;
 use super::lockon::PlayerLockOn;
 use super::state::GameState;
 
@@ -164,6 +164,7 @@ pub fn record_pre_physics_velocity(
 
 pub fn update_ball_visuals(
     time: Res<Time>,
+    cfg: Res<BallConfig>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut visuals: Query<(&mut Health, &BallState, &BallVisual)>,
     mut fx_query: Query<(&mut Transform, &mut Visibility), With<ChargeFx>>,
@@ -188,7 +189,7 @@ pub fn update_ball_visuals(
             Color::srgb(0.04, 0.035, 0.05)
         } else if state.charging {
             Color::srgb(1.0, 0.18, 0.85)
-        } else if state.speed > 1.0 {
+        } else if state.speed > cfg.moving_speed_threshold {
             Color::srgb(0.1, 0.95, 1.0)
         } else {
             Color::srgb(0.75, 0.95, 1.0)
@@ -224,10 +225,7 @@ pub fn process_deaths(
     mut stats: ResMut<GameStats>,
     mut next_state: ResMut<NextState<GameState>>,
     state: Res<State<GameState>>,
-    mut query: Query<
-        (Entity, &mut Health, Option<&Player>, Option<&Enemy>),
-        With<Ball>,
-    >,
+    mut query: Query<(Entity, &mut Health, Option<&Player>, Option<&Enemy>), With<Ball>>,
 ) {
     for (entity, mut health, is_player, is_enemy) in &mut query {
         if !health.dead || health.death_processed {
@@ -302,10 +300,7 @@ pub fn tick_ball_fx(
     }
 }
 
-pub fn spin_pickups(
-    time: Res<Time>,
-    mut query: Query<(&mut Transform, &Spin)>,
-) {
+pub fn spin_pickups(time: Res<Time>, mut query: Query<(&mut Transform, &Spin)>) {
     for (mut transform, spin) in &mut query {
         transform.rotate_y(spin.radians_per_second * time.delta_secs());
     }
