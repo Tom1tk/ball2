@@ -5,7 +5,7 @@ edition = "2024"
 description = "Ball2 - The Baller, ported from Unity to Bevy"
 
 [dependencies]
-bevy = "0.20"
+bevy = { version = "0.20", features = ["debug"] }
 avian3d = "0.8"
 rand = "0.9"
 
