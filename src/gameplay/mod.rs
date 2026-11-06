@@ -73,6 +73,8 @@ impl Plugin for Ball2Plugin {
                     ball::tick_despawn,
                     ball::tick_ball_fx,
                     ball::spin_pickups,
+                    ball::draw_player_fx,
+                    ball::draw_speed_trail,
                     ui::update_hud,
                     grapple::draw_grapple_gizmos,
                 )

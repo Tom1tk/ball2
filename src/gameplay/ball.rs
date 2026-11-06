@@ -302,3 +302,46 @@ pub fn spin_pickups(time: Res<Time>, mut query: Query<(&mut Transform, &Spin)>) 
         transform.rotate_y(spin.radians_per_second * time.delta_secs());
     }
 }
+
+/// Simplified dodge/perfect-hit feedback in place of the Unity particles.
+pub fn draw_player_fx(
+    stats: Res<GameStats>,
+    player_query: Query<&Transform, With<Player>>,
+    mut gizmos: Gizmos,
+) {
+    let Ok(player) = player_query.single() else {
+        return;
+    };
+    let position = player.translation;
+
+    if stats.dodge_fx_timer > 0.0 {
+        let progress = 1.0 - (stats.dodge_fx_timer / 0.25).clamp(0.0, 1.0);
+        let radius = 1.0 + progress * 1.8;
+        gizmos.circle(
+            Isometry3d::from_translation(position),
+            radius,
+            Color::srgba(1.0, 0.7, 0.15, 1.0 - progress),
+        );
+    }
+
+    if stats.perfect_hit_flash > 0.0 {
+        gizmos.cross(
+            Isometry3d::from_translation(position),
+            1.4,
+            Color::srgba(1.0, 0.95, 0.4, stats.perfect_hit_flash / 0.35),
+        );
+    }
+}
+
+/// Simplified port of Unity's SpeedFX particle trail: draw the recorded path
+/// while the boost-release trail timer is alive.
+pub fn draw_speed_trail(trail: Res<SpeedTrail>, mut gizmos: Gizmos) {
+    if trail.points.len() < 2 || trail.active <= 0.0 {
+        return;
+    }
+    let alpha = (trail.active / 0.35).clamp(0.0, 1.0);
+    let color = Color::srgba(0.25, 0.85, 1.0, alpha * 0.7);
+    for pair in trail.points.windows(2) {
+        gizmos.line(pair[0], pair[1], color);
+    }
+}

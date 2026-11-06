@@ -206,6 +206,7 @@ fn update_aim_for_side(
 ) {
     if hook.state != HookState::Ready {
         hook.cursor_world = None;
+        hook.auto_target = None;
         return;
     }
 
