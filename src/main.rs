@@ -1,9 +1,6 @@
-mod core;
-mod gameplay;
-
 use avian3d::prelude::*;
+use ball2::gameplay::Ball2Plugin;
 use bevy::prelude::*;
-use gameplay::Ball2Plugin;
 
 fn main() {
     App::new()

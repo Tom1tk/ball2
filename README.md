@@ -42,12 +42,15 @@ sudo pacman -S --needed base-devel pkgconf alsa-lib libx11 libxkbcommon wayland 
 - [x] Third-person camera with sphere-cast collision
 - [x] Arena, strawberry pickups, HUD, pause/game-over overlay and restart
 
-The game starts directly in the arena. All Unity prefab tuning values live in
-`src/gameplay/config.rs` as Bevy resources and in the pure resolver configs, so
-feel can be adjusted without touching the systems. Wall impacts use the
-pre-physics contact momentum, which makes high-speed wall/ceiling hits
-dangerous; lower `CombatSettings` or the ball speed caps to soften that.
+The game starts directly in the arena (there is no menu scene). All Unity
+prefab tuning values live in `src/gameplay/config.rs` as Bevy resources and in
+the pure resolver configs, so feel can be adjusted without touching the
+systems. Wall impacts use the pre-physics contact momentum, which makes
+high-speed wall/ceiling hits dangerous; lower `CombatSettings` or the ball
+speed caps to soften that.
 
 The AI keeps Unity's detection/chase/wander/boost state machine, but steers
-directly toward its target instead of using a NavMesh. The original Unity
-project is preserved for reference outside this repository.
+directly toward its target instead of using a NavMesh. Particle effects are
+simplified to emissive materials and gizmo trails/rings; the mechanics and
+tuning that drive them are unchanged. The original Unity project is preserved
+for reference outside this repository.
