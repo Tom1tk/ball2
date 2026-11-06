@@ -44,7 +44,10 @@ pub fn camera_follow(
     // target), but express the rotation in Bevy's mirrored basis.
     let sensitivity = cfg.sensitivity.to_radians();
     follow.yaw += mouse.delta.x * sensitivity;
-    follow.pitch -= mouse.delta.y * sensitivity;
+    // Unity's mouse Y is positive upward, while Bevy/winit reports positive
+    // downward. Adding the Bevy delta keeps Unity's `pitch -= mouseY` feel:
+    // moving the mouse up looks up instead of down.
+    follow.pitch += mouse.delta.y * sensitivity;
     follow.pitch = follow
         .pitch
         .clamp(cfg.min_pitch.to_radians(), cfg.max_pitch.to_radians());
