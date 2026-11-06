@@ -6,11 +6,10 @@
 
 use avian3d::prelude::*;
 use bevy::prelude::*;
-use bevy_hanabi::ParticleEffect;
 
 use super::components::*;
 use super::config::{BallConfig, HealthSettings};
-use super::effects::FxAssets;
+use super::effects::GhostBall;
 use super::enemy::{ArenaBounds, EnemyAi};
 use super::grapple::{GrappleAssets, GrappleState};
 use super::lockon::PlayerLockOn;
@@ -346,7 +345,6 @@ pub fn spawn_world(
     ball_cfg: Res<BallConfig>,
     health_settings: Res<HealthSettings>,
     grapple_assets: Res<GrappleAssets>,
-    fx: Res<FxAssets>,
 ) {
     if world.0 {
         return;
@@ -432,20 +430,18 @@ pub fn spawn_world(
     commands
         .entity(player)
         .insert((Player, BallMovement::default()));
-    commands.spawn((
-        ChildOf(player),
-        PhaseFx,
-        ParticleEffect::new(fx.phase.clone()),
-        Transform::IDENTITY,
-    ));
 
-    // Grapple indicator meshes are world entities (they follow the player).
+    // Unity's LeftIndicator/RightIndicator are children of PlayerBall at
+    // local x = +/-0.75 (root scale 2 -> 1.5 m). They stay at either side of
+    // the ball rather than inheriting its roll; `update_indicator_transforms`
+    // follows the interpolated ball each render frame so the cubes do not
+    // snap at the fixed physics rate.
     commands.spawn((
         GameWorld,
         HookIndicator { is_left: true },
         Mesh3d(grapple_assets.indicator_mesh.clone()),
         MeshMaterial3d(grapple_assets.indicator_material.clone()),
-        Transform::from_xyz(-1.5, 3.0, 0.0),
+        Transform::from_xyz(-1.5, 0.0, 0.0),
         Visibility::Visible,
     ));
     commands.spawn((
@@ -453,7 +449,7 @@ pub fn spawn_world(
         HookIndicator { is_left: false },
         Mesh3d(grapple_assets.indicator_mesh.clone()),
         MeshMaterial3d(grapple_assets.indicator_material.clone()),
-        Transform::from_xyz(1.5, 3.0, 0.0),
+        Transform::from_xyz(1.5, 0.0, 0.0),
         Visibility::Visible,
     ));
 
@@ -587,6 +583,8 @@ fn spawn_ball(
 pub fn despawn_world(
     mut commands: Commands,
     query: Query<Entity, With<GameWorld>>,
+    ghosts: Query<&GhostBall>,
+    mut ghost_materials: ResMut<Assets<StandardMaterial>>,
     mut camera: Query<(&mut Transform, &mut CameraFollow), With<Camera>>,
     mut world: ResMut<WorldSpawned>,
     mut stats: ResMut<GameStats>,
@@ -595,6 +593,9 @@ pub fn despawn_world(
     mut next: ResMut<NextState<GameState>>,
     mut fx: ResMut<super::effects::FxState>,
 ) {
+    for ghost in &ghosts {
+        ghost_materials.remove(&ghost.material);
+    }
     for entity in &query {
         commands.entity(entity).despawn();
     }
@@ -617,6 +618,7 @@ pub fn despawn_world(
     if let Some(effect) = fx.speed_entity.take() {
         commands.entity(effect).despawn();
     }
+    *fx = super::effects::FxState::default();
     world.0 = false;
     *stats = GameStats::default();
     *grapple = GrappleState::default();

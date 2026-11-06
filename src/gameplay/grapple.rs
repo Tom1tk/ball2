@@ -349,6 +349,40 @@ fn find_auto_aim_target(
     best_target
 }
 
+/// Keep the two grapple-base cubes on either side of the player ball.
+///
+/// They are separate world entities rather than children of the rolling ball,
+/// so they stay camera-left/right like Unity's indicators while following the
+/// interpolated ball transform every render frame. This avoids the 50 Hz snap
+/// the fixed-step world-space version had.
+pub fn update_indicator_transforms(
+    grapple: Res<GrappleState>,
+    player_query: Query<&Transform, With<Player>>,
+    camera_query: Query<&GlobalTransform, (With<Camera>, Without<Player>)>,
+    mut indicators: Query<
+        (&HookIndicator, &mut Transform),
+        (Without<Player>, Without<Camera>, Without<HookProjectile>),
+    >,
+) {
+    let Ok(player_transform) = player_query.single() else {
+        return;
+    };
+    let Ok(camera_transform) = camera_query.single() else {
+        return;
+    };
+    let camera_right = camera_transform.right().as_vec3().normalize_or_zero();
+    let camera_forward = camera_transform.forward().as_vec3().normalize_or_zero();
+    let player_pos = player_transform.translation;
+    let offset = grapple.config.indicator_offset;
+
+    for (indicator, mut transform) in &mut indicators {
+        let side = if indicator.is_left { -1.0 } else { 1.0 };
+        let position = player_pos + camera_right * (offset * side);
+        transform.translation = position;
+        transform.look_at(position + camera_forward, Vec3::Y);
+    }
+}
+
 pub fn update_grapple(
     time: Res<Time<Fixed>>,
     input: Res<PlayerInput>,
@@ -364,14 +398,6 @@ pub fn update_grapple(
             With<HookProjectile>,
             Without<Player>,
             Without<HookIndicator>,
-        ),
-    >,
-    mut indicators: Query<
-        (&HookIndicator, &mut Transform),
-        (
-            With<HookIndicator>,
-            Without<Player>,
-            Without<HookProjectile>,
         ),
     >,
     spatial: SpatialQuery,
@@ -400,19 +426,10 @@ pub fn update_grapple(
     let filter = SpatialQueryFilter::default().with_excluded_entities([player_entity]);
 
     let cfg = grapple.config.clone();
+    // Keep the rope sources on the same camera-left/right bases as the
+    // indicator cubes; the visual cubes are updated in `Update` for smoothness.
     let left_indicator_pos = player_pos - camera_right * cfg.indicator_offset;
     let right_indicator_pos = player_pos + camera_right * cfg.indicator_offset;
-
-    // Keep the two world-space indicator meshes at the source positions.
-    for (indicator, mut transform) in &mut indicators {
-        let pos = if indicator.is_left {
-            left_indicator_pos
-        } else {
-            right_indicator_pos
-        };
-        transform.translation = pos;
-        transform.look_at(pos + camera_forward, Vec3::Y);
-    }
 
     grapple.is_reeling = input.reel_held;
 

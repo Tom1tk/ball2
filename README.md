@@ -59,7 +59,8 @@ ECS world.
 - [x] Player controller: reduced gravity, camera-relative steering, boost charge,
       dodge, speed caps and core-colour speed response
 - [x] Dual grapple hooks: projectiles, view-facing rope ribbons, rope constraint,
-      reel, release boost and swing anti-gravity
+      reel, release boost and swing anti-gravity, with smooth camera-relative
+      base cubes that follow the interpolated ball
 - [x] Health/damage states, Unity's shell damage textures, broken shell, enemy
       and player death behaviour
 - [x] Lock-on boost assist and the world-space green lock indicator
@@ -72,9 +73,9 @@ ECS world.
       crosshair/cursor sprites and lock icon
 - [x] HUD and pause menu: crosshair, hook cursors, boost/dodge sliders, Controls
       and Debug text, 1920x1080 pause layout and resume/restart/quit buttons
-- [x] Hanabi particle ports of `ChargeFX`, `SpeedFX` and `PhaseFX` (the particle
-      system Unity actually assigns to `BallMovement.DodgeFX`)
-- [x] Restart cleanup and respawn, including the deceptively named `PhaseFX` child
+- [x] Hanabi ports of `ChargeFX` and `SpeedFX`, plus mesh-clone dodge and boost
+      afterimages (`PhaseFX`, which Unity assigns to `BallMovement.DodgeFX`)
+- [x] Restart cleanup and respawn, including camera-mounted `SpeedFX` and clones
 
 All Unity prefab tuning values live in `src/gameplay/config.rs` as Bevy
 resources, and the pure resolver configs live in `src/core/`. Ball-ball contact

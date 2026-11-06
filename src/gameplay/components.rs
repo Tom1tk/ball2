@@ -100,11 +100,6 @@ pub struct BallVisual {
     pub charge_fx: Option<Entity>,
 }
 
-/// Marks the `PhaseFX` child of PlayerBall (Unity assigns it to
-/// `BallMovement.DodgeFX`, despite the name).
-#[derive(Component)]
-pub struct PhaseFx;
-
 #[derive(Component, Clone, Copy, Debug, Default)]
 pub struct BallState {
     pub speed: f32,

@@ -76,6 +76,7 @@ impl Plugin for Ball2Plugin {
                     state::handle_state_input,
                     input::read_player_input,
                     camera::camera_follow,
+                    grapple::update_indicator_transforms,
                     grapple::update_grapple_aiming,
                     grapple::update_rope_visuals,
                     lockon::update_lockon,
@@ -85,7 +86,7 @@ impl Plugin for Ball2Plugin {
                     ball::tick_despawn,
                     ball::tick_ball_fx,
                     effects::update_charge_fx,
-                    effects::update_dodge_fx,
+                    effects::update_ghost_balls,
                     effects::update_speed_fx,
                     ball::spin_pickups,
                     ui::update_hud,
@@ -97,8 +98,11 @@ impl Plugin for Ball2Plugin {
                 FixedPostUpdate,
                 // Resolve contacts in the same physics step as the collision
                 // event. Running this in Update batches several fixed steps
-                // and reads a stale pre-physics velocity.
-                combat::resolve_ball_collisions.after(PhysicsSystems::Writeback),
+                // and reads a stale pre-physics velocity. Ghost clones are
+                // emitted here too, after the ball transform is written back.
+                (combat::resolve_ball_collisions, effects::emit_ghost_clones)
+                    .chain()
+                    .after(PhysicsSystems::Writeback),
             )
             .add_systems(
                 FixedUpdate,
