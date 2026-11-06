@@ -69,11 +69,25 @@ pub fn resolve_ball_collisions(
             let (_, transform_a, mut health_a, mut forces_a, pre_a, mass_a) = a;
             let (_, transform_b, mut health_b, mut forces_b, pre_b, mass_b) = b;
 
-            if health_a.dead && health_b.dead {
+            if health_a.dead || health_b.dead {
                 continue;
             }
 
-            let normal = (transform_a.translation - transform_b.translation).normalize_or_zero();
+            // Prefer the actual contact normal; fall back to the sphere-centre
+            // direction if the manifold is not available.
+            let normal = collisions
+                .get(collider1, collider2)
+                .and_then(|pair| pair.manifolds.first())
+                .map(|manifold| {
+                    if body1 == collider1 {
+                        -manifold.normal
+                    } else {
+                        manifold.normal
+                    }
+                })
+                .unwrap_or_else(|| {
+                    (transform_a.translation - transform_b.translation).normalize_or_zero()
+                });
             if normal == Vec3::ZERO {
                 continue;
             }

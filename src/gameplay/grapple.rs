@@ -94,9 +94,14 @@ pub struct GrappleAssets {
 
 pub fn setup_grapple_assets(
     mut commands: Commands,
+    existing: Option<Res<GrappleAssets>>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
+    if existing.is_some() {
+        return;
+    }
+
     let projectile_mesh = meshes.add(Sphere::new(0.12).mesh().ico(2).unwrap());
     let projectile_material = materials.add(StandardMaterial {
         base_color: Color::srgb(1.0, 0.9, 0.2),
