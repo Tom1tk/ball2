@@ -4,10 +4,18 @@ version = "0.1.0"
 edition = "2024"
 description = "Ball2 - The Baller, ported from Unity to Bevy"
 
+[features]
+default = []
+# Optional in-game editor: hierarchy, component/resource inspector, gizmos.
+editor = ["dep:bevy-inspector-egui", "dep:bevy_egui"]
+
 [dependencies]
 bevy = "0.20"
 avian3d = "0.8"
 rand = "0.9"
+bevy_hanabi = "0.20"
+bevy-inspector-egui = { version = "0.38", optional = true }
+bevy_egui = { version = "0.43", optional = true }
 
 [profile.dev]
 opt-level = 1

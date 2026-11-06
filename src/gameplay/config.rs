@@ -6,10 +6,12 @@ use bevy::prelude::*;
 use crate::core::combat::CombatConfig;
 
 /// Bevy resource wrapper for the engine-independent combat tuning.
-#[derive(Resource, Clone, Copy, Debug, Default)]
+#[derive(Resource, Clone, Copy, Debug, Default, Reflect)]
+#[reflect(Resource)]
 pub struct CombatSettings(pub CombatConfig);
 
-#[derive(Resource, Clone, Debug)]
+#[derive(Resource, Clone, Debug, Reflect)]
+#[reflect(Resource)]
 pub struct BallConfig {
     /// Physics radius. The Unity prefab root is scaled 2x with a 0.5 collider radius.
     pub radius: f32,
@@ -54,7 +56,8 @@ impl Default for BallConfig {
     }
 }
 
-#[derive(Resource, Clone, Debug)]
+#[derive(Resource, Clone, Debug, Reflect)]
+#[reflect(Resource)]
 pub struct EnemyConfig {
     pub max_velocity: f32,
     pub input_force: f32,
@@ -87,7 +90,8 @@ impl Default for EnemyConfig {
     }
 }
 
-#[derive(Resource, Clone, Debug)]
+#[derive(Resource, Clone, Debug, Reflect)]
+#[reflect(Resource)]
 pub struct CameraConfig {
     pub distance: f32,
     /// Degrees per mouse pixel (Unity sensitivity = 0.1).
@@ -119,7 +123,8 @@ impl Default for CameraConfig {
     }
 }
 
-#[derive(Resource, Clone, Debug)]
+#[derive(Resource, Clone, Debug, Reflect)]
+#[reflect(Resource)]
 pub struct GrappleConfig {
     pub max_range: f32,
     pub projectile_speed: f32,
@@ -161,7 +166,8 @@ impl Default for GrappleConfig {
     }
 }
 
-#[derive(Resource, Clone, Debug)]
+#[derive(Resource, Clone, Debug, Reflect)]
+#[reflect(Resource)]
 pub struct HealthSettings {
     pub player_max_health: i32,
     pub enemy_max_health: i32,

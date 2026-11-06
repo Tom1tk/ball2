@@ -9,6 +9,7 @@
 //! - A wall is `mass_b = f32::INFINITY` (the symmetric `mass_a = f32::INFINITY` is also handled).
 
 use bevy::math::Vec3;
+use bevy::prelude::Reflect;
 
 /// Inputs describing a single contact, in ball A's frame relative to ball B.
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -71,7 +72,7 @@ impl ContactOutcome {
 
 /// All combat tuning. Defaults are the values serialized on the Unity prefabs
 /// (Q12 placeholders — tune freely, do not bake magic numbers into the resolver).
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Reflect)]
 pub struct CombatConfig {
     /// Relative normal closing speed below this deals no damage and no impulse.
     pub damage_threshold_speed: f32,

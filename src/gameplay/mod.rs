@@ -27,6 +27,12 @@ pub struct Ball2Plugin;
 impl Plugin for Ball2Plugin {
     fn build(&self, app: &mut App) {
         app.init_state::<GameState>()
+            .register_type::<BallConfig>()
+            .register_type::<EnemyConfig>()
+            .register_type::<CameraConfig>()
+            .register_type::<GrappleConfig>()
+            .register_type::<HealthSettings>()
+            .register_type::<CombatSettings>()
             .init_resource::<BallConfig>()
             .init_resource::<EnemyConfig>()
             .init_resource::<CameraConfig>()

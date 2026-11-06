@@ -8,6 +8,20 @@ Physics hamster-ball aerial combat, ported from the Unity project to **Bevy 0.20
 cargo run --release
 ```
 
+### In-game editor
+
+A development inspector is available behind an optional feature:
+
+```bash
+cargo run --release --features editor
+```
+
+Press `F1` to toggle the world inspector. It shows the live entity hierarchy,
+all reflected components and resources (including the gameplay tuning
+resources) and lets you edit them at runtime. The cursor is released while the
+inspector is open and recaptured when it closes. This is an inspector, not a
+full Unity-style scene editor; it is meant for debugging and feel-tuning.
+
 The first build takes a while. On Linux you need the usual Bevy system packages (X11/Wayland, Vulkan, ALSA, udev). On CachyOS/Arch:
 
 ```bash
