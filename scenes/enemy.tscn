@@ -1,0 +1,91 @@
+[gd_scene load_steps=13 format=3]
+
+[ext_resource type="Script" path="res://scripts/Gameplay/EnemyAI.cs" id="1_ai"]
+[ext_resource type="Script" path="res://scripts/Gameplay/Health.cs" id="2_health"]
+[ext_resource type="Script" path="res://scripts/Gameplay/CombatAdapter.cs" id="3_combat"]
+[ext_resource type="Texture2D" path="res://assets/textures/BallTex3.png" id="4_balltex"]
+[ext_resource type="Texture2D" path="res://assets/sprites/hamster.svg" id="5_hamster"]
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_ball"]
+friction = 0.7
+bounce = 0.45
+
+[sub_resource type="SphereShape3D" id="SphereShape_ball"]
+radius = 1.0
+
+[sub_resource type="SphereMesh" id="SphereMesh_ball"]
+radius = 1.0
+height = 2.0
+radial_segments = 32
+rings = 16
+
+[sub_resource type="StandardMaterial3D" id="Material_ball"]
+albedo_texture = ExtResource("4_balltex")
+albedo_color = Color(1, 0.55, 0.4, 0.55)
+metallic = 0.1
+roughness = 0.35
+transparency = 1
+
+[sub_resource type="SphereMesh" id="SphereMesh_particle"]
+radius = 0.05
+height = 0.1
+radial_segments = 8
+rings = 4
+
+[sub_resource type="StandardMaterial3D" id="Material_charge"]
+shading_mode = 0
+albedo_color = Color(1, 0.35, 0.2, 1)
+vertex_color_use_as_albedo = true
+
+[node name="EnemyBall" type="RigidBody3D"]
+collision_layer = 4
+collision_mask = 3
+mass = 1.0
+physics_material_override = SubResource("PhysicsMaterial_ball")
+gravity_scale = 1.0
+linear_damp = 0.0
+angular_damp = 4.0
+can_sleep = false
+continuous_cd = true
+contact_monitor = true
+max_contacts_reported = 8
+script = ExtResource("1_ai")
+
+[node name="Sphere" type="MeshInstance3D" parent="."]
+mesh = SubResource("SphereMesh_ball")
+material_override = SubResource("Material_ball")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("SphereShape_ball")
+
+[node name="HamsterSprite" type="Sprite3D" parent="."]
+pixel_size = 0.0026
+billboard = 1
+render_priority = 1
+modulate = Color(1, 0.82, 0.7, 1)
+texture = ExtResource("5_hamster")
+
+[node name="Health" type="Node" parent="."]
+script = ExtResource("2_health")
+MaxHealth = 3
+
+[node name="CombatAdapter" type="Node" parent="."]
+script = ExtResource("3_combat")
+
+[node name="ChargeFX" type="CPUParticles3D" parent="."]
+emitting = false
+amount = 24
+lifetime = 0.55
+local_coords = false
+mesh = SubResource("SphereMesh_particle")
+material_override = SubResource("Material_charge")
+emission_shape = 1
+emission_sphere_radius = 0.7
+direction = Vector3(0, 1, 0)
+spread = 45.0
+gravity = Vector3(0, -2, 0)
+initial_velocity_min = 1.0
+initial_velocity_max = 2.6
+scale_amount_min = 0.5
+scale_amount_max = 1.5
+color = Color(1, 0.35, 0.2, 1)

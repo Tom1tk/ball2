@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_hook"]
+radius = 0.07
+height = 0.55
+radial_segments = 12
+rings = 4
+
+[sub_resource type="StandardMaterial3D" id="Material_hook"]
+shading_mode = 0
+albedo_color = Color(1, 0.84, 0.25, 1)
+
+[node name="HookProjectile" type="Node3D"]
+
+[node name="Mesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.7071068, -0.7071068, 0, 0.7071068, 0.7071068, 0, 0, 0)
+mesh = SubResource("CapsuleMesh_hook")
+material_override = SubResource("Material_hook")

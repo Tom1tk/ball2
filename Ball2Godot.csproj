@@ -1,0 +1,21 @@
+<Project Sdk="Godot.NET.Sdk/4.7.2">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+    <RootNamespace>Ball2</RootNamespace>
+    <Nullable>disable</Nullable>
+    <LangVersion>12</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- The pure core is a separate assembly; tests are compiled by dotnet test only. -->
+    <Compile Remove="Ball2.Core/**/*.cs" />
+    <Compile Remove="tests/**/*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="Ball2.Core/Ball2.Core.csproj" />
+  </ItemGroup>
+
+</Project>

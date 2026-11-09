@@ -1,0 +1,175 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/UI/MainMenuScript.cs" id="1_menu"]
+
+[sub_resource type="StyleBoxFlat" id="HowToPanel"]
+bg_color = Color(0.045, 0.06, 0.11, 0.98)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.4, 0.65, 0.95, 0.55)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[node name="Menu" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_menu")
+
+[node name="Background" type="ColorRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.035, 0.05, 0.1, 1)
+
+[node name="GlowTop" type="ColorRect" parent="."]
+anchor_right = 1.0
+offset_bottom = 6.0
+grow_horizontal = 2
+color = Color(0.25, 0.72, 1, 0.65)
+
+[node name="GlowBottom" type="ColorRect" parent="."]
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -6.0
+grow_horizontal = 2
+grow_vertical = 0
+color = Color(1, 0.55, 0.3, 0.65)
+
+[node name="MenuBox" type="VBoxContainer" parent="."]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -320.0
+offset_top = -250.0
+offset_right = 320.0
+offset_bottom = 300.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 14
+alignment = 1
+
+[node name="Title" type="Label" parent="MenuBox"]
+theme_override_colors/font_color = Color(0.95, 0.98, 1, 1)
+theme_override_font_sizes/font_size = 104
+text = "BALL2"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="MenuBox"]
+theme_override_colors/font_color = Color(0.3, 0.78, 1, 1)
+theme_override_font_sizes/font_size = 28
+text = "THE BALLER"
+horizontal_alignment = 1
+
+[node name="Tagline" type="Label" parent="MenuBox"]
+theme_override_colors/font_color = Color(0.72, 0.8, 0.95, 0.8)
+theme_override_font_sizes/font_size = 18
+text = "Physics hamster-ball aerial combat"
+horizontal_alignment = 1
+
+[node name="Spacer" type="Control" parent="MenuBox"]
+custom_minimum_size = Vector2(0, 26)
+
+[node name="PlayButton" type="Button" parent="MenuBox"]
+custom_minimum_size = Vector2(0, 58)
+theme_override_font_sizes/font_size = 26
+text = "PLAY"
+
+[node name="HowToButton" type="Button" parent="MenuBox"]
+custom_minimum_size = Vector2(0, 58)
+theme_override_font_sizes/font_size = 26
+text = "HOW TO PLAY"
+
+[node name="QuitButton" type="Button" parent="MenuBox"]
+custom_minimum_size = Vector2(0, 58)
+theme_override_font_sizes/font_size = 26
+text = "QUIT"
+
+[node name="Footer" type="Label" parent="MenuBox"]
+theme_override_colors/font_color = Color(0.6, 0.68, 0.85, 0.6)
+theme_override_font_sizes/font_size = 14
+text = "Godot 4.7 .NET port of the Unity project"
+horizontal_alignment = 1
+
+[node name="HowToPlay" type="Control" parent="."]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Dim" type="ColorRect" parent="HowToPlay"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.7)
+
+[node name="Panel" type="Panel" parent="HowToPlay"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -380.0
+offset_top = -280.0
+offset_right = 380.0
+offset_bottom = 280.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("HowToPanel")
+
+[node name="Title" type="Label" parent="HowToPlay/Panel"]
+anchor_right = 1.0
+offset_top = 26.0
+offset_bottom = 74.0
+theme_override_colors/font_color = Color(0.85, 0.94, 1, 1)
+theme_override_font_sizes/font_size = 34
+text = "HOW TO PLAY"
+horizontal_alignment = 1
+
+[node name="Body" type="Label" parent="HowToPlay/Panel"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 48.0
+offset_top = 92.0
+offset_right = -48.0
+offset_bottom = -110.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.82, 0.88, 0.98, 0.95)
+theme_override_font_sizes/font_size = 19
+text = "You are a hamster in a physics ball. Momentum is your weapon.
+
+WASD       roll / steer
+SPACE      hold to charge boost, release to launch
+Q / E      dodge left / right
+LMB / RMB  fire left / right grapple hook
+SHIFT      reel in while hooked
+ESC        pause
+
+Build speed with boosts and grapple swings, then slam into enemies. Hard, head-on hits deal the most damage. Beware walls: hit them too fast and your own ball cracks.
+
+Lock-on: charge a boost while the reticle is near an enemy to soft-home into them. The lock commits once you start charging."
+autowrap_mode = 3
+
+[node name="CloseButton" type="Button" parent="HowToPlay/Panel"]
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -120.0
+offset_top = -82.0
+offset_right = 120.0
+offset_bottom = -28.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_font_sizes/font_size = 22
+text = "Close"
