@@ -1,0 +1,724 @@
+[gd_scene load_steps=88 format=3]
+
+; Source of truth: Assets/Scenes/Test2.unity (Unity 6000.4.10f1).
+; 41 box colliders, 500 x 500 m floor, tall tower course.
+; Unity left-handed transforms converted to Godot right-handed space.
+
+[ext_resource type="Texture2D" path="res://assets/textures/prototype_512x512_pink.png" id="1_pink"]
+[ext_resource type="Texture2D" path="res://assets/textures/prototype_512x512_blue1.png" id="2_blue"]
+
+[sub_resource type="StandardMaterial3D" id="Material_pink"]
+albedo_texture = ExtResource("1_pink")
+uv1_triplanar = true
+uv1_scale = Vector3(0.15, 0.15, 0.15)
+roughness = 0.6
+
+[sub_resource type="StandardMaterial3D" id="Material_blue"]
+albedo_texture = ExtResource("2_blue")
+uv1_triplanar = true
+uv1_scale = Vector3(0.15, 0.15, 0.15)
+roughness = 0.6
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_arena"]
+friction = 0.6
+bounce = 0.0
+
+[sub_resource type="BoxMesh" id="Mesh_00"]
+size = Vector3(10, 60, 20)
+material = SubResource("Material_pink")
+
+[sub_resource type="BoxShape3D" id="Shape_00"]
+size = Vector3(10, 60, 20)
+
+[sub_resource type="BoxMesh" id="Mesh_01"]
+size = Vector3(5, 0.5, 30)
+material = SubResource("Material_pink")
+
+[sub_resource type="BoxShape3D" id="Shape_01"]
+size = Vector3(5, 0.5, 30)
+
+[sub_resource type="BoxMesh" id="Mesh_02"]
+size = Vector3(5, 0.5, 20)
+material = SubResource("Material_pink")
+
+[sub_resource type="BoxShape3D" id="Shape_02"]
+size = Vector3(5, 0.5, 20)
+
+[sub_resource type="BoxMesh" id="Mesh_03"]
+size = Vector3(5, 0.5, 30)
+material = SubResource("Material_pink")
+
+[sub_resource type="BoxShape3D" id="Shape_03"]
+size = Vector3(5, 0.5, 30)
+
+[sub_resource type="BoxMesh" id="Mesh_04"]
+size = Vector3(5, 0.5, 20)
+material = SubResource("Material_pink")
+
+[sub_resource type="BoxShape3D" id="Shape_04"]
+size = Vector3(5, 0.5, 20)
+
+[sub_resource type="BoxMesh" id="Mesh_05"]
+size = Vector3(1, 20, 500)
+material = SubResource("Material_pink")
+
+[sub_resource type="BoxShape3D" id="Shape_05"]
+size = Vector3(1, 20, 500)
+
+[sub_resource type="BoxMesh" id="Mesh_06"]
+size = Vector3(1, 20, 500)
+material = SubResource("Material_pink")
+
+[sub_resource type="BoxShape3D" id="Shape_06"]
+size = Vector3(1, 20, 500)
+
+[sub_resource type="BoxMesh" id="Mesh_07"]
+size = Vector3(10, 10, 10)
+material = SubResource("Material_pink")
+
+[sub_resource type="BoxShape3D" id="Shape_07"]
+size = Vector3(10, 10, 10)
+
+[sub_resource type="BoxMesh" id="Mesh_08"]
+size = Vector3(5, 0.5, 30)
+material = SubResource("Material_pink")
+
+[sub_resource type="BoxShape3D" id="Shape_08"]
+size = Vector3(5, 0.5, 30)
+
+[sub_resource type="BoxMesh" id="Mesh_09"]
+size = Vector3(10, 10, 20)
+material = SubResource("Material_pink")
+
+[sub_resource type="BoxShape3D" id="Shape_09"]
+size = Vector3(10, 10, 20)
+
+[sub_resource type="BoxMesh" id="Mesh_10"]
+size = Vector3(5, 2, 10)
+material = SubResource("Material_pink")
+
+[sub_resource type="BoxShape3D" id="Shape_10"]
+size = Vector3(5, 2, 10)
+
+[sub_resource type="BoxMesh" id="Mesh_11"]
+size = Vector3(10, 60, 20)
+material = SubResource("Material_pink")
+
+[sub_resource type="BoxShape3D" id="Shape_11"]
+size = Vector3(10, 60, 20)
+
+[sub_resource type="BoxMesh" id="Mesh_12"]
+size = Vector3(5, 0.5, 20)
+material = SubResource("Material_pink")
+
+[sub_resource type="BoxShape3D" id="Shape_12"]
+size = Vector3(5, 0.5, 20)
+
+[sub_resource type="BoxMesh" id="Mesh_13"]
+size = Vector3(10, 70, 20)
+material = SubResource("Material_pink")
+
+[sub_resource type="BoxShape3D" id="Shape_13"]
+size = Vector3(10, 70, 20)
+
+[sub_resource type="BoxMesh" id="Mesh_14"]
+size = Vector3(10, 40, 20)
+material = SubResource("Material_pink")
+
+[sub_resource type="BoxShape3D" id="Shape_14"]
+size = Vector3(10, 40, 20)
+
+[sub_resource type="BoxMesh" id="Mesh_15"]
+size = Vector3(10, 70, 20)
+material = SubResource("Material_pink")
+
+[sub_resource type="BoxShape3D" id="Shape_15"]
+size = Vector3(10, 70, 20)
+
+[sub_resource type="BoxMesh" id="Mesh_16"]
+size = Vector3(10, 10, 10)
+material = SubResource("Material_pink")
+
+[sub_resource type="BoxShape3D" id="Shape_16"]
+size = Vector3(10, 10, 10)
+
+[sub_resource type="BoxMesh" id="Mesh_17"]
+size = Vector3(10, 70, 20)
+material = SubResource("Material_pink")
+
+[sub_resource type="BoxShape3D" id="Shape_17"]
+size = Vector3(10, 70, 20)
+
+[sub_resource type="BoxMesh" id="Mesh_18"]
+size = Vector3(5, 0.5, 20)
+material = SubResource("Material_pink")
+
+[sub_resource type="BoxShape3D" id="Shape_18"]
+size = Vector3(5, 0.5, 20)
+
+[sub_resource type="BoxMesh" id="Mesh_19"]
+size = Vector3(10, 70, 20)
+material = SubResource("Material_pink")
+
+[sub_resource type="BoxShape3D" id="Shape_19"]
+size = Vector3(10, 70, 20)
+
+[sub_resource type="BoxMesh" id="Mesh_20"]
+size = Vector3(5, 0.5, 15)
+material = SubResource("Material_pink")
+
+[sub_resource type="BoxShape3D" id="Shape_20"]
+size = Vector3(5, 0.5, 15)
+
+[sub_resource type="BoxMesh" id="Mesh_21"]
+size = Vector3(10, 10, 10)
+material = SubResource("Material_pink")
+
+[sub_resource type="BoxShape3D" id="Shape_21"]
+size = Vector3(10, 10, 10)
+
+[sub_resource type="BoxMesh" id="Mesh_22"]
+size = Vector3(5, 0.5, 20)
+material = SubResource("Material_pink")
+
+[sub_resource type="BoxShape3D" id="Shape_22"]
+size = Vector3(5, 0.5, 20)
+
+[sub_resource type="BoxMesh" id="Mesh_23"]
+size = Vector3(10, 70, 20)
+material = SubResource("Material_pink")
+
+[sub_resource type="BoxShape3D" id="Shape_23"]
+size = Vector3(10, 70, 20)
+
+[sub_resource type="BoxMesh" id="Mesh_24"]
+size = Vector3(10, 10, 10)
+material = SubResource("Material_pink")
+
+[sub_resource type="BoxShape3D" id="Shape_24"]
+size = Vector3(10, 10, 10)
+
+[sub_resource type="BoxMesh" id="Mesh_25"]
+size = Vector3(5, 0.5, 20)
+material = SubResource("Material_pink")
+
+[sub_resource type="BoxShape3D" id="Shape_25"]
+size = Vector3(5, 0.5, 20)
+
+[sub_resource type="BoxMesh" id="Mesh_26"]
+size = Vector3(5, 0.5, 10)
+material = SubResource("Material_pink")
+
+[sub_resource type="BoxShape3D" id="Shape_26"]
+size = Vector3(5, 0.5, 10)
+
+[sub_resource type="BoxMesh" id="Mesh_27"]
+size = Vector3(5, 2, 10)
+material = SubResource("Material_pink")
+
+[sub_resource type="BoxShape3D" id="Shape_27"]
+size = Vector3(5, 2, 10)
+
+[sub_resource type="BoxMesh" id="Mesh_28"]
+size = Vector3(5, 0.5, 20)
+material = SubResource("Material_pink")
+
+[sub_resource type="BoxShape3D" id="Shape_28"]
+size = Vector3(5, 0.5, 20)
+
+[sub_resource type="BoxMesh" id="Mesh_29"]
+size = Vector3(5, 0.5, 15)
+material = SubResource("Material_pink")
+
+[sub_resource type="BoxShape3D" id="Shape_29"]
+size = Vector3(5, 0.5, 15)
+
+[sub_resource type="BoxMesh" id="Mesh_30"]
+size = Vector3(1, 20, 500)
+material = SubResource("Material_pink")
+
+[sub_resource type="BoxShape3D" id="Shape_30"]
+size = Vector3(1, 20, 500)
+
+[sub_resource type="BoxMesh" id="Mesh_31"]
+size = Vector3(500, 10, 500)
+material = SubResource("Material_blue")
+
+[sub_resource type="BoxShape3D" id="Shape_31"]
+size = Vector3(500, 10, 500)
+
+[sub_resource type="BoxMesh" id="Mesh_32"]
+size = Vector3(10, 70, 20)
+material = SubResource("Material_pink")
+
+[sub_resource type="BoxShape3D" id="Shape_32"]
+size = Vector3(10, 70, 20)
+
+[sub_resource type="BoxMesh" id="Mesh_33"]
+size = Vector3(1, 20, 500)
+material = SubResource("Material_pink")
+
+[sub_resource type="BoxShape3D" id="Shape_33"]
+size = Vector3(1, 20, 500)
+
+[sub_resource type="BoxMesh" id="Mesh_34"]
+size = Vector3(10, 100, 20)
+material = SubResource("Material_pink")
+
+[sub_resource type="BoxShape3D" id="Shape_34"]
+size = Vector3(10, 100, 20)
+
+[sub_resource type="BoxMesh" id="Mesh_35"]
+size = Vector3(5, 0.5, 10)
+material = SubResource("Material_pink")
+
+[sub_resource type="BoxShape3D" id="Shape_35"]
+size = Vector3(5, 0.5, 10)
+
+[sub_resource type="BoxMesh" id="Mesh_36"]
+size = Vector3(5, 0.5, 20)
+material = SubResource("Material_pink")
+
+[sub_resource type="BoxShape3D" id="Shape_36"]
+size = Vector3(5, 0.5, 20)
+
+[sub_resource type="BoxMesh" id="Mesh_37"]
+size = Vector3(10, 70, 20)
+material = SubResource("Material_pink")
+
+[sub_resource type="BoxShape3D" id="Shape_37"]
+size = Vector3(10, 70, 20)
+
+[sub_resource type="BoxMesh" id="Mesh_38"]
+size = Vector3(10, 70, 20)
+material = SubResource("Material_pink")
+
+[sub_resource type="BoxShape3D" id="Shape_38"]
+size = Vector3(10, 70, 20)
+
+[sub_resource type="BoxMesh" id="Mesh_39"]
+size = Vector3(5, 0.5, 30)
+material = SubResource("Material_pink")
+
+[sub_resource type="BoxShape3D" id="Shape_39"]
+size = Vector3(5, 0.5, 30)
+
+[sub_resource type="BoxMesh" id="Mesh_40"]
+size = Vector3(10, 70, 20)
+material = SubResource("Material_pink")
+
+[sub_resource type="BoxShape3D" id="Shape_40"]
+size = Vector3(10, 70, 20)
+
+[node name="ArenaTest2" type="Node3D"]
+
+[node name="Obstacle (12)" type="StaticBody3D" parent="."]
+transform = Transform3D(0.1712831, -0, 0.9852219, 0, 1, 0, -0.9852219, 0, 0.1712831, -35.55, 28.4, 36.36981)
+physics_material_override = SubResource("PhysicsMaterial_arena")
+
+[node name="Mesh" type="MeshInstance3D" parent="Obstacle (12)"]
+mesh = SubResource("Mesh_00")
+
+[node name="Collision" type="CollisionShape3D" parent="Obstacle (12)"]
+shape = SubResource("Shape_00")
+
+[node name="Obstacle (19)" type="StaticBody3D" parent="."]
+transform = Transform3D(-2.220446e-16, 0, -1, 0, 1, 0, 1, -0, -2.220446e-16, -2.420001, 104.51, -44.8)
+physics_material_override = SubResource("PhysicsMaterial_arena")
+
+[node name="Mesh" type="MeshInstance3D" parent="Obstacle (19)"]
+mesh = SubResource("Mesh_01")
+
+[node name="Collision" type="CollisionShape3D" parent="Obstacle (19)"]
+shape = SubResource("Shape_01")
+
+[node name="Obstacle (17)" type="StaticBody3D" parent="."]
+transform = Transform3D(-2.220446e-16, -0.3420201, 0.9396926, -2.775558e-17, 0.9396926, 0.3420201, -1, 2.775558e-17, -2.220446e-16, -26.7, 101.1, -8.7)
+physics_material_override = SubResource("PhysicsMaterial_arena")
+
+[node name="Mesh" type="MeshInstance3D" parent="Obstacle (17)"]
+mesh = SubResource("Mesh_02")
+
+[node name="Collision" type="CollisionShape3D" parent="Obstacle (17)"]
+shape = SubResource("Shape_02")
+
+[node name="Obstacle (22)" type="StaticBody3D" parent="."]
+transform = Transform3D(-2.220446e-16, 0, -1, 0, 1, 0, 1, -0, -2.220446e-16, -2.4, 104.51, 43.6)
+physics_material_override = SubResource("PhysicsMaterial_arena")
+
+[node name="Mesh" type="MeshInstance3D" parent="Obstacle (22)"]
+mesh = SubResource("Mesh_03")
+
+[node name="Collision" type="CollisionShape3D" parent="Obstacle (22)"]
+shape = SubResource("Shape_03")
+
+[node name="Obstacle (6)" type="StaticBody3D" parent="."]
+transform = Transform3D(-2.220446e-16, 0.3420201, -0.9396926, 2.775558e-17, 0.9396926, 0.3420201, 1, 2.775558e-17, -2.220446e-16, 21.92, 101.1, 7.05)
+physics_material_override = SubResource("PhysicsMaterial_arena")
+
+[node name="Mesh" type="MeshInstance3D" parent="Obstacle (6)"]
+mesh = SubResource("Mesh_04")
+
+[node name="Collision" type="CollisionShape3D" parent="Obstacle (6)"]
+shape = SubResource("Shape_04")
+
+[node name="Wall (1)" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, -0, 0, 1, 0, 0, -0, 1, -250, 1, -0)
+physics_material_override = SubResource("PhysicsMaterial_arena")
+
+[node name="Mesh" type="MeshInstance3D" parent="Wall (1)"]
+mesh = SubResource("Mesh_05")
+
+[node name="Collision" type="CollisionShape3D" parent="Wall (1)"]
+shape = SubResource("Shape_05")
+
+[node name="Wall (3)" type="StaticBody3D" parent="."]
+transform = Transform3D(-2.220446e-16, 0, -1, 0, 1, 0, 1, -0, -2.220446e-16, 0, 1, 250)
+physics_material_override = SubResource("PhysicsMaterial_arena")
+
+[node name="Mesh" type="MeshInstance3D" parent="Wall (3)"]
+mesh = SubResource("Mesh_06")
+
+[node name="Collision" type="CollisionShape3D" parent="Wall (3)"]
+shape = SubResource("Shape_06")
+
+[node name="Obstacle (27)" type="StaticBody3D" parent="."]
+transform = Transform3D(-2.220446e-16, 0, -1, 0, 1, 0, 1, -0, -2.220446e-16, -64.8, 95.5, 68.5)
+physics_material_override = SubResource("PhysicsMaterial_arena")
+
+[node name="Mesh" type="MeshInstance3D" parent="Obstacle (27)"]
+mesh = SubResource("Mesh_07")
+
+[node name="Collision" type="CollisionShape3D" parent="Obstacle (27)"]
+shape = SubResource("Shape_07")
+
+[node name="Obstacle (16)" type="StaticBody3D" parent="."]
+transform = Transform3D(-2.220446e-16, 0, -1, 0, 1, 0, 1, -0, -2.220446e-16, -2.420001, 104.51, -8.7)
+physics_material_override = SubResource("PhysicsMaterial_arena")
+
+[node name="Mesh" type="MeshInstance3D" parent="Obstacle (16)"]
+mesh = SubResource("Mesh_08")
+
+[node name="Collision" type="CollisionShape3D" parent="Obstacle (16)"]
+shape = SubResource("Shape_08")
+
+[node name="Obstacle" type="StaticBody3D" parent="."]
+transform = Transform3D(-2.220446e-16, 0, -1, 0, 1, 0, 1, -0, -2.220446e-16, 0, 4.9, -33.4)
+physics_material_override = SubResource("PhysicsMaterial_arena")
+
+[node name="Mesh" type="MeshInstance3D" parent="Obstacle"]
+mesh = SubResource("Mesh_09")
+
+[node name="Collision" type="CollisionShape3D" parent="Obstacle"]
+shape = SubResource("Shape_09")
+
+[node name="Obstacle (1)" type="StaticBody3D" parent="."]
+transform = Transform3D(0, -0.3106764, -0.9505158, 0, 0.9505158, -0.3106764, 1, 0, 0, -13.8, 2.2, -33.4)
+physics_material_override = SubResource("PhysicsMaterial_arena")
+
+[node name="Mesh" type="MeshInstance3D" parent="Obstacle (1)"]
+mesh = SubResource("Mesh_10")
+
+[node name="Collision" type="CollisionShape3D" parent="Obstacle (1)"]
+shape = SubResource("Shape_10")
+
+[node name="Obstacle (2)" type="StaticBody3D" parent="."]
+transform = Transform3D(-0.6384359, 0, -0.769675, 0, 1, 0, 0.769675, -0, -0.6384359, 28.64, 28.4, -22.66)
+physics_material_override = SubResource("PhysicsMaterial_arena")
+
+[node name="Mesh" type="MeshInstance3D" parent="Obstacle (2)"]
+mesh = SubResource("Mesh_11")
+
+[node name="Collision" type="CollisionShape3D" parent="Obstacle (2)"]
+shape = SubResource("Shape_11")
+
+[node name="Obstacle (8)" type="StaticBody3D" parent="."]
+transform = Transform3D(-2.220446e-16, -0.3420201, 0.9396926, -2.775558e-17, 0.9396926, 0.3420201, -1, 2.775558e-17, -2.220446e-16, -26.68, 101.1, 7.05)
+physics_material_override = SubResource("PhysicsMaterial_arena")
+
+[node name="Mesh" type="MeshInstance3D" parent="Obstacle (8)"]
+mesh = SubResource("Mesh_12")
+
+[node name="Collision" type="CollisionShape3D" parent="Obstacle (8)"]
+shape = SubResource("Shape_12")
+
+[node name="Obstacle (33)" type="StaticBody3D" parent="."]
+transform = Transform3D(-2.220446e-16, 0, -1, 0, 1, 0, 1, -0, -2.220446e-16, -144.4, 33.4, 101.3)
+physics_material_override = SubResource("PhysicsMaterial_arena")
+
+[node name="Mesh" type="MeshInstance3D" parent="Obstacle (33)"]
+mesh = SubResource("Mesh_13")
+
+[node name="Collision" type="CollisionShape3D" parent="Obstacle (33)"]
+shape = SubResource("Shape_13")
+
+[node name="Obstacle (10)" type="StaticBody3D" parent="."]
+transform = Transform3D(-0.03226792, -0, 0.9994793, 0, 1, 0, -0.9994793, 0, -0.03226792, -4.73, 20, 40.92)
+physics_material_override = SubResource("PhysicsMaterial_arena")
+
+[node name="Mesh" type="MeshInstance3D" parent="Obstacle (10)"]
+mesh = SubResource("Mesh_14")
+
+[node name="Collision" type="CollisionShape3D" parent="Obstacle (10)"]
+shape = SubResource("Shape_14")
+
+[node name="Obstacle (32)" type="StaticBody3D" parent="."]
+transform = Transform3D(-2.220446e-16, 0, -1, 0, 1, 0, 1, -0, -2.220446e-16, -103.8, 33.4, -106.1)
+physics_material_override = SubResource("PhysicsMaterial_arena")
+
+[node name="Mesh" type="MeshInstance3D" parent="Obstacle (32)"]
+mesh = SubResource("Mesh_15")
+
+[node name="Collision" type="CollisionShape3D" parent="Obstacle (32)"]
+shape = SubResource("Shape_15")
+
+[node name="Obstacle (26)" type="StaticBody3D" parent="."]
+transform = Transform3D(-2.220446e-16, 0, -1, 0, 1, 0, 1, -0, -2.220446e-16, 31.4, 95.5, -85.5)
+physics_material_override = SubResource("PhysicsMaterial_arena")
+
+[node name="Mesh" type="MeshInstance3D" parent="Obstacle (26)"]
+mesh = SubResource("Mesh_16")
+
+[node name="Collision" type="CollisionShape3D" parent="Obstacle (26)"]
+shape = SubResource("Shape_16")
+
+[node name="Obstacle (9)" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, -0, 0, 1, 0, 0, -0, 1, -40.9, 33.4, 14.55)
+physics_material_override = SubResource("PhysicsMaterial_arena")
+
+[node name="Mesh" type="MeshInstance3D" parent="Obstacle (9)"]
+mesh = SubResource("Mesh_17")
+
+[node name="Collision" type="CollisionShape3D" parent="Obstacle (9)"]
+shape = SubResource("Shape_17")
+
+[node name="Obstacle (20)" type="StaticBody3D" parent="."]
+transform = Transform3D(-2.220446e-16, -0.3420201, 0.9396926, -2.775558e-17, 0.9396926, 0.3420201, -1, 2.775558e-17, -2.220446e-16, -26.7, 101.1, -44.8)
+physics_material_override = SubResource("PhysicsMaterial_arena")
+
+[node name="Mesh" type="MeshInstance3D" parent="Obstacle (20)"]
+mesh = SubResource("Mesh_18")
+
+[node name="Collision" type="CollisionShape3D" parent="Obstacle (20)"]
+shape = SubResource("Shape_18")
+
+[node name="Obstacle (29)" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, -0, 0, 1, 0, 0, -0, 1, -22.2, 33.4, -77.6)
+physics_material_override = SubResource("PhysicsMaterial_arena")
+
+[node name="Mesh" type="MeshInstance3D" parent="Obstacle (29)"]
+mesh = SubResource("Mesh_19")
+
+[node name="Collision" type="CollisionShape3D" parent="Obstacle (29)"]
+shape = SubResource("Shape_19")
+
+[node name="Obstacle (3)" type="StaticBody3D" parent="."]
+transform = Transform3D(-0.2988384, 0, -0.9543037, 0, 1, 0, 0.9543037, -0, -0.2988384, 15.82, 9.4, -31.74)
+physics_material_override = SubResource("PhysicsMaterial_arena")
+
+[node name="Mesh" type="MeshInstance3D" parent="Obstacle (3)"]
+mesh = SubResource("Mesh_20")
+
+[node name="Collision" type="CollisionShape3D" parent="Obstacle (3)"]
+shape = SubResource("Shape_20")
+
+[node name="Obstacle (24)" type="StaticBody3D" parent="."]
+transform = Transform3D(-2.220446e-16, 0, -1, 0, 1, 0, 1, -0, -2.220446e-16, -55.3, 95.5, -51.1)
+physics_material_override = SubResource("PhysicsMaterial_arena")
+
+[node name="Mesh" type="MeshInstance3D" parent="Obstacle (24)"]
+mesh = SubResource("Mesh_21")
+
+[node name="Collision" type="CollisionShape3D" parent="Obstacle (24)"]
+shape = SubResource("Shape_21")
+
+[node name="Obstacle (15)" type="StaticBody3D" parent="."]
+transform = Transform3D(-2.220446e-16, 0.3420201, -0.9396926, 2.775558e-17, 0.9396926, 0.3420201, 1, 2.775558e-17, -2.220446e-16, 21.9, 101.1, -8.7)
+physics_material_override = SubResource("PhysicsMaterial_arena")
+
+[node name="Mesh" type="MeshInstance3D" parent="Obstacle (15)"]
+mesh = SubResource("Mesh_22")
+
+[node name="Collision" type="CollisionShape3D" parent="Obstacle (15)"]
+shape = SubResource("Shape_22")
+
+[node name="Obstacle (30)" type="StaticBody3D" parent="."]
+transform = Transform3D(-2.220446e-16, 0, -1, 0, 1, 0, 1, -0, -2.220446e-16, 44.5, 33.4, -189.1)
+physics_material_override = SubResource("PhysicsMaterial_arena")
+
+[node name="Mesh" type="MeshInstance3D" parent="Obstacle (30)"]
+mesh = SubResource("Mesh_23")
+
+[node name="Collision" type="CollisionShape3D" parent="Obstacle (30)"]
+shape = SubResource("Shape_23")
+
+[node name="Obstacle (25)" type="StaticBody3D" parent="."]
+transform = Transform3D(-2.220446e-16, 0, -1, 0, 1, 0, 1, -0, -2.220446e-16, 67.9, 95.5, 8.6)
+physics_material_override = SubResource("PhysicsMaterial_arena")
+
+[node name="Mesh" type="MeshInstance3D" parent="Obstacle (25)"]
+mesh = SubResource("Mesh_24")
+
+[node name="Collision" type="CollisionShape3D" parent="Obstacle (25)"]
+shape = SubResource("Shape_24")
+
+[node name="Obstacle (23)" type="StaticBody3D" parent="."]
+transform = Transform3D(-2.220446e-16, -0.3420201, 0.9396926, -2.775558e-17, 0.9396926, 0.3420201, -1, 2.775558e-17, -2.220446e-16, -26.68, 101.1, 43.6)
+physics_material_override = SubResource("PhysicsMaterial_arena")
+
+[node name="Mesh" type="MeshInstance3D" parent="Obstacle (23)"]
+mesh = SubResource("Mesh_25")
+
+[node name="Collision" type="CollisionShape3D" parent="Obstacle (23)"]
+shape = SubResource("Shape_25")
+
+[node name="Obstacle (14)" type="StaticBody3D" parent="."]
+transform = Transform3D(-0.9994791, 0.01103763, -0.03032605, -2.600941e-07, 0.9396913, 0.3420237, 0.03227225, 0.3418455, -0.9392019, -41.57459, 67.06, 28.96997)
+physics_material_override = SubResource("PhysicsMaterial_arena")
+
+[node name="Mesh" type="MeshInstance3D" parent="Obstacle (14)"]
+mesh = SubResource("Mesh_26")
+
+[node name="Collision" type="CollisionShape3D" parent="Obstacle (14)"]
+shape = SubResource("Shape_26")
+
+[node name="Obstacle (11)" type="StaticBody3D" parent="."]
+transform = Transform3D(-0.03226932, 0.3105164, 0.9500201, -8.691456e-07, 0.9505152, -0.3106782, -0.9994792, -0.0100262, -0.03067221, 9.672497, 0, 42.04)
+physics_material_override = SubResource("PhysicsMaterial_arena")
+
+[node name="Mesh" type="MeshInstance3D" parent="Obstacle (11)"]
+mesh = SubResource("Mesh_27")
+
+[node name="Collision" type="CollisionShape3D" parent="Obstacle (11)"]
+shape = SubResource("Shape_27")
+
+[node name="Obstacle (21)" type="StaticBody3D" parent="."]
+transform = Transform3D(-2.220446e-16, 0.3420201, -0.9396926, 2.775558e-17, 0.9396926, 0.3420201, 1, 2.775558e-17, -2.220446e-16, 21.92, 101.1, 43.6)
+physics_material_override = SubResource("PhysicsMaterial_arena")
+
+[node name="Mesh" type="MeshInstance3D" parent="Obstacle (21)"]
+mesh = SubResource("Mesh_28")
+
+[node name="Collision" type="CollisionShape3D" parent="Obstacle (21)"]
+shape = SubResource("Shape_28")
+
+[node name="Obstacle (13)" type="StaticBody3D" parent="."]
+transform = Transform3D(0.2678851, -0, 0.9634509, 0, 1, 0, -0.9634509, 0, 0.2678851, -20.59534, 41.99, 40.06)
+physics_material_override = SubResource("PhysicsMaterial_arena")
+
+[node name="Mesh" type="MeshInstance3D" parent="Obstacle (13)"]
+mesh = SubResource("Mesh_29")
+
+[node name="Collision" type="CollisionShape3D" parent="Obstacle (13)"]
+shape = SubResource("Shape_29")
+
+[node name="Wall (2)" type="StaticBody3D" parent="."]
+transform = Transform3D(-2.220446e-16, 0, -1, 0, 1, 0, 1, -0, -2.220446e-16, 0, 1, -250)
+physics_material_override = SubResource("PhysicsMaterial_arena")
+
+[node name="Mesh" type="MeshInstance3D" parent="Wall (2)"]
+mesh = SubResource("Mesh_30")
+
+[node name="Collision" type="CollisionShape3D" parent="Wall (2)"]
+shape = SubResource("Shape_30")
+
+[node name="Floor1" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, -0, 0, 1, 0, 0, -0, 1, 0, -5, -0)
+physics_material_override = SubResource("PhysicsMaterial_arena")
+
+[node name="Mesh" type="MeshInstance3D" parent="Floor1"]
+mesh = SubResource("Mesh_31")
+
+[node name="Collision" type="CollisionShape3D" parent="Floor1"]
+shape = SubResource("Shape_31")
+
+[node name="Obstacle (35)" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, -0, 0, 1, 0, 0, -0, 1, 14.8, 33.4, 172.6)
+physics_material_override = SubResource("PhysicsMaterial_arena")
+
+[node name="Mesh" type="MeshInstance3D" parent="Obstacle (35)"]
+mesh = SubResource("Mesh_32")
+
+[node name="Collision" type="CollisionShape3D" parent="Obstacle (35)"]
+shape = SubResource("Shape_32")
+
+[node name="Wall" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, -0, 0, 1, 0, 0, -0, 1, 250, 1, -0)
+physics_material_override = SubResource("PhysicsMaterial_arena")
+
+[node name="Mesh" type="MeshInstance3D" parent="Wall"]
+mesh = SubResource("Mesh_33")
+
+[node name="Collision" type="CollisionShape3D" parent="Wall"]
+shape = SubResource("Shape_33")
+
+[node name="Obstacle (4)" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, -0, 0, 1, 0, 0, -0, 1, 36.2, 48.8, -0.45)
+physics_material_override = SubResource("PhysicsMaterial_arena")
+
+[node name="Mesh" type="MeshInstance3D" parent="Obstacle (4)"]
+mesh = SubResource("Mesh_34")
+
+[node name="Collision" type="CollisionShape3D" parent="Obstacle (4)"]
+shape = SubResource("Shape_34")
+
+[node name="Obstacle (5)" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, -0, 0, 0.9396926, 0.3420201, 0, -0.3420201, 0.9396926, 36.27, 3.92, -15.01)
+physics_material_override = SubResource("PhysicsMaterial_arena")
+
+[node name="Mesh" type="MeshInstance3D" parent="Obstacle (5)"]
+mesh = SubResource("Mesh_35")
+
+[node name="Collision" type="CollisionShape3D" parent="Obstacle (5)"]
+shape = SubResource("Shape_35")
+
+[node name="Obstacle (18)" type="StaticBody3D" parent="."]
+transform = Transform3D(-2.220446e-16, 0.3420201, -0.9396926, 2.775558e-17, 0.9396926, 0.3420201, 1, 2.775558e-17, -2.220446e-16, 21.9, 101.1, -44.8)
+physics_material_override = SubResource("PhysicsMaterial_arena")
+
+[node name="Mesh" type="MeshInstance3D" parent="Obstacle (18)"]
+mesh = SubResource("Mesh_36")
+
+[node name="Collision" type="CollisionShape3D" parent="Obstacle (18)"]
+shape = SubResource("Shape_36")
+
+[node name="Obstacle (31)" type="StaticBody3D" parent="."]
+transform = Transform3D(-2.220446e-16, 0, -1, 0, 1, 0, 1, -0, -2.220446e-16, 122.5, 33.4, -124)
+physics_material_override = SubResource("PhysicsMaterial_arena")
+
+[node name="Mesh" type="MeshInstance3D" parent="Obstacle (31)"]
+mesh = SubResource("Mesh_37")
+
+[node name="Collision" type="CollisionShape3D" parent="Obstacle (31)"]
+shape = SubResource("Shape_37")
+
+[node name="Obstacle (28)" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, -0, 0, 1, 0, 0, -0, 1, 27.8, 33.4, -80.6)
+physics_material_override = SubResource("PhysicsMaterial_arena")
+
+[node name="Mesh" type="MeshInstance3D" parent="Obstacle (28)"]
+mesh = SubResource("Mesh_38")
+
+[node name="Collision" type="CollisionShape3D" parent="Obstacle (28)"]
+shape = SubResource("Shape_38")
+
+[node name="Obstacle (7)" type="StaticBody3D" parent="."]
+transform = Transform3D(-2.220446e-16, 0, -1, 0, 1, 0, 1, -0, -2.220446e-16, -2.4, 104.51, 7.05)
+physics_material_override = SubResource("PhysicsMaterial_arena")
+
+[node name="Mesh" type="MeshInstance3D" parent="Obstacle (7)"]
+mesh = SubResource("Mesh_39")
+
+[node name="Collision" type="CollisionShape3D" parent="Obstacle (7)"]
+shape = SubResource("Shape_39")
+
+[node name="Obstacle (34)" type="StaticBody3D" parent="."]
+transform = Transform3D(-2.220446e-16, 0, -1, 0, 1, 0, 1, -0, -2.220446e-16, 151.8, 33.4, 74.4)
+physics_material_override = SubResource("PhysicsMaterial_arena")
+
+[node name="Mesh" type="MeshInstance3D" parent="Obstacle (34)"]
+mesh = SubResource("Mesh_40")
+
+[node name="Collision" type="CollisionShape3D" parent="Obstacle (34)"]
+shape = SubResource("Shape_40")
+

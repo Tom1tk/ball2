@@ -34,8 +34,17 @@ project sits at the branch root; the Unity project stays untouched on `main`.
 | `ProjectSettings/`, `Packages/` | `project.godot`, `*.csproj` | Godot + .NET configuration |
 | `.github/workflows/ci.yml` (Unity) | — | CI needs a Godot/.NET replacement |
 
-The arena layout (floor, four walls, 14 obstacles) was parsed from the Unity scene and regenerated as
-`scenes/main.tscn`; obstacles keep their original position, size and rotation.
+The active course is `Assets/Scenes/Test2.unity` (the 500 × 500 m, 41-box course), transcribed into
+`scenes/arena_test2.tscn` and instanced by `scenes/main.tscn`. Each box keeps its original position,
+size and rotation, converted from Unity's left-handed space to Godot's right-handed space. The player,
+enemy and camera spawn points come from the same scene (`PlayerBall` at the origin, one `EnemyBall`
+at `(-25.2, 2.3, 27.8)` in Unity coordinates). `Assets/Scenes/Test.unity` is the earlier 100 × 100 m
+prototype and is not used.
+
+Tuning taken from the Unity project: gravity `-40` (`DynamicsManager.asset`), player
+`gravityScale = 0.8`, rigid-body angular damping `20`, camera FOV `75` with `0.1..5000` clip planes,
+camera `distance = 10`, `sensitivity = 0.1`, `minPitch = -30`, `maxPitch = 60` and a warm directional
+light of intensity `1.3`.
 
 ---
 
@@ -79,8 +88,10 @@ BallMovement / EnemyAI (RigidBody3D)   BallMovement (boost commit flag)
 
 Deliberate divergences:
 
-- **Closed arena.** A ceiling was added at y ≈ 30 so the arena is a closed box; walls were raised to
-  match. This avoids losing the ball over the walls and keeps the momentum game bounded.
+- **Test2 is the course.** The active Unity scene is `Test2.unity` (500 × 500 m, 41 colliders, tall
+  towers, one enemy). The older 100 × 100 `Test.unity` prototype is not ported.
+- **No ceiling.** `Test2.unity` has no ceiling; its four walls are 20 m high and the course is open
+  above. This is kept as authored, so a fast boost can carry the ball over a wall.
 - **Translucent balls.** The Unity ball texture is opaque, which hid the hamster sprite. The Godot
   materials are translucent (alpha ≈ 0.55) so the hamster reads from outside.
 - **Placeholder hamster.** The Unity `HamsterSprite` GUID resolves to no file in the repository;
@@ -97,7 +108,8 @@ Deliberate divergences:
 
 | System | Status | Notes |
 |---|---|---|
-| Ball movement (roll, air strafe, speed caps) | ✅ Ported | Ground probe fixed to start above the floor |
+| Arena / course | ✅ Ported | `Test2.unity`: 500 × 500 m floor, 41 boxes, one enemy, no ceiling |
+| Ball movement (roll, air strafe, speed caps) | ✅ Ported | Ground probe fixed; gravity 40, angular damping 20 |
 | Boost charge/launch + lock-on commit | ✅ Ported | Charge lift, release impulse, UI bar |
 | Dodge left/right + cooldown | ✅ Ported | Cooldown bar and particle burst |
 | Third-person orbit camera | ✅ Ported | Collision pull-in, lazy/reactive smoothing |

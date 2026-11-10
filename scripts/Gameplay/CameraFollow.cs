@@ -8,9 +8,9 @@ public partial class CameraFollow : Camera3D
 {
     [Export] public NodePath TargetPath;
     [Export] public float Distance = 10f;
-    [Export] public float Sensitivity = 0.12f;
+    [Export] public float Sensitivity = 0.1f;
     [Export] public float VerticalOffset = 1.5f;
-    [Export] public float MinPitch = -60f;
+    [Export] public float MinPitch = -30f;
     [Export] public float MaxPitch = 60f;
     [Export] public float CollisionRadius = 0.3f;
     [Export] public float MinDistance = 1.5f;

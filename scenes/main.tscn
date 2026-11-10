@@ -1,381 +1,57 @@
-[gd_scene load_steps=50 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scripts/Gameplay/CameraFollow.cs" id="1_cam"]
-[ext_resource type="PackedScene" path="res://scenes/player.tscn" id="2_player"]
-[ext_resource type="PackedScene" path="res://scenes/enemy.tscn" id="3_enemy"]
-[ext_resource type="PackedScene" path="res://scenes/ui.tscn" id="4_ui"]
-[ext_resource type="Texture2D" path="res://assets/textures/prototype_512x512_pink.png" id="5_pink"]
-[ext_resource type="Texture2D" path="res://assets/textures/prototype_512x512_blue1.png" id="6_blue"]
+[ext_resource type="PackedScene" path="res://scenes/arena_test2.tscn" id="2_arena"]
+[ext_resource type="PackedScene" path="res://scenes/player.tscn" id="3_player"]
+[ext_resource type="PackedScene" path="res://scenes/enemy.tscn" id="4_enemy"]
+[ext_resource type="PackedScene" path="res://scenes/ui.tscn" id="5_ui"]
 
-[sub_resource type="Environment" id="Environment_main"]
+[sub_resource type="Environment" id="Environment_test2"]
 background_mode = 1
-background_color = Color(0.045, 0.06, 0.11, 1)
+background_color = Color(0.1921569, 0.3019608, 0.4745098, 1)
 ambient_light_source = 2
-ambient_light_color = Color(0.62, 0.7, 0.9, 1)
-ambient_light_energy = 0.9
+ambient_light_color = Color(0.45, 0.52, 0.62, 1)
+ambient_light_energy = 0.7
 tonemap_mode = 2
-glow_enabled = true
-glow_intensity = 0.35
-
-[sub_resource type="StandardMaterial3D" id="Material_pink"]
-albedo_texture = ExtResource("5_pink")
-uv1_triplanar = true
-uv1_scale = Vector3(0.4, 0.4, 0.4)
-roughness = 0.8
-
-[sub_resource type="StandardMaterial3D" id="Material_blue"]
-albedo_texture = ExtResource("6_blue")
-uv1_triplanar = true
-uv1_scale = Vector3(0.25, 0.25, 0.25)
-roughness = 0.75
-
-[sub_resource type="BoxMesh" id="Mesh_00"]
-size = Vector3(100, 1, 100)
-material = SubResource("Material_blue")
-
-[sub_resource type="BoxShape3D" id="Shape_00"]
-size = Vector3(100, 1, 100)
-
-[sub_resource type="BoxMesh" id="Mesh_01"]
-size = Vector3(1, 30, 100)
-material = SubResource("Material_pink")
-
-[sub_resource type="BoxShape3D" id="Shape_01"]
-size = Vector3(1, 30, 100)
-
-[sub_resource type="BoxMesh" id="Mesh_02"]
-size = Vector3(1, 30, 100)
-material = SubResource("Material_pink")
-
-[sub_resource type="BoxShape3D" id="Shape_02"]
-size = Vector3(1, 30, 100)
-
-[sub_resource type="BoxMesh" id="Mesh_03"]
-size = Vector3(100, 30, 1)
-material = SubResource("Material_pink")
-
-[sub_resource type="BoxShape3D" id="Shape_03"]
-size = Vector3(100, 30, 1)
-
-[sub_resource type="BoxMesh" id="Mesh_04"]
-size = Vector3(100, 30, 1)
-material = SubResource("Material_pink")
-
-[sub_resource type="BoxShape3D" id="Shape_04"]
-size = Vector3(100, 30, 1)
-
-[sub_resource type="BoxMesh" id="Mesh_05"]
-size = Vector3(100, 1, 100)
-material = SubResource("Material_pink")
-
-[sub_resource type="BoxShape3D" id="Shape_05"]
-size = Vector3(100, 1, 100)
-
-[sub_resource type="BoxMesh" id="Mesh_06"]
-size = Vector3(10, 3, 20)
-material = SubResource("Material_pink")
-
-[sub_resource type="BoxShape3D" id="Shape_06"]
-size = Vector3(10, 3, 20)
-
-[sub_resource type="BoxMesh" id="Mesh_07"]
-size = Vector3(5, 2, 10)
-material = SubResource("Material_pink")
-
-[sub_resource type="BoxShape3D" id="Shape_07"]
-size = Vector3(5, 2, 10)
-
-[sub_resource type="BoxMesh" id="Mesh_08"]
-size = Vector3(10, 3, 20)
-material = SubResource("Material_pink")
-
-[sub_resource type="BoxShape3D" id="Shape_08"]
-size = Vector3(10, 3, 20)
-
-[sub_resource type="BoxMesh" id="Mesh_09"]
-size = Vector3(10, 6, 20)
-material = SubResource("Material_pink")
-
-[sub_resource type="BoxShape3D" id="Shape_09"]
-size = Vector3(10, 6, 20)
-
-[sub_resource type="BoxMesh" id="Mesh_10"]
-size = Vector3(5, 0.5, 10)
-material = SubResource("Material_pink")
-
-[sub_resource type="BoxShape3D" id="Shape_10"]
-size = Vector3(5, 0.5, 10)
-
-[sub_resource type="BoxMesh" id="Mesh_11"]
-size = Vector3(5, 0.5, 20)
-material = SubResource("Material_pink")
-
-[sub_resource type="BoxShape3D" id="Shape_11"]
-size = Vector3(5, 0.5, 20)
-
-[sub_resource type="BoxMesh" id="Mesh_12"]
-size = Vector3(5, 0.5, 30)
-material = SubResource("Material_pink")
-
-[sub_resource type="BoxShape3D" id="Shape_12"]
-size = Vector3(5, 0.5, 30)
-
-[sub_resource type="BoxMesh" id="Mesh_13"]
-size = Vector3(5, 0.5, 20)
-material = SubResource("Material_pink")
-
-[sub_resource type="BoxShape3D" id="Shape_13"]
-size = Vector3(5, 0.5, 20)
-
-[sub_resource type="BoxMesh" id="Mesh_14"]
-size = Vector3(10, 6, 20)
-material = SubResource("Material_pink")
-
-[sub_resource type="BoxShape3D" id="Shape_14"]
-size = Vector3(10, 6, 20)
-
-[sub_resource type="BoxMesh" id="Mesh_15"]
-size = Vector3(10, 3, 20)
-material = SubResource("Material_pink")
-
-[sub_resource type="BoxShape3D" id="Shape_15"]
-size = Vector3(10, 3, 20)
-
-[sub_resource type="BoxMesh" id="Mesh_16"]
-size = Vector3(5, 2, 10)
-material = SubResource("Material_pink")
-
-[sub_resource type="BoxShape3D" id="Shape_16"]
-size = Vector3(5, 2, 10)
-
-[sub_resource type="BoxMesh" id="Mesh_17"]
-size = Vector3(10, 3, 20)
-material = SubResource("Material_pink")
-
-[sub_resource type="BoxShape3D" id="Shape_17"]
-size = Vector3(10, 3, 20)
-
-[sub_resource type="BoxMesh" id="Mesh_18"]
-size = Vector3(5, 0.5, 15)
-material = SubResource("Material_pink")
-
-[sub_resource type="BoxShape3D" id="Shape_18"]
-size = Vector3(5, 0.5, 15)
-
-[sub_resource type="BoxMesh" id="Mesh_19"]
-size = Vector3(5, 0.5, 10)
-material = SubResource("Material_pink")
-
-[sub_resource type="BoxShape3D" id="Shape_19"]
-size = Vector3(5, 0.5, 10)
+glow_enabled = false
 
 [node name="Main" type="Node3D"]
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
-environment = SubResource("Environment_main")
+environment = SubResource("Environment_test2")
 
 [node name="Sun" type="DirectionalLight3D" parent="."]
-transform = Transform3D(0.819152, 0.439385, -0.3686878, 0, 0.6427876, 0.7660444, 0.5735764, -0.6275069, 0.5265408, 0, 24, 0)
-light_energy = 1.25
+transform = Transform3D(0.8660254, -0.3830222, 0.3213938, -7.438671e-09, 0.6427876, 0.7660444, -0.4999999, -0.663414, 0.5566704, 0, 3, -0)
+light_color = Color(1, 0.9568627, 0.8392157, 1)
+light_energy = 1.3
 shadow_enabled = true
-directional_shadow_max_distance = 140.0
+directional_shadow_max_distance = 400.0
 
 [node name="Camera" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9902681, 0.1391731, 0, -0.1391731, 0.9902681, 0, 4, 10)
+transform = Transform3D(0.9989061, 0.006006743, -0.0463734, -4.096045e-10, 0.9917151, 0.1284568, 0.04676081, -0.1283163, 0.9906303, -0.5611295, 3.9, 11.98687)
 current = true
 fov = 75.0
+near = 0.1
+far = 5000.0
 script = ExtResource("1_cam")
 TargetPath = NodePath("../PlayerBall")
+Distance = 10.0
+Sensitivity = 0.1
+VerticalOffset = 1.5
+MinPitch = -30.0
+MaxPitch = 60.0
+CollisionRadius = 0.3
+MinDistance = 1.5
+LazySpeed = 8.0
+ReactiveSpeed = 25.0
 
-[node name="Arena" type="Node3D" parent="."]
+[node name="ArenaTest2" parent="." instance=ExtResource("2_arena")]
 
-[node name="Floor" type="StaticBody3D" parent="Arena"]
-position = Vector3(0, -0.5, 0)
-
-[node name="Mesh" type="MeshInstance3D" parent="Arena/Floor"]
-mesh = SubResource("Mesh_00")
-
-[node name="Collision" type="CollisionShape3D" parent="Arena/Floor"]
-shape = SubResource("Shape_00")
-
-[node name="WallWest" type="StaticBody3D" parent="Arena"]
-position = Vector3(-50, 15, 0)
-
-[node name="Mesh" type="MeshInstance3D" parent="Arena/WallWest"]
-mesh = SubResource("Mesh_01")
-
-[node name="Collision" type="CollisionShape3D" parent="Arena/WallWest"]
-shape = SubResource("Shape_01")
-
-[node name="WallEast" type="StaticBody3D" parent="Arena"]
-position = Vector3(50, 15, 0)
-
-[node name="Mesh" type="MeshInstance3D" parent="Arena/WallEast"]
-mesh = SubResource("Mesh_02")
-
-[node name="Collision" type="CollisionShape3D" parent="Arena/WallEast"]
-shape = SubResource("Shape_02")
-
-[node name="WallNorth" type="StaticBody3D" parent="Arena"]
-position = Vector3(0, 15, -50)
-
-[node name="Mesh" type="MeshInstance3D" parent="Arena/WallNorth"]
-mesh = SubResource("Mesh_03")
-
-[node name="Collision" type="CollisionShape3D" parent="Arena/WallNorth"]
-shape = SubResource("Shape_03")
-
-[node name="WallSouth" type="StaticBody3D" parent="Arena"]
-position = Vector3(0, 15, 50)
-
-[node name="Mesh" type="MeshInstance3D" parent="Arena/WallSouth"]
-mesh = SubResource("Mesh_04")
-
-[node name="Collision" type="CollisionShape3D" parent="Arena/WallSouth"]
-shape = SubResource("Shape_04")
-
-[node name="Ceiling" type="StaticBody3D" parent="Arena"]
-position = Vector3(0, 30.5, 0)
-
-[node name="Mesh" type="MeshInstance3D" parent="Arena/Ceiling"]
-mesh = SubResource("Mesh_05")
-
-[node name="Collision" type="CollisionShape3D" parent="Arena/Ceiling"]
-shape = SubResource("Shape_05")
-
-[node name="Obstacle01" type="StaticBody3D" parent="Arena"]
-transform = Transform3D(-2.220446e-16, 0, 1, 0, 1, 0, -1, 0, -2.220446e-16, 0, 1, 33.4)
-
-[node name="Mesh" type="MeshInstance3D" parent="Arena/Obstacle01"]
-mesh = SubResource("Mesh_06")
-
-[node name="Collision" type="CollisionShape3D" parent="Arena/Obstacle01"]
-shape = SubResource("Shape_06")
-
-[node name="Obstacle02" type="StaticBody3D" parent="Arena"]
-transform = Transform3D(0, -0.3106764, 0.9505158, 0, 0.9505158, 0.3106764, -1, 0, 0, -14.41, 0, 33.4)
-
-[node name="Mesh" type="MeshInstance3D" parent="Arena/Obstacle02"]
-mesh = SubResource("Mesh_07")
-
-[node name="Collision" type="CollisionShape3D" parent="Arena/Obstacle02"]
-shape = SubResource("Shape_07")
-
-[node name="Obstacle03" type="StaticBody3D" parent="Arena"]
-transform = Transform3D(-0.6384359, 0, 0.769675, 0, 1, 0, -0.769675, 0, -0.6384359, 28.64, 1, 22.66)
-
-[node name="Mesh" type="MeshInstance3D" parent="Arena/Obstacle03"]
-mesh = SubResource("Mesh_08")
-
-[node name="Collision" type="CollisionShape3D" parent="Arena/Obstacle03"]
-shape = SubResource("Shape_08")
-
-[node name="Obstacle04" type="StaticBody3D" parent="Arena"]
-position = Vector3(36.2, 2.87, 0.45)
-
-[node name="Mesh" type="MeshInstance3D" parent="Arena/Obstacle04"]
-mesh = SubResource("Mesh_09")
-
-[node name="Collision" type="CollisionShape3D" parent="Arena/Obstacle04"]
-shape = SubResource("Shape_09")
-
-[node name="Obstacle05" type="StaticBody3D" parent="Arena"]
-transform = Transform3D(1, 0, 0, 0, 0.9396926, -0.3420201, 0, 0.3420201, 0.9396926, 36.27, 3.92, 15.01)
-
-[node name="Mesh" type="MeshInstance3D" parent="Arena/Obstacle05"]
-mesh = SubResource("Mesh_10")
-
-[node name="Collision" type="CollisionShape3D" parent="Arena/Obstacle05"]
-shape = SubResource("Shape_10")
-
-[node name="Obstacle06" type="StaticBody3D" parent="Arena"]
-transform = Transform3D(-2.220446e-16, 0.3420201, 0.9396926, 0, 0.9396926, -0.3420201, -1, 0, -2.220446e-16, 21.92, 9.05, -7.05)
-
-[node name="Mesh" type="MeshInstance3D" parent="Arena/Obstacle06"]
-mesh = SubResource("Mesh_11")
-
-[node name="Collision" type="CollisionShape3D" parent="Arena/Obstacle06"]
-shape = SubResource("Shape_11")
-
-[node name="Obstacle07" type="StaticBody3D" parent="Arena"]
-transform = Transform3D(-2.220446e-16, 0, 1, 0, 1, 0, -1, 0, -2.220446e-16, -2.4, 12.46, -7.05)
-
-[node name="Mesh" type="MeshInstance3D" parent="Arena/Obstacle07"]
-mesh = SubResource("Mesh_12")
-
-[node name="Collision" type="CollisionShape3D" parent="Arena/Obstacle07"]
-shape = SubResource("Shape_12")
-
-[node name="Obstacle08" type="StaticBody3D" parent="Arena"]
-transform = Transform3D(-2.220446e-16, -0.3420201, -0.9396926, 0, 0.9396926, -0.3420201, 1, 0, -2.220446e-16, -26.68, 9.05, -7.05)
-
-[node name="Mesh" type="MeshInstance3D" parent="Arena/Obstacle08"]
-mesh = SubResource("Mesh_13")
-
-[node name="Collision" type="CollisionShape3D" parent="Arena/Obstacle08"]
-shape = SubResource("Shape_13")
-
-[node name="Obstacle09" type="StaticBody3D" parent="Arena"]
-position = Vector3(-40.9, 2.87, -14.55)
-
-[node name="Mesh" type="MeshInstance3D" parent="Arena/Obstacle09"]
-mesh = SubResource("Mesh_14")
-
-[node name="Collision" type="CollisionShape3D" parent="Arena/Obstacle09"]
-shape = SubResource("Shape_14")
-
-[node name="Obstacle10" type="StaticBody3D" parent="Arena"]
-transform = Transform3D(-0.03226792, -0, -0.9994793, 0, 1, -0, 0.9994793, 0, -0.03226792, -4.73, 1, -40.92)
-
-[node name="Mesh" type="MeshInstance3D" parent="Arena/Obstacle10"]
-mesh = SubResource("Mesh_15")
-
-[node name="Collision" type="CollisionShape3D" parent="Arena/Obstacle10"]
-shape = SubResource("Shape_15")
-
-[node name="Obstacle11" type="StaticBody3D" parent="Arena"]
-transform = Transform3D(-0.03226932, 0.3105164, -0.9500201, -8.691456e-07, 0.9505152, 0.3106782, 0.9994792, 0.0100262, -0.03067221, 9.672497, 0, -42.04)
-
-[node name="Mesh" type="MeshInstance3D" parent="Arena/Obstacle11"]
-mesh = SubResource("Mesh_16")
-
-[node name="Collision" type="CollisionShape3D" parent="Arena/Obstacle11"]
-shape = SubResource("Shape_16")
-
-[node name="Obstacle12" type="StaticBody3D" parent="Arena"]
-transform = Transform3D(0.1712831, -0, -0.9852219, 0, 1, -0, 0.9852219, 0, 0.1712831, -35.55, 1, -36.36981)
-
-[node name="Mesh" type="MeshInstance3D" parent="Arena/Obstacle12"]
-mesh = SubResource("Mesh_17")
-
-[node name="Collision" type="CollisionShape3D" parent="Arena/Obstacle12"]
-shape = SubResource("Shape_17")
-
-[node name="Obstacle13" type="StaticBody3D" parent="Arena"]
-transform = Transform3D(0.2678851, -0, -0.9634509, 0, 1, -0, 0.9634509, 0, 0.2678851, -20.59534, 2.47, -40.06)
-
-[node name="Mesh" type="MeshInstance3D" parent="Arena/Obstacle13"]
-mesh = SubResource("Mesh_18")
-
-[node name="Collision" type="CollisionShape3D" parent="Arena/Obstacle13"]
-shape = SubResource("Shape_18")
-
-[node name="Obstacle14" type="StaticBody3D" parent="Arena"]
-transform = Transform3D(-0.9994791, 0.01103763, 0.03032605, -2.600941e-07, 0.9396913, -0.3420237, -0.03227225, -0.3418455, -0.9392019, -41.57459, 3.92, -28.96997)
-
-[node name="Mesh" type="MeshInstance3D" parent="Arena/Obstacle14"]
-mesh = SubResource("Mesh_19")
-
-[node name="Collision" type="CollisionShape3D" parent="Arena/Obstacle14"]
-shape = SubResource("Shape_19")
-
-[node name="PlayerBall" parent="." instance=ExtResource("2_player")]
+[node name="PlayerBall" parent="." instance=ExtResource("3_player")]
 position = Vector3(0, 1.4, 0)
 
-[node name="EnemyBall" parent="." instance=ExtResource("3_enemy")]
-position = Vector3(-13.38, 1.4, -14.08)
+[node name="EnemyBall" parent="." instance=ExtResource("4_enemy")]
+position = Vector3(-25.2, 2.3, -27.8)
 
-[node name="EnemyBall2" parent="." instance=ExtResource("3_enemy")]
-position = Vector3(31.65, 1.4, -28.68)
+[node name="UI" parent="." instance=ExtResource("5_ui")]
 
-[node name="UI" parent="." instance=ExtResource("4_ui")]

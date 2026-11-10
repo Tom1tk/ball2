@@ -53,6 +53,16 @@ The engine-agnostic rules live in `Ball2.Core` and are covered by **37 NUnit tes
 
 Charging a boost near an enemy acquires a soft lock; the lock commits when the charge starts.
 
+## Course
+
+The active course is transcribed from `Assets/Scenes/Test2.unity` on `main`: a 500 × 500 m floor,
+41 box colliders including the tall tower course, and a single enemy. It lives in
+`scenes/arena_test2.tscn` and is instanced by `scenes/main.tscn`. `Test.unity` is an earlier
+100 × 100 m prototype and is not used by the port.
+
+Tuning values come from the Unity project where possible: gravity is `-40`, the player ball uses
+`gravityScale = 0.8`, and rigid bodies use angular damping `20`.
+
 ## Project structure
 
 ```
@@ -62,7 +72,7 @@ Ball2.Core/                Engine-agnostic rules (System.Numerics, no Godot refe
   Combat/                  CombatResolver, LockOnResolver and their config/result types
 scripts/Gameplay/          Balls, camera, grapple, AI, health and resolver adapters
 scripts/UI/                HUD/pause/lose and main-menu scripts
-scenes/                    main, player, enemy, hook, HUD and menu scenes
+scenes/                    main, arena_test2, player, enemy, hook, HUD and menu scenes
 assets/                    Art and audio copied from the Unity project (Git LFS)
 docs/                      Original design/spec documents (Unity-era, kept for reference)
 tests/Ball2.Core.Tests/    NUnit test project
