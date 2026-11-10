@@ -1,20 +1,68 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
-  <!-- Placeholder hamster face. The original Unity HamsterSprite asset was not
-       present in the repository (its GUID resolved to no file), so this engine-
-       neutral stand-in preserves the billboarded 2D hamster inside the ball. -->
-  <ellipse cx="128" cy="146" rx="76" ry="66" fill="#f7d9a8" stroke="#5a3b22" stroke-width="6"/>
-  <ellipse cx="80" cy="90" rx="24" ry="21" fill="#f7d9a8" stroke="#5a3b22" stroke-width="6"/>
-  <ellipse cx="176" cy="90" rx="24" ry="21" fill="#f7d9a8" stroke="#5a3b22" stroke-width="6"/>
-  <ellipse cx="80" cy="90" rx="11" ry="9" fill="#f3b6b6"/>
-  <ellipse cx="176" cy="90" rx="11" ry="9" fill="#f3b6b6"/>
-  <circle cx="102" cy="136" r="10" fill="#2a1a10"/>
-  <circle cx="154" cy="136" r="10" fill="#2a1a10"/>
-  <circle cx="106" cy="132" r="3.5" fill="#ffffff"/>
-  <circle cx="158" cy="132" r="3.5" fill="#ffffff"/>
-  <ellipse cx="128" cy="160" rx="10" ry="7" fill="#e78a8a"/>
-  <path d="M128 167 q11 14 24 4" fill="none" stroke="#5a3b22" stroke-width="5" stroke-linecap="round"/>
-  <path d="M64 158 l-28 -10 M64 170 l-30 3 M192 158 l28 -10 M192 170 l30 3"
-        stroke="#5a3b22" stroke-width="4" stroke-linecap="round"/>
-  <ellipse cx="76" cy="174" rx="13" ry="8" fill="#f3b6b6" opacity="0.85"/>
-  <ellipse cx="180" cy="174" rx="13" ry="8" fill="#f3b6b6" opacity="0.85"/>
+  <!-- Ball2 hamster face. The original Unity HamsterSprite GUID resolved to no
+       file in the repository, so the Godot branch ships this original SVG. -->
+  <defs>
+    <radialGradient id="fur" cx="42%" cy="36%" r="72%">
+      <stop offset="0%" stop-color="#fff0cf"/>
+      <stop offset="62%" stop-color="#f6d49b"/>
+      <stop offset="100%" stop-color="#dda869"/>
+    </radialGradient>
+    <radialGradient id="ear" cx="45%" cy="40%" r="65%">
+      <stop offset="0%" stop-color="#f8b7b7"/>
+      <stop offset="100%" stop-color="#d97d86"/>
+    </radialGradient>
+    <radialGradient id="cheek" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#f5a3a3" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#f5a3a3" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Ears -->
+  <ellipse cx="76" cy="82" rx="30" ry="27" fill="url(#fur)" stroke="#573620" stroke-width="6"/>
+  <ellipse cx="180" cy="82" rx="30" ry="27" fill="url(#fur)" stroke="#573620" stroke-width="6"/>
+  <ellipse cx="76" cy="82" rx="16" ry="14" fill="url(#ear)"/>
+  <ellipse cx="180" cy="82" rx="16" ry="14" fill="url(#ear)"/>
+
+  <!-- Head / body -->
+  <path d="M128 46
+           C 74 46, 44 78, 44 132
+           C 44 190, 78 218, 128 218
+           C 178 218, 212 190, 212 132
+           C 212 78, 182 46, 128 46 Z"
+        fill="url(#fur)" stroke="#573620" stroke-width="6"/>
+
+  <!-- Forehead fur tufts -->
+  <path d="M104 56 q8 -14 18 -4 q4 -16 16 -4 q8 -12 16 3"
+        fill="none" stroke="#c48b53" stroke-width="5" stroke-linecap="round"/>
+  <path d="M88 70 q-10 10 -12 24 M184 70 q10 10 12 24"
+        fill="none" stroke="#e0b073" stroke-width="4" stroke-linecap="round" opacity="0.8"/>
+
+  <!-- Cheeks -->
+  <ellipse cx="72" cy="166" rx="28" ry="20" fill="url(#cheek)"/>
+  <ellipse cx="184" cy="166" rx="28" ry="20" fill="url(#cheek)"/>
+
+  <!-- Eyes -->
+  <ellipse cx="99" cy="130" rx="14" ry="16" fill="#2b1a10"/>
+  <ellipse cx="157" cy="130" rx="14" ry="16" fill="#2b1a10"/>
+  <circle cx="104" cy="124" r="5" fill="#ffffff"/>
+  <circle cx="162" cy="124" r="5" fill="#ffffff"/>
+  <circle cx="94" cy="136" r="2.5" fill="#ffffff" opacity="0.65"/>
+  <circle cx="152" cy="136" r="2.5" fill="#ffffff" opacity="0.65"/>
+
+  <!-- Nose, muzzle and mouth -->
+  <ellipse cx="128" cy="158" rx="9" ry="6.5" fill="#d97d86" stroke="#8c4a50" stroke-width="2"/>
+  <path d="M128 165 v6" stroke="#573620" stroke-width="4" stroke-linecap="round"/>
+  <path d="M128 171 q-10 12 -22 3 M128 171 q10 12 22 3"
+        fill="none" stroke="#573620" stroke-width="4" stroke-linecap="round"/>
+  <rect x="121" y="176" width="6" height="12" rx="2" fill="#fffaf0" stroke="#c9a06b" stroke-width="1.5"/>
+  <rect x="129" y="176" width="6" height="12" rx="2" fill="#fffaf0" stroke="#c9a06b" stroke-width="1.5"/>
+
+  <!-- Whiskers -->
+  <path d="M70 150 l-34 -12 M70 161 l-36 -2 M70 172 l-34 9
+           M186 150 l34 -12 M186 161 l36 -2 M186 172 l34 9"
+        fill="none" stroke="#573620" stroke-width="3.5" stroke-linecap="round" opacity="0.85"/>
+
+  <!-- Paws -->
+  <ellipse cx="92" cy="214" rx="20" ry="10" fill="#f9e2b9" stroke="#573620" stroke-width="4"/>
+  <ellipse cx="164" cy="214" rx="20" ry="10" fill="#f9e2b9" stroke="#573620" stroke-width="4"/>
 </svg>

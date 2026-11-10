@@ -2,8 +2,9 @@ using Godot;
 
 /// <summary>
 /// Enemy ball AI: detect, chase, wander and charge-boost at the player.
-/// The Unity original used a NavMeshAgent for path corners; this port uses direct
-/// steering against an open arena (see MIGRATION_PLAN.md for the NavigationAgent3D path).
+/// Path corners come from a baked Test2 NavigationRegion3D via NavigationAgent3D,
+/// matching the Unity NavMeshAgent setup. Direct steering remains as a fallback when
+/// no navigation map is available (e.g. isolated unit tests).
 /// </summary>
 public partial class EnemyAI : RigidBody3D
 {
@@ -25,7 +26,9 @@ public partial class EnemyAI : RigidBody3D
 
     private Node3D _player;
     private CombatAdapter _combat;
+    private NavigationAgent3D _navAgent;
     private CpuParticles3D _chargeFx;
+    private float _navRepathTimer;
     private float _chargeTimer;
     private float _cooldownTimer;
     private float _wanderTimer;
@@ -39,7 +42,14 @@ public partial class EnemyAI : RigidBody3D
     {
         AddToGroup("enemies");
         _combat = GetNode<CombatAdapter>("CombatAdapter");
+        _navAgent = GetNodeOrNull<NavigationAgent3D>("NavigationAgent3D");
         _chargeFx = GetNodeOrNull<CpuParticles3D>("ChargeFX");
+        if (_navAgent != null)
+        {
+            _navAgent.MaxSpeed = MaxVelocity;
+            _navAgent.Radius = 1.1f;
+            _navAgent.Height = 2f;
+        }
         _gravity = (float)ProjectSettings.GetSetting("physics/3d/default_gravity", 9.8f);
         _selfExclude.Add(GetRid());
         _rng.Randomize();
@@ -118,7 +128,13 @@ public partial class EnemyAI : RigidBody3D
 
     private void ChasePlayer(float dt)
     {
-        Vector3 direction = _player.GlobalPosition - GlobalPosition;
+        if (TryGetNavigationDirection(_player.GlobalPosition, dt, out Vector3 direction))
+        {
+            ApplyCentralForce(direction * InputForce * Mass);
+            return;
+        }
+
+        direction = _player.GlobalPosition - GlobalPosition;
         direction.Y = 0f;
         if (direction.LengthSquared() < 1e-6f) return;
         ApplyCentralForce(direction.Normalized() * InputForce * Mass);
@@ -130,15 +146,54 @@ public partial class EnemyAI : RigidBody3D
         if (!_hasWanderPoint || _wanderTimer <= 0f)
             PickWanderPoint();
 
-        Vector3 direction = _wanderPoint - GlobalPosition;
-        direction.Y = 0f;
-        if (direction.LengthSquared() < 1f)
+        Vector3 direction;
+        if (!TryGetNavigationDirection(_wanderPoint, dt, out direction))
         {
-            _hasWanderPoint = false;
-            return;
+            direction = _wanderPoint - GlobalPosition;
+            direction.Y = 0f;
+            if (direction.LengthSquared() < 1f)
+            {
+                _hasWanderPoint = false;
+                return;
+            }
+            direction = direction.Normalized();
         }
 
-        ApplyCentralForce(direction.Normalized() * (InputForce * 0.5f) * Mass);
+        ApplyCentralForce(direction * (InputForce * 0.5f) * Mass);
+    }
+
+    /// <summary>
+    /// Returns the next direction along the baked navigation path, or false when no
+    /// navigation map/path is available so the caller can fall back to direct steering.
+    /// </summary>
+    private bool TryGetNavigationDirection(Vector3 target, float dt, out Vector3 direction)
+    {
+        direction = Vector3.Zero;
+        if (_navAgent == null || !_navAgent.IsInsideTree())
+            return false;
+
+        // Re-path a few times per second rather than every physics tick.
+        _navRepathTimer -= dt;
+        if (_navRepathTimer <= 0f)
+        {
+            _navAgent.TargetPosition = target;
+            _navRepathTimer = 0.2f;
+        }
+
+        Vector3 next = _navAgent.GetNextPathPosition();
+        direction = next - GlobalPosition;
+        direction.Y = 0f;
+
+        if (direction.LengthSquared() < 0.25f)
+        {
+            direction = target - GlobalPosition;
+            direction.Y = 0f;
+            if (direction.LengthSquared() < 1e-6f)
+                return false;
+        }
+
+        direction = direction.Normalized();
+        return true;
     }
 
     private void PickWanderPoint()
@@ -148,6 +203,14 @@ public partial class EnemyAI : RigidBody3D
             GlobalPosition.X + randomCircle.X * WanderRadius,
             GlobalPosition.Y,
             GlobalPosition.Z + randomCircle.Y * WanderRadius);
+
+        if (_navAgent != null)
+        {
+            Rid map = _navAgent.GetNavigationMap();
+            if (map.IsValid)
+                _wanderPoint = NavigationServer3D.MapGetClosestPoint(map, _wanderPoint);
+        }
+
         _wanderTimer = _rng.RandfRange(WanderIntervalMin, WanderIntervalMax);
         _hasWanderPoint = true;
     }

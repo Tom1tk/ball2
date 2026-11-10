@@ -1,7 +1,8 @@
 using Godot;
+using System.Collections.Generic;
 
 /// <summary>
-/// HUD, pause menu, lose screen and grapple cursors.
+/// HUD, pause menu, controls/rebinding screen, lose screen and grapple cursors.
 /// Port of the Unity UIScript, without the legacy strawberry/win-screen remnants.
 /// </summary>
 public partial class UIScript : CanvasLayer
@@ -20,6 +21,11 @@ public partial class UIScript : CanvasLayer
     private TextureRect _crosshairRight;
     private Control _pauseMenu;
     private Control _loseScreen;
+    private Control _controlsPanel;
+    private VBoxContainer _controlsList;
+    private readonly Dictionary<string, Button> _bindingButtons = new();
+    private string _awaitingAction;
+    private Button _awaitingButton;
 
     public override void _Ready()
     {
@@ -34,6 +40,8 @@ public partial class UIScript : CanvasLayer
         _crosshairRight = GetNode<TextureRect>("Root/CrosshairRight");
         _pauseMenu = GetNode<Control>("Root/PauseMenu");
         _loseScreen = GetNode<Control>("Root/LoseScreen");
+        _controlsPanel = GetNode<Control>("Root/ControlsPanel");
+        _controlsList = GetNode<VBoxContainer>("Root/ControlsPanel/Panel/Scroll/List");
 
         Player = GetTree().GetFirstNodeInGroup("player") as BallMovement;
         EnemiesMax = Mathf.Max(1, GetTree().GetNodesInGroup("enemies").Count);
@@ -47,13 +55,18 @@ public partial class UIScript : CanvasLayer
         HideDodgeUi();
         HidePauseUiInternal();
         _loseScreen.Visible = false;
+        _controlsPanel.Visible = false;
+        BuildControlsRows();
 
         GetNode<Button>("Root/PauseMenu/Panel/Buttons/ResumeButton").Pressed += HidePauseUi;
         GetNode<Button>("Root/PauseMenu/Panel/Buttons/RestartButton").Pressed += RestartGame;
+        GetNode<Button>("Root/PauseMenu/Panel/Buttons/ControlsButton").Pressed += ShowControls;
         GetNode<Button>("Root/PauseMenu/Panel/Buttons/MenuButton").Pressed += BackToMenu;
         GetNode<Button>("Root/PauseMenu/Panel/Buttons/QuitButton").Pressed += QuitGame;
         GetNode<Button>("Root/LoseScreen/Panel/Buttons/RestartButton").Pressed += RestartGame;
         GetNode<Button>("Root/LoseScreen/Panel/Buttons/MenuButton").Pressed += BackToMenu;
+        GetNode<Button>("Root/ControlsPanel/Panel/BackButton").Pressed += HideControls;
+        WireButtonSounds();
 
         UpdateEnemyCounter();
         Input.MouseMode = Input.MouseModeEnum.Captured;
@@ -154,6 +167,119 @@ public partial class UIScript : CanvasLayer
         _pauseMenu.Visible = false;
         GetTree().Paused = false;
         Input.MouseMode = Input.MouseModeEnum.Captured;
+    }
+
+    public override void _Input(InputEvent @event)
+    {
+        if (_awaitingAction == null) return;
+
+        if (@event is InputEventKey key && key.Pressed && !key.Echo)
+        {
+            if (key.PhysicalKeycode == Key.Escape || key.Keycode == Key.Escape)
+            {
+                CancelRebind();
+            }
+            else
+            {
+                var binding = new InputEventKey { PhysicalKeycode = key.PhysicalKeycode };
+                InputBindings.Instance?.Rebind(_awaitingAction, binding);
+                FinishRebind();
+            }
+            GetViewport().SetInputAsHandled();
+        }
+        else if (@event is InputEventMouseButton mouse && mouse.Pressed)
+        {
+            var binding = new InputEventMouseButton { ButtonIndex = mouse.ButtonIndex };
+            InputBindings.Instance?.Rebind(_awaitingAction, binding);
+            FinishRebind();
+            GetViewport().SetInputAsHandled();
+        }
+    }
+
+    private void ShowControls()
+    {
+        RefreshBindingLabels();
+        _controlsPanel.Visible = true;
+    }
+
+    private void HideControls()
+    {
+        CancelRebind();
+        _controlsPanel.Visible = false;
+    }
+
+    private void BuildControlsRows()
+    {
+        foreach ((string action, string label) in InputBindings.BindableActions)
+        {
+            var row = new HBoxContainer();
+            row.AddThemeConstantOverride("separation", 12);
+
+            var nameLabel = new Label
+            {
+                Text = label,
+                SizeFlagsHorizontal = Control.SizeFlags.ExpandFill,
+                VerticalAlignment = VerticalAlignment.Center,
+            };
+            nameLabel.AddThemeFontSizeOverride("font_size", 18);
+
+            var button = new Button
+            {
+                Text = InputBindings.Instance?.GetEventLabel(action) ?? "?",
+                CustomMinimumSize = new Vector2(190f, 38f),
+                Alignment = HorizontalAlignment.Center,
+            };
+            button.AddThemeFontSizeOverride("font_size", 17);
+            button.Pressed += () => BeginRebind(action, button);
+
+            row.AddChild(nameLabel);
+            row.AddChild(button);
+            _controlsList.AddChild(row);
+            _bindingButtons[action] = button;
+        }
+    }
+
+    private void BeginRebind(string action, Button button)
+    {
+        CancelRebind();
+        _awaitingAction = action;
+        _awaitingButton = button;
+        button.Text = "Press a key... (Esc cancels)";
+        button.GrabFocus();
+    }
+
+    private void FinishRebind()
+    {
+        if (_awaitingButton != null && _awaitingAction != null)
+            _awaitingButton.Text = InputBindings.Instance?.GetEventLabel(_awaitingAction) ?? "?";
+        _awaitingAction = null;
+        _awaitingButton = null;
+    }
+
+    private void CancelRebind()
+    {
+        if (_awaitingButton != null && _awaitingAction != null)
+            _awaitingButton.Text = InputBindings.Instance?.GetEventLabel(_awaitingAction) ?? "?";
+        _awaitingAction = null;
+        _awaitingButton = null;
+    }
+
+    private void RefreshBindingLabels()
+    {
+        foreach ((string action, _) in InputBindings.BindableActions)
+        {
+            if (_bindingButtons.TryGetValue(action, out Button button))
+                button.Text = InputBindings.Instance?.GetEventLabel(action) ?? "?";
+        }
+    }
+
+    private void WireButtonSounds()
+    {
+        foreach (Node node in FindChildren("*", "Button", true, false))
+        {
+            if (node is Button button)
+                button.Pressed += () => AudioManager.Instance?.Play2D("ui_click", -8f);
+        }
     }
 
     private void UpdateEnemyCounter()

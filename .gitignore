@@ -1,9 +1,10 @@
 # Godot
 .godot/
 .import/
-export.cfg
-export_presets.cfg
 *.translation
+
+# Build outputs
+build/
 
 # .NET / C#
 bin/

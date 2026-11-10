@@ -96,12 +96,14 @@ public partial class Health : Node
 
         if (_body.IsInGroup("player"))
         {
+            AudioManager.Instance?.Play3D("death", _body.GlobalPosition, -4f);
             _body.SetDeferred("freeze", true);
             _body.SetDeferred("visible", false);
             _ui?.ShowLoseUi();
             return;
         }
 
+        AudioManager.Instance?.Play3D("death", _body.GlobalPosition, -10f, 1.15f);
         _enemyAi?.DisableAi();
         if (_chargeFx != null) _chargeFx.Emitting = false;
         _ui?.EnemyDied();

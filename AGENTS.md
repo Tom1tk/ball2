@@ -16,9 +16,13 @@ This branch is the **Godot 4.7 .NET / C#** port of Ball2. Before changing anythi
 - Use the **Godot .NET** build. Verify with:
   - `dotnet build Ball2Godot.csproj`
   - `dotnet test tests/Ball2.Core.Tests/Ball2.Core.Tests.csproj`
+  - `godot --headless --path . res://tests/GameplayTests.tscn` (47 gameplay checks)
   - headless scene smoke tests (`godot --headless --path . res://scenes/main.tscn --quit-after N`)
 - The active course is `scenes/arena_test2.tscn`, transcribed from `Assets/Scenes/Test2.unity` on
-  `main`. `Test.unity` is the older prototype and is not used.
+  `main`, with its baked navmesh. `Test.unity` is available as the optional `main_test.tscn` comparison
+  scene.
+- Assets live in Git LFS. Run `git lfs install && git lfs pull` (or `scripts/setup.sh`) after a fresh
+  clone; never commit a pointer file in place of art.
 - Strawberries and the win screen were intentionally removed. Do not reintroduce them without an
   explicit request.
 

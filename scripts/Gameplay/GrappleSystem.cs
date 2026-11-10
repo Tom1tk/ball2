@@ -179,6 +179,7 @@ public partial class GrappleSystem : Node3D
         hook.Projectile.GlobalPosition = hook.Indicator.GlobalPosition;
         FaceDirection(hook.Projectile, hook.FireDir);
         hook.State = HookState.Firing;
+        AudioManager.Instance?.Play2D("grapple_fire", -12f);
     }
 
     private void ReleaseHook(HookRuntime hook)
@@ -209,6 +210,7 @@ public partial class GrappleSystem : Node3D
                     hook.RopeLength = hook.Indicator.GlobalPosition.DistanceTo(hook.HookPoint);
                     hook.Projectile.GlobalPosition = hook.HookPoint;
                     hook.State = HookState.Hooked;
+                    AudioManager.Instance?.Play3D("grapple_hook", hook.HookPoint, -8f);
                 }
                 else
                 {

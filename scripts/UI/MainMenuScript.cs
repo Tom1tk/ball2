@@ -20,6 +20,12 @@ public partial class MainMenuScript : Control
         GetNode<Button>("MenuBox/HowToButton").Pressed += ToggleHowToPlay;
         GetNode<Button>("MenuBox/QuitButton").Pressed += QuitGame;
         GetNode<Button>("HowToPlay/Panel/CloseButton").Pressed += ToggleHowToPlay;
+
+        foreach (Node node in FindChildren("*", "Button", true, false))
+        {
+            if (node is Button button)
+                button.Pressed += () => AudioManager.Instance?.Play2D("ui_click", -8f);
+        }
     }
 
     private void StartGame()

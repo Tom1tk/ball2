@@ -8,6 +8,11 @@
 
 config_version=5
 
+[autoload]
+
+AudioManager="*res://scripts/Audio/AudioManager.cs"
+InputBindings="*res://scripts/UI/InputBindings.cs"
+
 [application]
 
 config/name="Ball2"

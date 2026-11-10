@@ -20,11 +20,13 @@ public partial class CombatAdapter : Node
     private RigidBody3D _body;
     private Health _health;
     private CombatConfig _config;
+    private Vector3 _lastVelocity;
 
     public override void _Ready()
     {
         _body = GetParent<RigidBody3D>();
         _health = GetParent().GetNodeOrNull<Health>("Health");
+        _lastVelocity = _body.LinearVelocity;
         _config = new CombatConfig
         {
             DamageThresholdSpeed = DamageThresholdSpeed,
@@ -38,7 +40,13 @@ public partial class CombatAdapter : Node
     public void ProcessContacts(PhysicsDirectBodyState3D state)
     {
         int contactCount = state.GetContactCount();
-        if (contactCount == 0) return;
+        if (contactCount == 0)
+        {
+            // Remember the velocity from the frame before impact: by the time a
+            // contact is reported, the solver has already changed LinearVelocity.
+            _lastVelocity = state.LinearVelocity;
+            return;
+        }
 
         // A ball-ball collision can report several contact points. Resolve each collider once.
         var seen = new Godot.Collections.Array<ulong>();
@@ -64,14 +72,24 @@ public partial class CombatAdapter : Node
             if (normalBtoA.LengthSquared() < 1e-8f) continue;
             normalBtoA = normalBtoA.Normalized();
 
-            Vector3 relativeVelocity = _body.LinearVelocity -
-                (otherIsWall ? Vector3.Zero : otherBody.LinearVelocity);
+            // Use the pre-impact velocity for the aggressor (recorded on a contact-free
+            // frame) and the collision point velocity for the other body. Reading
+            // LinearVelocity here would use the post-solver velocity and hide the hit.
+            Vector3 relativeVelocity = _lastVelocity -
+                (otherIsWall ? Vector3.Zero : state.GetContactColliderVelocityAtPosition(i));
 
             float massA = _body.Mass;
             float massB = otherIsWall ? float.PositiveInfinity : otherBody.Mass;
 
             var input = new ContactInput(ToNumerics(relativeVelocity), ToNumerics(normalBtoA), massA, massB);
             ContactOutcome outcome = CombatResolver.Resolve(in input, _config);
+
+            if (outcome.DamageA > 0f || outcome.DamageB > 0f)
+            {
+                bool heavy = outcome.PerfectHit || outcome.DamageA + outcome.DamageB >= 2f;
+                AudioManager.Instance?.Play3D(heavy ? "hit_heavy" : "hit_light",
+                    state.GetContactLocalPosition(i), heavy ? -3f : -7f);
+            }
 
             // --- Apply outputs to self (A) ---
             if (outcome.DamageA > 0f)
@@ -88,6 +106,8 @@ public partial class CombatAdapter : Node
             if (outcome.ImpulseB != NVector3.Zero)
                 otherBody.ApplyCentralImpulse(ToGodot(outcome.ImpulseB));
         }
+
+        _lastVelocity = state.LinearVelocity;
     }
 
     private static NVector3 ToNumerics(Vector3 v) => new(v.X, v.Y, v.Z);

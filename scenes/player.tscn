@@ -24,9 +24,12 @@ rings = 16
 
 [sub_resource type="StandardMaterial3D" id="Material_ball"]
 albedo_texture = ExtResource("6_balltex")
-albedo_color = Color(0.55, 0.75, 1, 0.55)
-metallic = 0.1
-roughness = 0.35
+albedo_color = Color(0.62, 0.8, 1, 0.68)
+metallic = 0.05
+roughness = 0.3
+rim_enabled = true
+rim = 0.35
+rim_tint = 0.4
 transparency = 1
 
 [sub_resource type="StandardMaterial3D" id="Material_indicator"]

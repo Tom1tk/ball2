@@ -28,10 +28,18 @@ Where the Unity documents and the Godot branch disagree, the Godot branch wins:
 - **Tuning from the Unity project:** gravity `-40`, player `gravityScale = 0.8`, angular damping
   `20`, camera FOV `75`, clip planes `0.1..5000`, sensitivity `0.1`, pitch `-30..60`, warm sun at
   `1.3`.
+- **Optional legacy course:** `Test.unity` → `scenes/arena_test.tscn` / `scenes/main_test.tscn`
+  (100 × 100 m, two enemies). Test2 remains the active course.
+- **Enemy navigation:** pre-baked `scenes/arena_test2_navmesh.tres` (357 polygons, 1.1 m agent radius)
+  inside a `NavigationRegion3D`; `EnemyAI` uses `NavigationAgent3D` with direct steering as fallback.
 - **Removed:** strawberry counter and win screen. They were remnants of an earlier iteration; do not
   reintroduce them without an explicit request.
-- **Not yet ported:** NavMesh enemy pathfinding, gameplay integration tests, audio, input remapping,
-  export presets/CI, optional old `Test.unity` arena.
+- **Audio:** generated WAV set under `assets/audio/` with a pooled `AudioManager` autoload.
+- **Controls:** Pause → Controls lets the player rebind keys/mouse buttons; bindings are saved to
+  `user://input_bindings.cfg`.
+- **Tests:** 37 NUnit core tests plus `tests/GameplayTests.tscn`, a 47-check headless suite.
+- **Build/CI:** `export_presets.cfg` for Linux/Windows/macOS and `.github/workflows/godot.yml` for
+  LFS checkout, import, build, tests and smoke checks.
 
 ## Godot working rules
 
@@ -41,14 +49,17 @@ Where the Unity documents and the Godot branch disagree, the Godot branch wins:
 - Godot-facing code is an adapter in `scripts/Gameplay/` or `scripts/UI/`.
 - Expose tuning as `[Export]` fields or core config types; do not hard-code feel numbers.
 - Use the **Godot .NET** build, not standard Godot. Build with `dotnet build Ball2Godot.csproj`,
-  test with `dotnet test tests/Ball2.Core.Tests/...`, and smoke-test scenes headlessly.
+  test with `dotnet test tests/Ball2.Core.Tests/...` plus
+  `godot --headless --path . res://tests/GameplayTests.tscn`, and smoke-test scenes headlessly.
+- Assets are Git LFS-backed. Run `git lfs install && git lfs pull` (or `scripts/setup.sh`) after a
+  fresh clone; do not commit LFS pointer files as if they were art.
 - Keep `MIGRATION_PLAN.md` and this addendum current when scope or parity changes.
 
 ## Unity-era material that is now historical
 
 - Unity component names, asset paths, `MonoBehaviour`/`FixedUpdate` patterns and `Assets/` layout.
-- `Test.unity` as the course; the active course is Test2.
-- NavMeshAgent-based enemy movement (Godot navigation is still to be added).
-- `Tools/run-tests.sh` and the Unity Test Framework (use `dotnet test`).
+- `Test.unity` as the course; the active course is Test2 (the legacy scene is optional).
+- NavMeshAgent-based enemy movement; Godot uses a baked `NavigationMesh` + `NavigationAgent3D`.
+- `Tools/run-tests.sh` and the Unity Test Framework (use `dotnet test` and the Godot headless suite).
 - The Unity lane rules in `AGENTS.md` and the Fishnet/netcode section of the spec are design
   reference only; they are not implemented in the Godot branch.

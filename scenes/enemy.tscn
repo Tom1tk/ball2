@@ -21,9 +21,12 @@ rings = 16
 
 [sub_resource type="StandardMaterial3D" id="Material_ball"]
 albedo_texture = ExtResource("4_balltex")
-albedo_color = Color(1, 0.55, 0.4, 0.55)
-metallic = 0.1
-roughness = 0.35
+albedo_color = Color(1, 0.58, 0.42, 0.68)
+metallic = 0.05
+roughness = 0.3
+rim_enabled = true
+rim = 0.35
+rim_tint = 0.4
 transparency = 1
 
 [sub_resource type="SphereMesh" id="SphereMesh_particle"]
@@ -64,6 +67,14 @@ billboard = 1
 render_priority = 1
 modulate = Color(1, 0.82, 0.7, 1)
 texture = ExtResource("5_hamster")
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
+radius = 1.1
+height = 2.0
+max_speed = 15.0
+path_desired_distance = 1.5
+target_desired_distance = 1.0
+avoidance_enabled = false
 
 [node name="Health" type="Node" parent="."]
 script = ExtResource("2_health")
