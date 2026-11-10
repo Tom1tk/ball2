@@ -149,16 +149,19 @@ public partial class GameplayTestRunner : Node
         await PhysicsFrames(4);
 
         var agent = _enemy.GetNode<NavigationAgent3D>("NavigationAgent3D");
-        await PhysicsFrames(90);
+        await PhysicsFrames(10);
 
+        // Sample the path before the enemy closes the distance; the final path
+        // naturally shortens once it has rounded the tower.
         Vector3[] path = agent.GetCurrentNavigationPath();
         float pathLength = 0f;
         for (int i = 1; i < path.Length; i++)
             pathLength += path[i - 1].DistanceTo(path[i]);
-
-        float moved = _enemy.GlobalPosition.DistanceTo(new Vector3(-28f, 1.05f, 36.37f));
         Check("enemy AI follows a navigation path", path.Length >= 3 && pathLength > 15f,
             $"{path.Length} points, {pathLength:F1} m");
+
+        await PhysicsFrames(90);
+        float moved = _enemy.GlobalPosition.DistanceTo(new Vector3(-28f, 1.05f, 36.37f));
         Check("enemy moves around the tower", moved > 2f,
             $"moved {moved:F1} m from start");
 
