@@ -1,5 +1,8 @@
 # Ball2 — Task Register
 
+> **Godot branch note:** Unity-era ticket register, kept for reference. It is not the current task
+> list for the Godot branch; see `GODOT_ADDENDUM.md` and `../MIGRATION_PLAN.md` §6.
+
 > Authoritative ticket list. Each ticket follows the §6.2 schema from `BALL2_SPEC.md`.
 > An agent takes **one** ticket, works it on a branch against `./Tools/run-tests.sh`, and respects its **Lane** (see `AGENTS.md`).
 > Status keys: `READY` (do now) · `BLOCKED` (waiting on a dependency) · `DONE`.

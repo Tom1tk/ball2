@@ -1,5 +1,8 @@
 # Ball2 — Progress Journal
 
+> **Godot branch note:** Unity-era progress log, kept for reference. It is not the operational
+> record for the Godot branch.
+
 Append-only build log. **Newest entry first.** This is the operational record of what has
 actually happened on each ticket: the transition, what was verified, and any gotchas the
 next worker needs. It complements — it does **not** replace:

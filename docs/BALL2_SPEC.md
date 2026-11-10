@@ -1,5 +1,9 @@
 # Ball2 — Living Design & Build Spec
 
+> **Godot branch note:** This is the original Unity-era design spec, kept as reference for design
+> intent and numbers. It is not authoritative for the Godot branch where it conflicts with
+> `GODOT_ADDENDUM.md` or `../MIGRATION_PLAN.md`.
+
 > **Status:** `v1.0` (first complete baseline; still living) · **Last updated:** 17 June 2026 · **Owner:** Tom (architect/orchestrator)
 > **Repo:** https://github.com/Tom1tk/ball2 · **Engine:** Unity 6000.4.10f1 (Built-in RP)
 > **Companion files:** `AGENTS.md` (agent entrypoint) · `BALL2_TASKS.md` (task register / tickets) · `PROGRESS.md` (progress journal) · `Tools/run-tests.sh` (verification harness)

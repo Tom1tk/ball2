@@ -1,5 +1,9 @@
 # AGENTS.md — Ball2
 
+> **Godot branch note:** This is the original Unity-era agent contract, kept for reference. For this
+> branch read `/AGENTS.md` at the repository root and `GODOT_ADDENDUM.md`; the Unity lane rules,
+> file paths and test harness described below do not apply.
+
 You are working on **Ball2**, a physics hamster-ball aerial combat game in Unity 6 (Built-in RP).
 This file is your contract. Read it before doing anything.
 

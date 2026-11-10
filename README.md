@@ -87,6 +87,12 @@ not resolve to a file in the repository, so `assets/sprites/hamster.svg` is a de
 that preserves the hamster-inside-the-ball look. Ball materials are translucent so the sprite stays
 visible.
 
+## Design reference
+
+The original Unity-era spec is kept in `docs/BALL2_SPEC.md` as design reference. It is not
+authoritative for this branch where it conflicts with the Godot implementation. Read
+`docs/GODOT_ADDENDUM.md` for what carries over, what is outdated, and the Godot working rules.
+
 ## Branches
 
 - `main` — original Unity 6000.4 project.

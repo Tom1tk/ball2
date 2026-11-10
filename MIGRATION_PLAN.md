@@ -10,8 +10,9 @@ project sits at the branch root; the Unity project stays untouched on `main`.
 ## 1. Goals and constraints
 
 1. **Keep C#.** Gameplay stays in C#; no GDScript in the shipping game.
-2. **Preserve behaviour.** The Unity specs in `docs/` remain the design source of truth. Pure rules
-   (combat, lock-on) are ported verbatim in behaviour and covered by the original NUnit tests.
+2. **Preserve behaviour.** The Unity spec in `docs/BALL2_SPEC.md` is the design reference for intent
+   and numbers. Where it is outdated, `docs/GODOT_ADDENDUM.md` and this plan take precedence. Pure
+   rules (combat, lock-on) are ported verbatim in behaviour and covered by the original NUnit tests.
 3. **Reuse assets.** Meshes, textures and the prototype art come from the Unity project through Git LFS.
 4. **Keep the rules engine-agnostic.** `Ball2.Core` must not reference Godot, so the rules stay
    testable and portable to a future engine.
@@ -168,8 +169,8 @@ godot --headless --path . res://scenes/main.tscn --quit-after 180
    job.
 5. **Optional: port the older `Test.unity` arena** — keep Test2 as the active course, but add the
    100 × 100 prototype as an alternate `scenes/arena_test.tscn` for comparison or regression testing.
-6. **Docs** — fold the Godot decisions back into `docs/BALL2_SPEC.md` (or add a Godot addendum) so the
-   design source of truth matches the branch.
+6. **Docs** — keep `docs/GODOT_ADDENDUM.md`, `README.md` and this plan in sync. The Unity
+   `BALL2_SPEC.md` remains historical reference and should not be rewritten to describe Godot APIs.
 
 ---
 
