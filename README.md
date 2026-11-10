@@ -6,7 +6,8 @@ contains the Godot project at the repository root, mirroring how `bevy-rewrite` 
 
 > **Status:** playable vertical slice. Movement, camera, dual grappling hooks, momentum combat,
 > lock-on, damage states, enemy AI, HUD, pause/lose screens and the main menu are ported.
-> Pickups, win flow, audio and navigation-mesh pathfinding remain (see `MIGRATION_PLAN.md`).
+> Navigation-mesh enemy pathfinding, gameplay integration tests, pickups/win flow, audio and polish
+> remain (see `MIGRATION_PLAN.md` §6).
 
 ## Requirements
 

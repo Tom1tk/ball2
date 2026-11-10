@@ -152,15 +152,22 @@ godot --headless --path . res://scenes/main.tscn --quit-after 180
 
 ## 6. Remaining work (ordered)
 
-1. **Navigation for enemies** — add a `NavigationRegion3D` over the arena and move `EnemyAI` to a
-   `NavigationAgent3D`, preserving the Unity chase/wander ranges.
-2. **Pickups and win flow** — add strawberry entities and a win screen; re-enable the counter.
-3. **Integration tests** — grappling hook state machine, contact damage, enemy death/despawn.
-4. **Performance pass** — auto-aim raycasts are throttled to ~8 Hz; profile on the target Mac and
-   consider lowering shadow range/glow if GPU-bound.
-5. **Polish** — replace the placeholder hamster, tune ball translucency/lighting, add audio, wire an
-   input-remap screen, add export presets and a Godot CI job.
-6. **Docs** — fold the Godot decisions back into `docs/BALL2_SPEC.md` (or add a Godot addendum) so the
+1. **Navigation for enemies** — add a `NavigationRegion3D` over the Test2 course and move `EnemyAI` to
+   a `NavigationAgent3D`, preserving the Unity chase/wander ranges. This is the main gameplay gap in
+   the 500 × 500 course: direct steering collides with the towers instead of pathing around them.
+2. **Gameplay integration tests** — cover the runtime adapters, not just the pure rules: grapple hook
+   state machine, ball-to-ball contact damage, lock-on icon/commit behaviour, damage textures,
+   player death → lose screen, pause/resume and enemy death/despawn.
+3. **Pickups and win flow** — add strawberry entities and a win screen; re-enable the counter.
+4. **Performance pass** — auto-aim raycasts are throttled to ~8 Hz; profile the large Test2 course on
+   the target Mac, verify the first-run shader-compilation hitch is not mistaken for sustained lag,
+   and lower shadow range/quality if GPU-bound.
+5. **Polish** — replace the placeholder hamster, tune ball translucency/lighting, tune the arena
+   triplanar texture scale, add audio, wire an input-remap screen, add export presets and a Godot CI
+   job.
+6. **Optional: port the older `Test.unity` arena** — keep Test2 as the active course, but add the
+   100 × 100 prototype as an alternate `scenes/arena_test.tscn` for comparison or regression testing.
+7. **Docs** — fold the Godot decisions back into `docs/BALL2_SPEC.md` (or add a Godot addendum) so the
    design source of truth matches the branch.
 
 ---
