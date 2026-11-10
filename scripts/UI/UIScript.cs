@@ -2,22 +2,19 @@ using Godot;
 
 /// <summary>
 /// HUD, pause menu, lose screen and grapple cursors.
-/// Port of the Unity UIScript, minus the legacy commented-out win/lose code.
+/// Port of the Unity UIScript, without the legacy strawberry/win-screen remnants.
 /// </summary>
 public partial class UIScript : CanvasLayer
 {
     public bool GamePlaying { get; private set; }
     public int EnemiesAlive;
     public int EnemiesMax = 2;
-    public int StrawbCollected;
-    public int StrawbMax;
 
     public BallMovement Player { get; private set; }
 
     private ProgressBar _boostBar;
     private ProgressBar _dodgeBar;
     private Label _enemyCounter;
-    private Label _strawberryCounter;
     private Label _debugLabel;
     private TextureRect _crosshairLeft;
     private TextureRect _crosshairRight;
@@ -32,7 +29,6 @@ public partial class UIScript : CanvasLayer
         _boostBar = GetNode<ProgressBar>("Root/BoostBar");
         _dodgeBar = GetNode<ProgressBar>("Root/DodgeBar");
         _enemyCounter = GetNode<Label>("Root/EnemyCounter");
-        _strawberryCounter = GetNode<Label>("Root/StrawberryCounter");
         _debugLabel = GetNode<Label>("Root/DebugLabel");
         _crosshairLeft = GetNode<TextureRect>("Root/CrosshairLeft");
         _crosshairRight = GetNode<TextureRect>("Root/CrosshairRight");
@@ -60,7 +56,6 @@ public partial class UIScript : CanvasLayer
         GetNode<Button>("Root/LoseScreen/Panel/Buttons/MenuButton").Pressed += BackToMenu;
 
         UpdateEnemyCounter();
-        UpdateStrawberryCounter();
         Input.MouseMode = Input.MouseModeEnum.Captured;
     }
 
@@ -143,12 +138,6 @@ public partial class UIScript : CanvasLayer
         UpdateEnemyCounter();
     }
 
-    public void AddStrawberry()
-    {
-        StrawbCollected++;
-        UpdateStrawberryCounter();
-    }
-
     public void SetCrosshair(bool left, Vector2 screenPosition, bool visible, float scale)
     {
         TextureRect crosshair = left ? _crosshairLeft : _crosshairRight;
@@ -171,11 +160,5 @@ public partial class UIScript : CanvasLayer
     {
         if (_enemyCounter != null)
             _enemyCounter.Text = $"Enemies: {EnemiesAlive} / {EnemiesMax}";
-    }
-
-    private void UpdateStrawberryCounter()
-    {
-        if (_strawberryCounter != null)
-            _strawberryCounter.Text = $"Strawberries: {StrawbCollected} / {StrawbMax}";
     }
 }

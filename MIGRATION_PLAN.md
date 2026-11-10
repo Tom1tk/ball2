@@ -101,6 +101,9 @@ Deliberate divergences:
   the remaining-work list.
 - **Generated scenes.** Unity scene YAML is not converted automatically; the arena and prefabs were
   rebuilt as native `.tscn` files from the parsed layout and component values.
+- **Legacy UI removed.** The strawberry counter and the stubbed win screen were remnants of an
+  earlier iteration of the project, not part of the current game. They are intentionally not ported;
+  the lose screen, enemy counter, pause menu and HUD remain.
 
 ---
 
@@ -119,8 +122,7 @@ Deliberate divergences:
 | Health + five damage textures | ✅ Ported | Player death → lose screen; enemy death → despawn |
 | Enemy AI (detect, chase, wander, boost) | 🟡 Ported without NavMesh | Direct steering; pathfinding remains |
 | HUD / pause / lose / main menu | ✅ Ported | Enemy counter, boost/dodge bars, debug text |
-| Strawberry counter | 🟡 UI only | No pickup entities in the Unity source either |
-| Win screen | ⚪ Not ported | Unity code contains a stubbed `showWinUI` |
+| Strawberry counter / win screen | ⚫ Removed | Earlier-iteration remnants; intentionally not ported |
 | Audio | ⚪ Not ported | No audio sources found in the Unity gameplay scripts |
 | Input remapping UI | ⚪ Not ported | Input map lives in `project.godot` |
 | Export presets / CI | ⚪ Not ported | Needs Godot export templates and a CI job |
@@ -158,16 +160,15 @@ godot --headless --path . res://scenes/main.tscn --quit-after 180
 2. **Gameplay integration tests** — cover the runtime adapters, not just the pure rules: grapple hook
    state machine, ball-to-ball contact damage, lock-on icon/commit behaviour, damage textures,
    player death → lose screen, pause/resume and enemy death/despawn.
-3. **Pickups and win flow** — add strawberry entities and a win screen; re-enable the counter.
-4. **Performance pass** — auto-aim raycasts are throttled to ~8 Hz; profile the large Test2 course on
+3. **Performance pass** — auto-aim raycasts are throttled to ~8 Hz; profile the large Test2 course on
    the target Mac, verify the first-run shader-compilation hitch is not mistaken for sustained lag,
    and lower shadow range/quality if GPU-bound.
-5. **Polish** — replace the placeholder hamster, tune ball translucency/lighting, tune the arena
+4. **Polish** — replace the placeholder hamster, tune ball translucency/lighting, tune the arena
    triplanar texture scale, add audio, wire an input-remap screen, add export presets and a Godot CI
    job.
-6. **Optional: port the older `Test.unity` arena** — keep Test2 as the active course, but add the
+5. **Optional: port the older `Test.unity` arena** — keep Test2 as the active course, but add the
    100 × 100 prototype as an alternate `scenes/arena_test.tscn` for comparison or regression testing.
-7. **Docs** — fold the Godot decisions back into `docs/BALL2_SPEC.md` (or add a Godot addendum) so the
+6. **Docs** — fold the Godot decisions back into `docs/BALL2_SPEC.md` (or add a Godot addendum) so the
    design source of truth matches the branch.
 
 ---
