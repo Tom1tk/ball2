@@ -41,7 +41,7 @@ public partial class GameplayTestRunner : Node
             await TestLockOn();
             await TestGrapple();
             await TestContactDamage();
-            TestPauseResume();
+            await TestPauseResume();
             await TestEnemyDeath();
             TestPlayerDeath();
         }
@@ -289,7 +289,7 @@ public partial class GameplayTestRunner : Node
             $"enemy {enemyBefore}->{_enemyHealth.CurrentHealth}, player {playerBefore}->{_playerHealth.CurrentHealth}");
     }
 
-    private void TestPauseResume()
+    private async Task TestPauseResume()
     {
         _ui.TogglePause();
         Check("pause menu pauses the tree", GetTree().Paused);
@@ -299,6 +299,29 @@ public partial class GameplayTestRunner : Node
         var controlsPanel = _main.GetNode<Control>("UI/Root/ControlsPanel");
         controlsButton.EmitSignal("pressed");
         Check("controls screen opens from pause menu", controlsPanel.Visible);
+
+        var list = _main.GetNode<VBoxContainer>("UI/Root/ControlsPanel/Panel/Scroll/List");
+        Check("controls screen lists every bindable action",
+            list.GetChildCount() == InputBindings.BindableActions.Length,
+            $"{list.GetChildCount()} rows");
+
+        // Exercise the actual UI rebind path: click the Move Forward button,
+        // push a key event, then restore the default binding.
+        var bindings = InputBindings.Instance;
+        var original = (InputEvent)InputMap.ActionGetEvents("move_forward")[0].Duplicate();
+        var row = list.GetChild(0) as HBoxContainer;
+        var bindButton = row?.GetChild(1) as Button;
+        bindButton?.EmitSignal("pressed");
+        Input.ParseInputEvent(new InputEventKey { PhysicalKeycode = Key.K, Pressed = true });
+        await PhysicsFrames(2);
+        Check("controls UI rebinds an action",
+            bindings != null && bindings.GetEventLabel("move_forward") == "K",
+            bindings?.GetEventLabel("move_forward"));
+        bindings?.Rebind("move_forward", original);
+        Check("controls UI restore succeeds",
+            bindings != null && bindings.GetEventLabel("move_forward") == "W",
+            bindings?.GetEventLabel("move_forward"));
+
         _main.GetNode<Button>("UI/Root/ControlsPanel/Panel/BackButton").EmitSignal("pressed");
         Check("controls screen closes", !controlsPanel.Visible);
 

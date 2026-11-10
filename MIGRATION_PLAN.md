@@ -154,7 +154,7 @@ Deliberate divergences:
    wall contacts, perfect-hit windows, acquisition, soft tracking, break conditions, commit-on-charge,
    determinism and degenerate input.
 2. **Gameplay integration tests** — `tests/GameplayTests.tscn` loads the real `main.tscn` and runs
-   47 checks: spawn safety and enemy counter, arena/navmesh routing around a tower, damage textures,
+   50 checks: spawn safety and enemy counter, arena/navmesh routing around a tower, damage textures,
    lock-on acquire/break, grapple fire/hook/return, ball-to-ball contact damage, pause/resume,
    controls panel, audio samples, input rebinding, enemy death/despawn and player death → lose screen.
    The runner exits non-zero on failure.
@@ -182,7 +182,7 @@ All six items from the original migration list are complete:
 
 1. **Navigation for enemies** — ✅ `NavigationRegion3D` + pre-baked Test2 navmesh, `EnemyAI` uses
    `NavigationAgent3D` while preserving Unity chase/wander ranges.
-2. **Gameplay integration tests** — ✅ `tests/GameplayTests.tscn`, 47 checks covering grapple, contact
+2. **Gameplay integration tests** — ✅ `tests/GameplayTests.tscn`, 50 checks covering grapple, contact
    damage, lock-on, damage textures, pause, controls, audio/rebinding and death/despawn.
 3. **Performance pass** — ✅ Test2 holds 120 Hz/8.33 ms on the M1 Pro; auto-aim stays throttled; shadow
    range reduced from 400 m to 250 m; the earlier hitch was movie-writer contention/first-run shaders.

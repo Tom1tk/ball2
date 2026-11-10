@@ -37,7 +37,7 @@ Where the Unity documents and the Godot branch disagree, the Godot branch wins:
 - **Audio:** generated WAV set under `assets/audio/` with a pooled `AudioManager` autoload.
 - **Controls:** Pause → Controls lets the player rebind keys/mouse buttons; bindings are saved to
   `user://input_bindings.cfg`.
-- **Tests:** 37 NUnit core tests plus `tests/GameplayTests.tscn`, a 47-check headless suite.
+- **Tests:** 37 NUnit core tests plus `tests/GameplayTests.tscn`, a 50-check headless suite.
 - **Build/CI:** `export_presets.cfg` for Linux/Windows/macOS and `.github/workflows/godot.yml` for
   LFS checkout, import, build, tests and smoke checks.
 

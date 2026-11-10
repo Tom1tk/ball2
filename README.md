@@ -54,7 +54,7 @@ development Mac).
 dotnet build Ball2Godot.csproj
 dotnet test tests/Ball2.Core.Tests/Ball2.Core.Tests.csproj          # 37 core rules tests
 
-# Headless gameplay integration tests (47 checks, exit code 0 = pass)
+# Headless gameplay integration tests (50 checks, exit code 0 = pass)
 godot --headless --path . res://tests/GameplayTests.tscn
 
 # Smoke test the main scene
